@@ -1,0 +1,112 @@
+package com.aula.virtual.ui;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
+
+import com.aula.virtual.R;
+
+public class ThemeHelper {
+    private static final String PREFS_NAME = "theme_prefs";
+    private static final String KEY_IS_DARK_MODE = "is_dark_mode";
+    private static final String KEY_ACCENT_COLOR = "accent_color";
+
+    public static void applyTheme(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        
+        boolean isDarkMode = prefs.getBoolean(KEY_IS_DARK_MODE, false);
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+    }
+
+    public static int getAccentTheme(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String accent = prefs.getString(KEY_ACCENT_COLOR, "BLUE");
+        switch (accent) {
+            case "BLUE_LIGHT": return R.style.Theme_MyApplication_Blue_Light;
+            case "BLUE": return R.style.Theme_MyApplication_Blue;
+            case "BLUE_DARK": return R.style.Theme_MyApplication_Blue_Dark;
+            
+            case "RED_LIGHT": return R.style.Theme_MyApplication_Red_Light;
+            case "RED": return R.style.Theme_MyApplication_Red;
+            case "RED_DARK": return R.style.Theme_MyApplication_Red_Dark;
+            
+            case "GREEN_LIGHT": return R.style.Theme_MyApplication_Green_Light;
+            case "GREEN": return R.style.Theme_MyApplication_Green;
+            case "GREEN_DARK": return R.style.Theme_MyApplication_Green_Dark;
+            
+            case "PURPLE_LIGHT": return R.style.Theme_MyApplication_Purple_Light;
+            case "PURPLE": return R.style.Theme_MyApplication_Purple;
+            case "PURPLE_DARK": return R.style.Theme_MyApplication_Purple_Dark;
+            
+            case "CYAN_LIGHT": return R.style.Theme_MyApplication_Cyan_Light;
+            case "CYAN": return R.style.Theme_MyApplication_Cyan;
+            case "CYAN_DARK": return R.style.Theme_MyApplication_Cyan_Dark;
+            
+            case "YELLOW_LIGHT": return R.style.Theme_MyApplication_Yellow_Light;
+            case "YELLOW": return R.style.Theme_MyApplication_Yellow;
+            case "YELLOW_DARK": return R.style.Theme_MyApplication_Yellow_Dark;
+            
+            default: return R.style.Theme_MyApplication_Blue;
+        }
+    }
+
+    public static void setAccentColor(Context context, String color) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putString(KEY_ACCENT_COLOR, color).apply();
+    }
+
+    public static String getAccentColorName(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(KEY_ACCENT_COLOR, "BLUE");
+    }
+
+    public static void setDarkMode(Context context, boolean isDark) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_IS_DARK_MODE, isDark).apply();
+        if (isDark) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+    }
+
+    public static boolean isDarkMode(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(KEY_IS_DARK_MODE, false);
+    }
+
+    public static int getSubjectColor(Context context, String colorName) {
+        if (colorName == null) return ContextCompat.getColor(context, R.color.accent_blue);
+        switch (colorName) {
+            case "BLUE_LIGHT": return ContextCompat.getColor(context, R.color.accent_blue_light);
+            case "BLUE": return ContextCompat.getColor(context, R.color.accent_blue);
+            case "BLUE_DARK": return ContextCompat.getColor(context, R.color.accent_blue_dark);
+            case "RED_LIGHT": return ContextCompat.getColor(context, R.color.accent_red_light);
+            case "RED": return ContextCompat.getColor(context, R.color.accent_red);
+            case "RED_DARK": return ContextCompat.getColor(context, R.color.accent_red_dark);
+            case "GREEN_LIGHT": return ContextCompat.getColor(context, R.color.accent_green_light);
+            case "GREEN": return ContextCompat.getColor(context, R.color.accent_green);
+            case "GREEN_DARK": return ContextCompat.getColor(context, R.color.accent_green_dark);
+            case "PURPLE_LIGHT": return ContextCompat.getColor(context, R.color.accent_purple_light);
+            case "PURPLE": return ContextCompat.getColor(context, R.color.accent_purple);
+            case "PURPLE_DARK": return ContextCompat.getColor(context, R.color.accent_purple_dark);
+            case "CYAN_LIGHT": return ContextCompat.getColor(context, R.color.accent_cyan_light);
+            case "CYAN": return ContextCompat.getColor(context, R.color.accent_cyan);
+            case "CYAN_DARK": return ContextCompat.getColor(context, R.color.accent_cyan_dark);
+            case "YELLOW_LIGHT": return ContextCompat.getColor(context, R.color.accent_yellow_light);
+            case "YELLOW": return ContextCompat.getColor(context, R.color.accent_yellow);
+            case "YELLOW_DARK": return ContextCompat.getColor(context, R.color.accent_yellow_dark);
+            default: return ContextCompat.getColor(context, R.color.accent_blue);
+        }
+    }
+
+    public static boolean isColorLight(int color) {
+        double darkness = 1 - (0.299 * ((color >> 16) & 0xFF) + 0.587 * ((color >> 8) & 0xFF) + 0.114 * (color & 0xFF)) / 255;
+        return darkness < 0.5;
+    }
+}

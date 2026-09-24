@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.aula.virtual.ui.LoginFragment"
+        android:label="Iniciar Sesión"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_studentHomeFragment"
+            app:destination="@id/studentHomeFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_professorHomeFragment"
+            app:destination="@id/professorHomeFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/professorHomeFragment"
+        android:name="com.aula.virtual.ui.ProfessorHomeFragment"
+        android:label="Inicio Profesor"
+        tools:layout="@layout/fragment_professor_home">
+        <action
+            android:id="@+id/action_professorHomeFragment_to_professorSubjectListFragment"
+            app:destination="@id/professorSubjectListFragment" />
+        <action
+            android:id="@+id/action_professorHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_professorHomeFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/professorHomeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_professorHomeFragment_to_studentProfileFragment"
+            app:destination="@id/studentProfileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/professorSubjectListFragment"
+        android:name="com.aula.virtual.ui.ProfessorSubjectListFragment"
+        android:label="Mis Materias"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_professorSubjectListFragment_to_professorStudentListFragment"
+            app:destination="@id/professorStudentListFragment" />
+        <action
+            android:id="@+id/action_professorSubjectListFragment_to_adminFacilityTimetableFragment"
+            app:destination="@id/adminFacilityTimetableFragment" />
+        <action
+            android:id="@+id/action_professorSubjectListFragment_to_subjectDetailFragment"
+            app:destination="@id/subjectDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/professorStudentListFragment"
+        android:name="com.aula.virtual.ui.ProfessorStudentListFragment"
+        android:label="Alumnos y Notas"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <argument
+            android:name="subjectId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_professorStudentListFragment_to_adminEditGradeFragment"
+            app:destination="@id/adminEditGradeFragment" />
+        <action
+            android:id="@+id/action_professorStudentListFragment_to_studentProfileFragment"
+            app:destination="@id/studentProfileFragment" />
+        <action
+            android:id="@+id/action_professorStudentListFragment_to_subjectBlogFragment"
+            app:destination="@id/subjectBlogFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminHomeFragment"
+        android:name="com.aula.virtual.ui.AdminHomeFragment"
+        android:label="Inicio Administrador"
+        tools:layout="@layout/fragment_admin_home">
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminStudentListFragment"
+            app:destination="@id/adminStudentListFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminSubjectListFragment"
+            app:destination="@id/adminSubjectListFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminFacultyListFragment"
+            app:destination="@id/adminFacultyListFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminAdminListFragment"
+            app:destination="@id/adminAdminListFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminProfessorListFragment"
+            app:destination="@id/adminProfessorListFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminFacilityListFragment"
+            app:destination="@id/adminFacilityListFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_studentProfileFragment"
+            app:destination="@id/studentProfileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminProfessorListFragment"
+        android:name="com.aula.virtual.ui.AdminProfessorListFragment"
+        android:label="Gestión de Profesores"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_adminProfessorListFragment_to_adminDetailFragment"
+            app:destination="@id/adminDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/studentHomeFragment"
+        android:name="com.aula.virtual.ui.StudentHomeFragment"
+        android:label="Inicio Estudiante"
+        tools:layout="@layout/fragment_student_home">
+        <action
+            android:id="@+id/action_studentHomeFragment_to_studentDashboardFragment"
+            app:destination="@id/studentDashboardFragment" />
+        <action
+            android:id="@+id/action_studentHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_studentHomeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_studentHomeFragment_to_studentProfileFragment"
+            app:destination="@id/studentProfileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminStudentListFragment"
+        android:name="com.aula.virtual.ui.AdminStudentListFragment"
+        android:label="Gestión de Alumnos"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_adminStudentListFragment_to_studentDetailFragment"
+            app:destination="@id/studentDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminSubjectListFragment"
+        android:name="com.aula.virtual.ui.AdminSubjectListFragment"
+        android:label="Gestión de Materias"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_adminSubjectListFragment_to_subjectDetailFragment"
+            app:destination="@id/subjectDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminFacultyListFragment"
+        android:name="com.aula.virtual.ui.AdminFacultyListFragment"
+        android:label="Gestión de Facultades"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_adminFacultyListFragment_to_facultyDetailFragment"
+            app:destination="@id/facultyDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminAdminListFragment"
+        android:name="com.aula.virtual.ui.AdminAdminListFragment"
+        android:label="Gestión de Admins"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_adminAdminListFragment_to_adminDetailFragment"
+            app:destination="@id/adminDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/studentDashboardFragment"
+        android:name="com.aula.virtual.ui.StudentDashboardFragment"
+        android:label="Mis Notas"
+        tools:layout="@layout/fragment_student_dashboard">
+        <action
+            android:id="@+id/action_studentDashboardFragment_to_subjectBlogFragment"
+            app:destination="@id/subjectBlogFragment" />
+        <action
+            android:id="@+id/action_studentDashboardFragment_to_studentProfileFragment"
+            app:destination="@id/studentProfileFragment" />
+        <action
+            android:id="@+id/action_studentDashboardFragment_to_adminFacilityTimetableFragment"
+            app:destination="@id/adminFacilityTimetableFragment" />
+        <action
+            android:id="@+id/action_studentDashboardFragment_to_subjectDetailFragment"
+            app:destination="@id/subjectDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.aula.virtual.ui.SettingsFragment"
+        android:label="Ajustes"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/studentDetailFragment"
+        android:name="com.aula.virtual.ui.StudentDetailFragment"
+        android:label="Detalle Estudiante"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="studentId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_studentDetailFragment_to_adminEnrollmentListFragment"
+            app:destination="@id/adminEnrollmentListFragment" />
+        <action
+            android:id="@+id/action_studentDetailFragment_to_studentHomeFragment"
+            app:destination="@id/studentHomeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/subjectDetailFragment"
+        android:name="com.aula.virtual.ui.SubjectDetailFragment"
+        android:label="Gestión Materia"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="subjectId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_subjectDetailFragment_to_subjectBlogFragment"
+            app:destination="@id/subjectBlogFragment" />
+        <action
+            android:id="@+id/action_subjectDetailFragment_to_professorStudentListFragment"
+            app:destination="@id/professorStudentListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/facultyDetailFragment"
+        android:name="com.aula.virtual.ui.FacultyDetailFragment"
+        android:label="Detalle Facultad"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="facultyId"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminDetailFragment"
+        android:name="com.aula.virtual.ui.AdminDetailFragment"
+        android:label="Detalle Administrador"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="adminId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_adminDetailFragment_to_professorHomeFragment"
+            app:destination="@id/professorHomeFragment" />
+        <action
+            android:id="@+id/action_adminDetailFragment_to_studentHomeFragment"
+            app:destination="@id/studentHomeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminEnrollmentListFragment"
+        android:name="com.aula.virtual.ui.AdminEnrollmentListFragment"
+        android:label="Calificaciones de Alumno"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <argument
+            android:name="studentId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_adminEnrollmentListFragment_to_adminEditGradeFragment"
+            app:destination="@id/adminEditGradeFragment" />
+        <action
+            android:id="@+id/action_adminEnrollmentListFragment_to_subjectBlogFragment"
+            app:destination="@id/subjectBlogFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminEditGradeFragment"
+        android:name="com.aula.virtual.ui.AdminEditGradeFragment"
+        android:label="Editar Notas"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="enrollmentId"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/subjectBlogFragment"
+        android:name="com.aula.virtual.ui.SubjectBlogFragment"
+        android:label="Foro de Discusión"
+        tools:layout="@layout/fragment_subject_blog">
+        <argument
+            android:name="subjectId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_subjectBlogFragment_to_blogDiscussionFragment"
+            app:destination="@id/blogDiscussionFragment" />
+        <action
+            android:id="@+id/action_subjectBlogFragment_to_subjectParticipantsFragment"
+            app:destination="@id/subjectParticipantsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/blogDiscussionFragment"
+        android:name="com.aula.virtual.ui.BlogDiscussionFragment"
+        android:label="Discusión"
+        tools:layout="@layout/fragment_blog_discussion">
+        <argument
+            android:name="blogEntryId"
+            app:argType="integer" />
+        <argument
+            android:name="blogTitle"
+            app:argType="string" />
+        <argument
+            android:name="subjectId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_blogDiscussionFragment_to_subjectParticipantsFragment"
+            app:destination="@id/subjectParticipantsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/subjectParticipantsFragment"
+        android:name="com.aula.virtual.ui.SubjectParticipantsFragment"
+        android:label="Integrantes"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <argument
+            android:name="subjectId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_subjectParticipantsFragment_to_studentProfileFragment"
+            app:destination="@id/studentProfileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/studentProfileFragment"
+        android:name="com.aula.virtual.ui.StudentProfileFragment"
+        android:label="Perfil"
+        tools:layout="@layout/fragment_student_profile">
+        <argument
+            android:name="studentId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminFacilityListFragment"
+        android:name="com.aula.virtual.ui.AdminFacilityListFragment"
+        android:label="Gestión de Instalaciones"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_adminFacilityListFragment_to_adminFacilityDetailFragment"
+            app:destination="@id/adminFacilityDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminFacilityDetailFragment"
+        android:name="com.aula.virtual.ui.AdminFacilityDetailFragment"
+        android:label="Detalle Instalación"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="facilityId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_adminFacilityDetailFragment_to_adminFacilitySchedulesFragment"
+            app:destination="@id/adminFacilitySchedulesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminFacilitySchedulesFragment"
+        android:name="com.aula.virtual.ui.AdminFacilitySchedulesFragment"
+        android:label="Horarios de Instalación"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <argument
+            android:name="facilityId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_adminFacilitySchedulesFragment_to_adminEditGradeFragment"
+            app:destination="@id/adminEditGradeFragment" />
+        <action
+            android:id="@+id/action_adminFacilitySchedulesFragment_to_studentProfileFragment"
+            app:destination="@id/studentProfileFragment" />
+        <action
+            android:id="@+id/action_adminFacilitySchedulesFragment_to_adminFacilityTimetableFragment"
+            app:destination="@id/adminFacilityTimetableFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminFacilityTimetableFragment"
+        android:name="com.aula.virtual.ui.AdminFacilityTimetableFragment"
+        android:label="Vista Horarios"
+        tools:layout="@layout/fragment_facility_timetable">
+        <argument
+            android:name="facilityId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="studentId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="professorId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+
+</navigation>

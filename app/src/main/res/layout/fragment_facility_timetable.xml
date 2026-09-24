@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?attr/colorSurface"
+        android:elevation="4dp"
+        android:padding="16dp">
+        <TextView
+            android:id="@+id/tvTimetableHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vista Horarios"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary"/>
+    </LinearLayout>
+
+    <!-- Day Headers -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="?attr/colorSurface"
+        android:elevation="4dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <View android:layout_width="50dp" android:layout_height="0dp" /> <!-- Spacer for time column -->
+
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="L" android:gravity="center" android:textStyle="bold" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Ma" android:gravity="center" android:textStyle="bold" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Mi" android:gravity="center" android:textStyle="bold" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="J" android:gravity="center" android:textStyle="bold" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="V" android:gravity="center" android:textStyle="bold" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="S" android:gravity="center" android:textStyle="bold" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="D" android:gravity="center" android:textStyle="bold" android:textSize="12sp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Time Labels Column -->
+            <LinearLayout
+                android:id="@+id/layoutTimeLabels"
+                android:layout_width="50dp"
+                android:layout_height="1440dp"
+                android:orientation="vertical">
+                <!-- Will be populated programmatically -->
+            </LinearLayout>
+
+            <!-- Grid and Blocks Container -->
+            <FrameLayout
+                android:id="@+id/layoutGridContainer"
+                android:layout_width="match_parent"
+                android:layout_height="1440dp"
+                android:layout_toEndOf="@id/layoutTimeLabels"
+                android:background="@drawable/bg_timetable_grid">
+
+                <RelativeLayout
+                    android:id="@+id/layoutTimetableContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <!-- Blocks will be added here -->
+                </RelativeLayout>
+
+            </FrameLayout>
+
+        </RelativeLayout>
+    </ScrollView>
+</LinearLayout>

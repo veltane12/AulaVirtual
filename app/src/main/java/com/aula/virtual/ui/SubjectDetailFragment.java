@@ -1,0 +1,397 @@
+package com.aula.virtual.ui;
+
+import android.app.AlertDialog;
+import android.content.res.ColorStateList;
+import android.os.Bundle;
+import android.text.InputType;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import com.aula.virtual.R;
+import com.aula.virtual.data.StudentGradeInfo;
+import com.aula.virtual.data.entity.Enrollment;
+import com.aula.virtual.data.entity.Subject;
+import com.aula.virtual.data.entity.User;
+import com.aula.virtual.databinding.FragmentDetailBinding;
+import com.google.android.material.button.MaterialButton;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+public class SubjectDetailFragment extends Fragment {
+    private FragmentDetailBinding binding;
+    private MainViewModel viewModel;
+    private Subject subject;
+    private String selectedColor = "BLUE";
+    private final Map<String, MaterialButton> colorButtons = new HashMap<>();
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentDetailBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
+        int subjectId = getArguments().getInt("subjectId");
+        
+        setupUI();
+        setupColorSelector();
+        observeViewModel();
+        
+        viewModel.getModificationError().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                viewModel.clearModificationError();
+            }
+        });
+
+        viewModel.fetchSubjectById(subjectId);
+    }
+
+    private void setupUI() {
+        binding.tvDetailTitle.setText("Detalle Materia");
+        binding.etField1.setHint("Nombre de la Materia");
+        binding.etField2.setHint("Descripción");
+        
+        binding.etField3.setHint("Facultad (Click para cambiar)");
+        binding.etField3.setFocusable(false);
+        binding.etField3.setClickable(true);
+        binding.etField3.setVisibility(View.VISIBLE);
+        binding.etField3.setInputType(InputType.TYPE_CLASS_TEXT);
+        binding.btnTogglePassword.setVisibility(View.GONE);
+
+        binding.etField4.setHint("Sección (Ej: 01, 02)");
+        binding.etField4.setVisibility(View.VISIBLE);
+        binding.etField4.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        binding.btnSave.setOnClickListener(v -> saveChanges());
+        binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
+        
+        binding.btnManageStudents.setOnClickListener(v -> navigateToStudents());
+        binding.btnManageBlog.setOnClickListener(v -> navigateToBlog());
+    }
+
+    private void setupColorSelector() {
+        colorButtons.put("BLUE_LIGHT", binding.btnColor1);
+        colorButtons.put("RED_LIGHT", binding.btnColor2);
+        colorButtons.put("GREEN_LIGHT", binding.btnColor3);
+        colorButtons.put("PURPLE_LIGHT", binding.btnColor4);
+        colorButtons.put("CYAN_LIGHT", binding.btnColor5);
+        colorButtons.put("YELLOW_LIGHT", binding.btnColor6);
+
+        colorButtons.put("BLUE", binding.btnColor7);
+        colorButtons.put("RED", binding.btnColor8);
+        colorButtons.put("GREEN", binding.btnColor9);
+        colorButtons.put("PURPLE", binding.btnColor10);
+        colorButtons.put("CYAN", binding.btnColor11);
+        colorButtons.put("YELLOW", binding.btnColor12);
+
+        colorButtons.put("BLUE_DARK", binding.btnColor13);
+        colorButtons.put("RED_DARK", binding.btnColor14);
+        colorButtons.put("GREEN_DARK", binding.btnColor15);
+        colorButtons.put("PURPLE_DARK", binding.btnColor16);
+        colorButtons.put("CYAN_DARK", binding.btnColor17);
+        colorButtons.put("YELLOW_DARK", binding.btnColor18);
+
+        for (Map.Entry<String, MaterialButton> entry : colorButtons.entrySet()) {
+            entry.getValue().setOnClickListener(v -> selectColor(entry.getKey()));
+        }
+    }
+
+    private void selectColor(String colorName) {
+        if (!Boolean.TRUE.equals(viewModel.isServerConnected().getValue())) {
+            User currentUser = viewModel.getCurrentUser().getValue();
+            if (currentUser != null && !"ADMIN".equals(currentUser.role)) {
+                Toast.makeText(getContext(), "No se puede cambiar el color fuera de línea", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        selectedColor = colorName;
+        resetColorIcons();
+        MaterialButton btn = colorButtons.get(colorName);
+        if (btn != null) {
+            btn.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+            btn.setIconResource(R.drawable.ic_check);
+            int colorInt = ThemeHelper.getSubjectColor(requireContext(), colorName);
+            int tint = ThemeHelper.isColorLight(colorInt) ? 0xFF000000 : 0xFFFFFFFF;
+            btn.setIconTint(ColorStateList.valueOf(tint));
+        }
+    }
+
+    private void resetColorIcons() {
+        for (MaterialButton btn : colorButtons.values()) {
+            btn.setIcon(null);
+        }
+    }
+
+    private void navigateToBlog() {
+        if (subject == null) return;
+        Bundle args = new Bundle();
+        args.putInt("subjectId", subject.id);
+        Navigation.findNavController(requireView()).navigate(R.id.action_subjectDetailFragment_to_subjectBlogFragment, args);
+    }
+
+    private void navigateToStudents() {
+        if (subject == null) return;
+        Bundle args = new Bundle();
+        args.putInt("subjectId", subject.id);
+        Navigation.findNavController(requireView()).navigate(R.id.action_subjectDetailFragment_to_professorStudentListFragment, args);
+    }
+
+    private void observeViewModel() {
+        User currentUser = viewModel.getCurrentUser().getValue();
+        if (currentUser != null && !"ADMIN".equals(currentUser.role)) {
+            binding.etField1.setFocusable(false);
+            binding.etField1.setClickable(false);
+            binding.etField2.setFocusable(false);
+            binding.etField2.setClickable(false);
+            binding.etField3.setFocusable(false);
+            binding.etField3.setClickable(false);
+            binding.etField4.setFocusable(false);
+            binding.etField4.setClickable(false);
+            
+            binding.btnDelete.setVisibility(View.GONE);
+            binding.layoutColorSelector.setVisibility(View.VISIBLE);
+            binding.btnSave.setText("Guardar Color");
+            binding.btnSave.setVisibility(View.VISIBLE);
+
+            if ("PROFESSOR".equals(currentUser.role)) {
+                binding.tvColorLabel.setText("Color Personalizado para tu Horario Semanal");
+                binding.btnManageStudents.setVisibility(View.VISIBLE);
+                binding.btnManageBlog.setVisibility(View.GONE);
+            } else {
+                binding.tvColorLabel.setText("Color Materia");
+                binding.btnManageStudents.setVisibility(View.GONE);
+                binding.btnManageBlog.setVisibility(View.VISIBLE);
+
+                viewModel.getGradeInfoForStudent(currentUser.id).observe(getViewLifecycleOwner(), gradeInfos -> {
+                    if (gradeInfos != null && subject != null && binding != null) {
+                        for (StudentGradeInfo info : gradeInfos) {
+                            if (info.subject != null && info.subject.id == subject.id && info.enrollment != null) {
+                                binding.layoutStudentGrades.setVisibility(View.VISIBLE);
+                                Enrollment e = info.enrollment;
+                                binding.tvDetailP1.setText(formatGrade(e.grade1));
+                                setGradeColor(binding.tvDetailP1, e.grade1);
+                                binding.tvDetailP2.setText(formatGrade(e.grade2));
+                                setGradeColor(binding.tvDetailP2, e.grade2);
+                                binding.tvDetailP3.setText(formatGrade(e.grade3));
+                                setGradeColor(binding.tvDetailP3, e.grade3);
+                                binding.tvDetailP4.setText(formatGrade(e.grade4));
+                                setGradeColor(binding.tvDetailP4, e.grade4);
+                                binding.tvDetailP5.setText(formatGrade(e.grade5));
+                                setGradeColor(binding.tvDetailP5, e.grade5);
+
+                                double sum = 0;
+                                int count = 0;
+                                if (e.grade1 != null) { sum += e.grade1; count++; }
+                                if (e.grade2 != null) { sum += e.grade2; count++; }
+                                if (e.grade3 != null) { sum += e.grade3; count++; }
+                                if (e.grade4 != null) { sum += e.grade4; count++; }
+                                if (e.grade5 != null) { sum += e.grade5; count++; }
+
+                                if (count > 0) {
+                                    double avg = sum / count;
+                                    binding.tvDetailAverage.setText(String.format(Locale.getDefault(), "%.1f", avg));
+                                    setGradeColor(binding.tvDetailAverage, avg);
+                                } else {
+                                    binding.tvDetailAverage.setText("N/A");
+                                    binding.tvDetailAverage.setTextColor(ContextCompat.getColor(requireContext(), R.color.bs_secondary));
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+        } else {
+            binding.layoutColorSelector.setVisibility(View.GONE);
+            binding.btnDelete.setVisibility(View.VISIBLE);
+            binding.btnSave.setText("Guardar Cambios");
+            binding.btnSave.setVisibility(View.VISIBLE);
+            binding.btnManageStudents.setVisibility(View.GONE);
+            binding.btnManageBlog.setVisibility(View.VISIBLE);
+        }
+
+        viewModel.getSelectedSubject().observe(getViewLifecycleOwner(), sub -> {
+            if (sub != null) {
+                subject = sub;
+                binding.etField1.setText(subject.name);
+                binding.etField2.setText(subject.description);
+                binding.etField3.setText(subject.faculty);
+                binding.etField4.setText(subject.section != null ? subject.section : "01");
+
+                if (currentUser != null && !"ADMIN".equals(currentUser.role)) {
+                    viewModel.getUserSubjectColor(currentUser.id, subject.id, color -> {
+                        if (binding != null) selectColor(color);
+                    });
+
+                    if ("STUDENT".equals(currentUser.role)) {
+                        viewModel.getGradeInfoForStudent(currentUser.id).observe(getViewLifecycleOwner(), gradeInfos -> {
+                            if (gradeInfos != null && binding != null) {
+                                for (StudentGradeInfo info : gradeInfos) {
+                                    if (info.subject != null && info.subject.id == subject.id && info.enrollment != null) {
+                                        binding.layoutStudentGrades.setVisibility(View.VISIBLE);
+                                        Enrollment e = info.enrollment;
+                                        binding.tvDetailP1.setText(formatGrade(e.grade1));
+                                        setGradeColor(binding.tvDetailP1, e.grade1);
+                                        binding.tvDetailP2.setText(formatGrade(e.grade2));
+                                        setGradeColor(binding.tvDetailP2, e.grade2);
+                                        binding.tvDetailP3.setText(formatGrade(e.grade3));
+                                        setGradeColor(binding.tvDetailP3, e.grade3);
+                                        binding.tvDetailP4.setText(formatGrade(e.grade4));
+                                        setGradeColor(binding.tvDetailP4, e.grade4);
+                                        binding.tvDetailP5.setText(formatGrade(e.grade5));
+                                        setGradeColor(binding.tvDetailP5, e.grade5);
+
+                                        double sum = 0;
+                                        int count = 0;
+                                        if (e.grade1 != null) { sum += e.grade1; count++; }
+                                        if (e.grade2 != null) { sum += e.grade2; count++; }
+                                        if (e.grade3 != null) { sum += e.grade3; count++; }
+                                        if (e.grade4 != null) { sum += e.grade4; count++; }
+                                        if (e.grade5 != null) { sum += e.grade5; count++; }
+
+                                        if (count > 0) {
+                                            double avg = sum / count;
+                                            binding.tvDetailAverage.setText(String.format(Locale.getDefault(), "%.1f", avg));
+                                            setGradeColor(binding.tvDetailAverage, avg);
+                                        } else {
+                                            binding.tvDetailAverage.setText("N/A");
+                                            binding.tvDetailAverage.setTextColor(ContextCompat.getColor(requireContext(), R.color.bs_secondary));
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        });
+
+        viewModel.getAllFaculties().observe(getViewLifecycleOwner(), faculties -> {
+            if (faculties == null) return;
+            String[] names = new String[faculties.size()];
+            for (int i = 0; i < faculties.size(); i++) names[i] = faculties.get(i).name;
+            
+            binding.etField3.setOnClickListener(v -> {
+                if (currentUser != null && !"ADMIN".equals(currentUser.role)) return;
+                new AlertDialog.Builder(getContext())
+                    .setTitle("Seleccionar Facultad")
+                    .setItems(names, (dialog, which) -> {
+                        binding.etField3.setText(names[which]);
+                    }).show();
+            });
+        });
+    }
+
+    private void setGradeColor(TextView tv, Double grade) {
+        if (grade == null) {
+            tv.setTextColor(ContextCompat.getColor(tv.getContext(), R.color.bs_secondary));
+            return;
+        }
+        int colorRes;
+        if (grade <= 3.0) {
+            colorRes = R.color.bs_danger;
+        } else if (grade <= 6.0) {
+            colorRes = R.color.bs_warning;
+        } else {
+            colorRes = R.color.bs_success;
+        }
+        tv.setTextColor(ContextCompat.getColor(tv.getContext(), colorRes));
+    }
+
+    private String formatGrade(Double grade) {
+        if (grade == null) return "-";
+        return String.format(Locale.getDefault(), "%.1f", grade);
+    }
+
+    private void saveChanges() {
+        if (subject != null) {
+            User currentUser = viewModel.getCurrentUser().getValue();
+            if (currentUser != null && !"ADMIN".equals(currentUser.role)) {
+                viewModel.performOnlineAction(() -> {
+                    viewModel.updateUserSubjectColor(currentUser.id, subject.id, selectedColor);
+                    Toast.makeText(getContext(), "Color guardado para tu horario", Toast.LENGTH_SHORT).show();
+                    Navigation.findNavController(requireView()).popBackStack();
+                });
+                return;
+            }
+
+            String name = binding.etField1.getText().toString();
+            if (name.isEmpty()) {
+                binding.etField1.setError("El nombre es obligatorio");
+                return;
+            }
+            
+            String sectionStr = binding.etField4.getText().toString().trim();
+            if (sectionStr.isEmpty()) {
+                binding.etField4.setError("La sección es obligatoria");
+                return;
+            }
+            
+            // Si el usuario escribió un solo dígito como '2', convertirlo automáticamente a formato '02'
+            String formattedSection = sectionStr;
+            try {
+                int val = Integer.parseInt(sectionStr);
+                if (val < 1 || val > 9) {
+                    binding.etField4.setError("La sección debe ser un número entero entre 1 y 9");
+                    return;
+                }
+                if (sectionStr.length() == 1) {
+                    formattedSection = "0" + val;
+                }
+            } catch (NumberFormatException e) {
+                binding.etField4.setError("Debe introducir un número entero válido (1-9)");
+                return;
+            }
+
+            subject.name = name;
+            subject.description = binding.etField2.getText().toString();
+            subject.faculty = binding.etField3.getText().toString();
+            subject.section = formattedSection;
+            
+            viewModel.performOnlineAction(() -> {
+                viewModel.updateSubject(subject);
+                Toast.makeText(getContext(), "Materia actualizada", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(requireView()).popBackStack();
+            });
+        }
+    }
+
+    private void showDeleteConfirmation() {
+        new AlertDialog.Builder(getContext())
+            .setTitle("Confirmar Eliminación")
+            .setMessage("¿Estás seguro de que deseas eliminar esta materia?")
+            .setPositiveButton("Eliminar", (dialog, which) -> {
+                if (subject != null) {
+                    viewModel.performOnlineAction(() -> {
+                        viewModel.deleteSubject(subject);
+                        Toast.makeText(getContext(), "Materiaidn gerental", Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(requireView()).popBackStack();
+                    });
+                }
+            })
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+}

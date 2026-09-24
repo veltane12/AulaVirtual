@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="@drawable/bg_list_item">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardParticipantPhoto"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="?attr/colorPrimaryContainer"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true">
+        <ImageView
+            android:id="@+id/ivParticipantPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_person"
+            android:scaleType="centerCrop"
+            app:tint="?attr/colorOnPrimaryContainer"
+            android:padding="8dp"/>
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/cardParticipantPhoto"
+        android:layout_toStartOf="@id/btnViewProfile"
+        android:layout_marginStart="12dp"
+        android:layout_centerVertical="true"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvParticipantName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvParticipantRole"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Estudiante"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnViewProfile"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:text="Perfil"
+        android:textSize="11sp"
+        android:textAllCaps="false"
+        app:cornerRadius="18dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:backgroundTint="?attr/colorPrimary"
+        android:textColor="@color/white"/>
+
+</RelativeLayout>

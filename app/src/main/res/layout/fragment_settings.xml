@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Categoria: Apariencia -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Apariencia"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:textAllCaps="true"
+                    android:layout_marginBottom="16dp"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Modo Oscuro"
+                        android:textSize="18sp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:layout_centerVertical="true"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchDarkMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"/>
+                </RelativeLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Paleta de Colores"
+                    android:textSize="18sp"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:layout_marginBottom="12dp"/>
+
+                <!-- Fila 1: Claros -->
+                <LinearLayout
+                    android:id="@+id/rowLight"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnBlueLight" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_blue_light" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnRedLight" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_red_light" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnGreenLight" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_green_light" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnPurpleLight" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_purple_light" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnCyanLight" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_cyan_light" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnYellowLight" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_yellow_light" android:layout_marginHorizontal="4dp"/>
+                </LinearLayout>
+
+                <!-- Fila 2: Normales -->
+                <LinearLayout
+                    android:id="@+id/rowNormal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnBlue" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_blue" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnRed" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_red" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnGreen" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_green" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnPurple" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_purple" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnCyan" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_cyan" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnYellow" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_yellow" android:layout_marginHorizontal="4dp"/>
+                </LinearLayout>
+
+                <!-- Fila 3: Oscuros -->
+                <LinearLayout
+                    android:id="@+id/rowDark"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginBottom="16dp">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnBlueDark" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_blue_dark" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnRedDark" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_red_dark" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnGreenDark" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_green_dark" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnPurpleDark" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_purple_dark" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnCyanDark" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_cyan_dark" android:layout_marginHorizontal="4dp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnYellowDark" style="@style/Widget.Bootstrap.ColorButton" android:backgroundTint="@color/accent_yellow_dark" android:layout_marginHorizontal="4dp"/>
+                </LinearLayout>
+
+                <!-- Separador -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/bs_border"
+                    android:layout_marginVertical="16dp"/>
+
+                <!-- Categoria: Otros -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Otros"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:textAllCaps="true"
+                    android:layout_marginBottom="16dp"/>
+
+                <Button
+                    android:id="@+id/btnChangePassword"
+                    style="@style/Widget.Bootstrap.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Cambiar Contraseña"
+                    android:textAllCaps="false"
+                    android:layout_marginBottom="12dp"/>
+
+                <Button
+                    android:id="@+id/btnDownloadOfflineData"
+                    style="@style/Widget.Bootstrap.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Descargar datos para uso Offline"
+                    android:textAllCaps="false"
+                    android:layout_marginBottom="16dp"/>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+</ScrollView>

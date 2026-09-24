@@ -1,0 +1,154 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MyApplication" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent_blue</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/bs_secondary</item>
+        <item name="android:statusBarColor">@color/bs_dark</item>
+        <item name="android:windowBackground">@color/bs_light</item>
+        <item name="colorSurface">@color/surface_light</item>
+    </style>
+
+    <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
+
+    <!-- Blue Variants -->
+    <style name="Theme_MyApplication_Blue_Light" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_blue_light</item>
+        <item name="colorOnPrimary">@color/black</item>
+    </style>
+    <style name="Theme_MyApplication_Blue" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_blue</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+    <style name="Theme_MyApplication_Blue_Dark" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_blue_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <!-- Red Variants -->
+    <style name="Theme_MyApplication_Red_Light" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_red_light</item>
+        <item name="colorOnPrimary">@color/black</item>
+    </style>
+    <style name="Theme_MyApplication_Red" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_red</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+    <style name="Theme_MyApplication_Red_Dark" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_red_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <!-- Green Variants -->
+    <style name="Theme_MyApplication_Green_Light" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_green_light</item>
+        <item name="colorOnPrimary">@color/black</item>
+    </style>
+    <style name="Theme_MyApplication_Green" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_green</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+    <style name="Theme_MyApplication_Green_Dark" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_green_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <!-- Purple Variants -->
+    <style name="Theme_MyApplication_Purple_Light" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_purple_light</item>
+        <item name="colorOnPrimary">@color/black</item>
+    </style>
+    <style name="Theme_MyApplication_Purple" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_purple</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+    <style name="Theme_MyApplication_Purple_Dark" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_purple_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <!-- Cyan Variants -->
+    <style name="Theme_MyApplication_Cyan_Light" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_cyan_light</item>
+        <item name="colorOnPrimary">@color/black</item>
+    </style>
+    <style name="Theme_MyApplication_Cyan" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_cyan</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+    <style name="Theme_MyApplication_Cyan_Dark" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_cyan_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <!-- Yellow Variants -->
+    <style name="Theme_MyApplication_Yellow_Light" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_yellow_light</item>
+        <item name="colorOnPrimary">@color/black</item>
+    </style>
+    <style name="Theme_MyApplication_Yellow" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_yellow</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+    <style name="Theme_MyApplication_Yellow_Dark" parent="Base.Theme.MyApplication">
+        <item name="colorPrimary">@color/accent_yellow_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <!-- Bootstrap Styles -->
+    <style name="Widget.Bootstrap.Button" parent="Widget.Material3.Button">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Bootstrap.Small</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="Widget.Bootstrap.Button.Primary" parent="Widget.Bootstrap.Button">
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="Widget.Bootstrap.Button.Success" parent="Widget.Bootstrap.Button">
+        <item name="backgroundTint">@color/bs_success</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Widget.Bootstrap.Button.Danger" parent="Widget.Bootstrap.Button">
+        <item name="backgroundTint">@color/bs_danger</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Widget.Bootstrap.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">?attr/colorSurface</item>
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="android:layout_margin">8dp</item>
+    </style>
+
+    <style name="Widget.Bootstrap.EditText" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/bg_bootstrap_input</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="ShapeAppearance.Bootstrap.Small" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerSize">4dp</item>
+    </style>
+
+    <style name="Widget.Bootstrap.ColorButton" parent="Widget.Material3.Button.IconButton">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconSize">22dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Bootstrap.Circle</item>
+    </style>
+
+    <style name="ShapeAppearance.Bootstrap.Circle" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerSize">50%</item>
+    </style>
+</resources>

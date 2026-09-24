@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="end"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:maxWidth="280dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_bubble_me"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp">
+
+        <TextView
+            android:id="@+id/tvCommentContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mi mensaje..."
+            android:textSize="14sp"
+            android:textColor="?attr/colorOnPrimary"/>
+
+        <TextView
+            android:id="@+id/tvCommentTimestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="4dp"
+            android:text="14/09/2026 08:30 AM"
+            android:textSize="10sp"
+            android:textColor="?attr/colorOnPrimary"
+            android:alpha="0.8"/>
+
+    </LinearLayout>
+
+</LinearLayout>

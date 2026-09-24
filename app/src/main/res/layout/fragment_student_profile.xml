@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp">
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardProfilePicture"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:cardCornerRadius="60dp"
+                app:cardElevation="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView
+                    android:id="@+id/ivProfilePicture"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_person"
+                    android:scaleType="centerCrop"
+                    app:tint="?attr/colorPrimary"
+                    android:padding="0dp"
+                    android:contentDescription="Foto de perfil"/>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardEditPhotoIndicator"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignBottom="@id/cardProfilePicture"
+                android:layout_alignEnd="@id/cardProfilePicture"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="?attr/colorPrimary">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_add"
+                    android:padding="8dp"
+                    app:tint="@color/white"
+                    android:contentDescription="Añadir foto"/>
+            </androidx.cardview.widget.CardView>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/tvProfileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nombre del Estudiante"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"/>
+            <ImageButton
+                android:id="@+id/btnCopyName"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_copy"
+                app:tint="?attr/colorPrimary"
+                android:contentDescription="Copiar nombre"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
+            <TextView
+                android:id="@+id/tvProfileCarnet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2549372022"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorSecondary"/>
+            <ImageButton
+                android:id="@+id/btnCopyCarnet"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_copy"
+                app:tint="?android:attr/textColorSecondary"
+                android:contentDescription="Copiar carnet"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/bs_border"
+            android:layout_marginVertical="24dp"/>
+
+        <!-- Datos Detallados -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Facultad" android:textStyle="bold" android:textSize="12sp" android:textColor="?attr/colorPrimary"/>
+            <TextView android:id="@+id/tvValFaculty" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Facultad" android:textSize="16sp" android:layout_marginBottom="16dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dirección" android:textStyle="bold" android:textSize="12sp" android:textColor="?attr/colorPrimary"/>
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp">
+                <TextView android:id="@+id/tvValAddress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentStart="true" android:layout_toStartOf="@id/btnCopyAddress" android:text="Dirección" android:textSize="16sp"/>
+                <ImageButton android:id="@+id/btnCopyAddress" android:layout_width="32dp" android:layout_height="32dp" android:layout_alignParentEnd="true" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_copy" app:tint="?attr/colorPrimary" android:contentDescription="Copiar dirección"/>
+            </RelativeLayout>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Correo Personal" android:textStyle="bold" android:textSize="12sp" android:textColor="?attr/colorPrimary"/>
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp">
+                <TextView android:id="@+id/tvValPersonalEmail" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentStart="true" android:layout_toStartOf="@id/btnCopyPersonalEmail" android:text="Correo" android:textSize="16sp"/>
+                <ImageButton android:id="@+id/btnCopyPersonalEmail" android:layout_width="32dp" android:layout_height="32dp" android:layout_alignParentEnd="true" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_copy" app:tint="?attr/colorPrimary" android:contentDescription="Copiar correo personal"/>
+            </RelativeLayout>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Correo Institucional" android:textStyle="bold" android:textSize="12sp" android:textColor="?attr/colorPrimary"/>
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:id="@+id/tvValInstitutionalEmail" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentStart="true" android:layout_toStartOf="@id/btnCopyInstEmail" android:text="Correo" android:textSize="16sp" android:textStyle="italic" android:textColor="?android:attr/textColorSecondary"/>
+                <ImageButton android:id="@+id/btnCopyInstEmail" android:layout_width="32dp" android:layout_height="32dp" android:layout_alignParentEnd="true" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_copy" app:tint="?android:attr/textColorSecondary" android:contentDescription="Copiar correo institucional"/>
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

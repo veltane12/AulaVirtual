@@ -1,0 +1,497 @@
+package com.aula.virtual.ui;
+
+import android.app.AlertDialog;
+import android.app.TimePickerDialog;
+import android.content.res.ColorStateList;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.aula.virtual.R;
+import com.aula.virtual.data.ScheduleInfo;
+import com.aula.virtual.data.entity.Facility;
+import com.aula.virtual.data.entity.FacilitySchedule;
+import com.aula.virtual.data.entity.Subject;
+import com.aula.virtual.data.entity.User;
+import com.aula.virtual.databinding.FragmentAdminDashboardBinding;
+import com.google.android.material.button.MaterialButton;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class AdminFacilitySchedulesFragment extends Fragment {
+    private FragmentAdminDashboardBinding binding;
+    private MainViewModel viewModel;
+    private ScheduleAdapter adapter;
+    private int facilityId;
+    private List<ScheduleInfo> currentSchedules = new ArrayList<>();
+    private List<ScheduleInfo> professorSchedules = new ArrayList<>();
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentAdminDashboardBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        facilityId = getArguments().getInt("facilityId");
+
+        adapter = new ScheduleAdapter(new ScheduleAdapter.OnScheduleActionListener() {
+            @Override public void onDelete(ScheduleInfo info) { showDeleteScheduleConfirmation(info); }
+            @Override public void onEdit(ScheduleInfo info) { showAddScheduleDialog(info.schedule); }
+        });
+
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setAdapter(adapter);
+
+        observeViewModel();
+        
+        viewModel.getModificationError().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                viewModel.clearModificationError();
+            }
+        });
+
+        binding.btnAdd.setText("Programar Clase");
+        binding.btnAdd.setOnClickListener(v -> showAddScheduleDialog(null));
+        binding.spinnerFilter.setVisibility(View.GONE);
+        binding.etSearch.setVisibility(View.GONE);
+
+        // Timetable action
+        binding.btnHeaderAction.setVisibility(View.VISIBLE);
+        binding.btnHeaderAction.setImageResource(R.drawable.ic_timetable);
+        binding.btnHeaderAction.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putInt("facilityId", facilityId);
+            Navigation.findNavController(view).navigate(R.id.action_adminFacilitySchedulesFragment_to_adminFacilityTimetableFragment, args);
+        });
+    }
+
+    private void observeViewModel() {
+        viewModel.getAllFacilities().observe(getViewLifecycleOwner(), facilities -> {
+            for (Facility f : facilities) {
+                if (f.id == facilityId) {
+                    binding.tvTitle.setText("Horarios: " + f.name);
+                    binding.tvSubtitle.setText(f.type + " - " + f.description);
+                    binding.tvSubtitle.setVisibility(View.VISIBLE);
+                    break;
+                }
+            }
+        });
+
+        viewModel.getFacilitySchedules(facilityId).observe(getViewLifecycleOwner(), schedules -> {
+            currentSchedules = schedules;
+            adapter.setSchedules(schedules);
+        });
+    }
+
+    private void showAddScheduleDialog(@Nullable FacilitySchedule existing) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(existing == null ? "Nueva Programación" : "Editar Programación");
+        
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 20, 50, 20);
+
+        final int[] selectedSubId = {existing != null ? existing.subjectId : -1};
+        final int[] selectedProfId = {existing != null ? existing.professorId : -1};
+        final String[] selectedDays = {existing != null ? existing.days : ""};
+
+        professorSchedules = new ArrayList<>();
+        if (existing != null) {
+            viewModel.getProfessorSchedules(existing.professorId).observe(getViewLifecycleOwner(), schedules -> {
+                professorSchedules = schedules;
+            });
+        }
+
+        final TextView tvSubject = createValueButton("Seleccionar Materia...");
+        if (existing != null) {
+            viewModel.getSubjectById(existing.subjectId, s -> {
+                String sec = s.section != null ? s.section : "01";
+                tvSubject.setText("Materia: " + s.name + "\n(Sección " + sec + ")");
+            });
+        }
+        tvSubject.setOnClickListener(v -> showSearchDialog("Materia", (item) -> {
+            selectedSubId[0] = item.id;
+            tvSubject.setText("Materia: " + item.text + "\n(" + item.subtext + ")");
+        }));
+        layout.addView(tvSubject);
+
+        final TextView tvProfessor = createValueButton("Seleccionar Profesor...");
+        if (existing != null) {
+            viewModel.getUserById(existing.professorId, u -> tvProfessor.setText("Profesor: " + u.name + " [" + u.carnet + "]"));
+        }
+        tvProfessor.setOnClickListener(v -> showSearchDialog("Profesor", (item) -> {
+            selectedProfId[0] = item.id;
+            tvProfessor.setText("Profesor: " + item.text + " [" + item.subtext.replace("Carnet: ", "") + "]");
+            
+            viewModel.getProfessorSchedules(item.id).observe(getViewLifecycleOwner(), schedules -> {
+                professorSchedules = schedules;
+            });
+        }));
+        layout.addView(tvProfessor);
+
+        final TextView tvDays = createValueButton(selectedDays[0].isEmpty() ? "Seleccionar Días..." : "Días: " + selectedDays[0]);
+        tvDays.setOnClickListener(v -> showDaysPickerDialog(selectedDays[0], result -> {
+            selectedDays[0] = result;
+            tvDays.setText("Días: " + result);
+        }));
+        layout.addView(tvDays);
+
+        final TextView tvStart = createValueButton("Hora Inicio: " + (existing != null ? existing.startTime : "00:00"));
+        tvStart.setOnClickListener(v -> showTimePicker(tvStart));
+        layout.addView(tvStart);
+
+        final TextView tvEnd = createValueButton("Hora Fin: " + (existing != null ? existing.endTime : "00:00"));
+        tvEnd.setOnClickListener(v -> showTimePicker(tvEnd));
+        layout.addView(tvEnd);
+
+        final String[] selectedColor = {existing != null && existing.color != null ? existing.color : "BLUE"};
+        final TextView tvColor = createValueButton("Color en esta Aula: " + selectedColor[0]);
+        tvColor.setOnClickListener(v -> showColorPickerDialog(selectedColor[0], colorName -> {
+            selectedColor[0] = colorName;
+            tvColor.setText("Color en esta Aula: " + colorName);
+        }));
+        layout.addView(tvColor);
+
+        builder.setView(layout);
+        builder.setPositiveButton("Guardar", null); // Set to null to handle manually
+        builder.setNegativeButton("Cancelar", null);
+        
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            if (selectedSubId[0] == -1) {
+                Toast.makeText(getContext(), "Debe seleccionar una materia", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (selectedProfId[0] == -1) {
+                Toast.makeText(getContext(), "Debe seleccionar un profesor", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (selectedDays[0].isEmpty()) {
+                Toast.makeText(getContext(), "Debe seleccionar al menos un día", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String start = tvStart.getText().toString().replace("Hora Inicio: ", "");
+            String end = tvEnd.getText().toString().replace("Hora Fin: ", "");
+
+            if (start.equals("00:00") || end.equals("00:00")) {
+                Toast.makeText(getContext(), "Debe definir un horario válido", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String conflict = checkScheduleConflicts(existing != null ? existing.id : -1, selectedDays[0], start, end);
+            if (conflict != null) {
+                Toast.makeText(getContext(), "CONFLICTO: " + conflict, Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            FacilitySchedule sch = existing != null ? existing : new FacilitySchedule();
+            sch.facilityId = facilityId;
+            sch.subjectId = selectedSubId[0];
+            sch.professorId = selectedProfId[0];
+            sch.days = selectedDays[0];
+            sch.startTime = start;
+            sch.endTime = end;
+            sch.color = selectedColor[0];
+
+            if (existing == null) {
+                viewModel.performOnlineAction(() -> {
+                    viewModel.insertSchedule(sch);
+                    dialog.dismiss();
+                });
+            } else {
+                viewModel.performOnlineAction(() -> {
+                    viewModel.updateSchedule(sch);
+                    dialog.dismiss();
+                });
+            }
+        });
+    }
+
+    private void showColorPickerDialog(String currentColor, MainViewModel.DataCallback<String> onSelected) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Seleccionar Color del Horario");
+
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_detail, null);
+        dialogView.findViewById(R.id.tvDetailTitle).setVisibility(View.GONE);
+        dialogView.findViewById(R.id.etField1).setVisibility(View.GONE);
+        dialogView.findViewById(R.id.btnCopyField1).setVisibility(View.GONE);
+        dialogView.findViewById(R.id.etField2).setVisibility(View.GONE);
+        dialogView.findViewById(R.id.btnCopyField2).setVisibility(View.GONE);
+        dialogView.findViewById(R.id.btnSave).setVisibility(View.GONE);
+        dialogView.findViewById(R.id.btnDelete).setVisibility(View.GONE);
+        
+        View scrollViewChild = ((ViewGroup) dialogView).getChildAt(0);
+        if (scrollViewChild instanceof LinearLayout) {
+            LinearLayout innerLayout = (LinearLayout) scrollViewChild;
+            innerLayout.setGravity(Gravity.CENTER);
+            int p = (int) (24 * getResources().getDisplayMetrics().density);
+            int pTopBottom = (int) (48 * getResources().getDisplayMetrics().density);
+            innerLayout.setPadding(p, pTopBottom, p, pTopBottom);
+        }
+
+        LinearLayout layoutColorSelector = dialogView.findViewById(R.id.layoutColorSelector);
+        if (layoutColorSelector != null) {
+            layoutColorSelector.setVisibility(View.VISIBLE);
+            layoutColorSelector.setGravity(Gravity.CENTER);
+            TextView tvColorLabel = dialogView.findViewById(R.id.tvColorLabel);
+            if (tvColorLabel != null) {
+                tvColorLabel.setText("Seleccionar Color del Horario");
+                tvColorLabel.setGravity(Gravity.CENTER);
+                tvColorLabel.setLayoutParams(new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, 
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ));
+            }
+        }
+
+        Map<String, MaterialButton> colorButtons = new HashMap<>();
+        colorButtons.put("BLUE_LIGHT", dialogView.findViewById(R.id.btnColor1));
+        colorButtons.put("RED_LIGHT", dialogView.findViewById(R.id.btnColor2));
+        colorButtons.put("GREEN_LIGHT", dialogView.findViewById(R.id.btnColor3));
+        colorButtons.put("PURPLE_LIGHT", dialogView.findViewById(R.id.btnColor4));
+        colorButtons.put("CYAN_LIGHT", dialogView.findViewById(R.id.btnColor5));
+        colorButtons.put("YELLOW_LIGHT", dialogView.findViewById(R.id.btnColor6));
+
+        colorButtons.put("BLUE", dialogView.findViewById(R.id.btnColor7));
+        colorButtons.put("RED", dialogView.findViewById(R.id.btnColor8));
+        colorButtons.put("GREEN", dialogView.findViewById(R.id.btnColor9));
+        colorButtons.put("PURPLE", dialogView.findViewById(R.id.btnColor10));
+        colorButtons.put("CYAN", dialogView.findViewById(R.id.btnColor11));
+        colorButtons.put("YELLOW", dialogView.findViewById(R.id.btnColor12));
+
+        colorButtons.put("BLUE_DARK", dialogView.findViewById(R.id.btnColor13));
+        colorButtons.put("RED_DARK", dialogView.findViewById(R.id.btnColor14));
+        colorButtons.put("GREEN_DARK", dialogView.findViewById(R.id.btnColor15));
+        colorButtons.put("PURPLE_DARK", dialogView.findViewById(R.id.btnColor16));
+        colorButtons.put("CYAN_DARK", dialogView.findViewById(R.id.btnColor17));
+        colorButtons.put("YELLOW_DARK", dialogView.findViewById(R.id.btnColor18));
+
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
+
+        for (Map.Entry<String, MaterialButton> entry : colorButtons.entrySet()) {
+            if (entry.getValue() != null) {
+                if (entry.getKey().equals(currentColor)) {
+                    entry.getValue().setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+                    entry.getValue().setIconResource(R.drawable.ic_check);
+                    int colorInt = ThemeHelper.getSubjectColor(requireContext(), currentColor);
+                    int tint = ThemeHelper.isColorLight(colorInt) ? 0xFF000000 : 0xFFFFFFFF;
+                    entry.getValue().setIconTint(ColorStateList.valueOf(tint));
+                }
+                entry.getValue().setOnClickListener(v -> {
+                    onSelected.onResult(entry.getKey());
+                    dialog.dismiss();
+                });
+            }
+        }
+
+        dialog.show();
+    }
+
+    private String checkScheduleConflicts(int currentSchId, String newDays, String newStart, String newEnd) {
+        List<String> newDaysList = Arrays.asList(newDays.split(", "));
+        int newStartMin = timeToMinutes(newStart);
+        int newEndMin = timeToMinutes(newEnd);
+
+        // 1. Conflict in this Facility (Aula)
+        for (ScheduleInfo info : currentSchedules) {
+            if (info.schedule.id == currentSchId) continue;
+            if (overlaps(info, newDaysList, newStartMin, newEndMin)) {
+                return "Esta aula ya tiene una clase en este horario (" + info.subjectName + ")";
+            }
+        }
+
+        // 2. Conflict for the Professor in ANY Facility
+        for (ScheduleInfo info : professorSchedules) {
+            if (info.schedule.id == currentSchId) continue;
+            if (overlaps(info, newDaysList, newStartMin, newEndMin)) {
+                return "El profesor ya tiene una clase en este horario (" + info.subjectName + ")";
+            }
+        }
+        return null;
+    }
+
+    private boolean overlaps(ScheduleInfo info, List<String> newDaysList, int newStartMin, int newEndMin) {
+        List<String> existingDays = Arrays.asList(info.schedule.days.split(", "));
+        boolean overlapDay = false;
+        for (String day : newDaysList) {
+            if (existingDays.contains(day)) {
+                overlapDay = true;
+                break;
+            }
+        }
+
+        if (overlapDay) {
+            int exStart = timeToMinutes(info.schedule.startTime);
+            int exEnd = timeToMinutes(info.schedule.endTime);
+            return (newStartMin < exEnd && newEndMin > exStart);
+        }
+        return false;
+    }
+
+    private int timeToMinutes(String time) {
+        try {
+            // Soporta formatos "HH:mm AM/PM" o "HH:mm" (24h)
+            String[] parts = time.trim().split("[: ]");
+            int hour = Integer.parseInt(parts[0]);
+            int minute = Integer.parseInt(parts[1]);
+            
+            if (parts.length > 2) {
+                String ampm = parts[2].toUpperCase();
+                if (ampm.equals("PM") && hour < 12) hour += 12;
+                else if (ampm.equals("AM") && hour == 12) hour = 0;
+            }
+            return hour * 60 + minute;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private void showSearchDialog(String type, SearchableAdapter.OnItemClickListener onSelected) {
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_searchable_list, null);
+        AlertDialog dialog = new AlertDialog.Builder(getContext()).setView(dialogView).create();
+        EditText etSearch = dialogView.findViewById(R.id.etSearchDialog);
+        RecyclerView rvList = dialogView.findViewById(R.id.rvDialogList);
+        rvList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        List<SearchableAdapter.SearchableItem> allItems = new ArrayList<>();
+        if (type.equals("Materia")) {
+            List<Subject> subjects = viewModel.getAllSubjects().getValue();
+            if (subjects != null) {
+                for (Subject s : subjects) {
+                    String sec = s.section != null ? s.section : "01";
+                    allItems.add(new SearchableAdapter.SearchableItem(s.id, s.name, "Sección " + sec));
+                }
+            }
+        } else {
+            List<User> profs = viewModel.getAllProfessors().getValue();
+            if (profs != null) {
+                for (User u : profs) {
+                    allItems.add(new SearchableAdapter.SearchableItem(u.id, u.name, "Carnet: " + u.carnet));
+                }
+            }
+        }
+
+        SearchableAdapter sAdapter = new SearchableAdapter(item -> { onSelected.onItemClick(item); dialog.dismiss(); });
+        sAdapter.setItems(allItems);
+        rvList.setAdapter(sAdapter);
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String q = s.toString().toLowerCase();
+                sAdapter.setItems(allItems.stream().filter(i -> i.text.toLowerCase().contains(q)).collect(Collectors.toList()));
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+        dialog.show();
+    }
+
+    private void showDaysPickerDialog(String currentDays, MainViewModel.DataCallback<String> onResult) {
+        String[] days = {"Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"};
+        boolean[] checked = new boolean[7];
+        if (!currentDays.isEmpty()) {
+            List<String> currentList = Arrays.asList(currentDays.split(", "));
+            for (int i = 0; i < 7; i++) checked[i] = currentList.contains(days[i]);
+        }
+
+        new AlertDialog.Builder(getContext())
+            .setTitle("Seleccionar Días")
+            .setMultiChoiceItems(days, checked, (dialog, which, isChecked) -> checked[which] = isChecked)
+            .setPositiveButton("OK", (dialog, which) -> {
+                StringBuilder result = new StringBuilder();
+                for (int i = 0; i < 7; i++) {
+                    if (checked[i]) {
+                        if (result.length() > 0) result.append(", ");
+                        result.append(days[i]);
+                    }
+                }
+                onResult.onResult(result.toString());
+            }).show();
+    }
+
+    private TextView createValueButton(String text) {
+        TextView tv = new TextView(getContext());
+        tv.setText(text);
+        tv.setPadding(20, 30, 20, 30);
+        tv.setBackgroundResource(R.drawable.bg_list_item);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, 10, 0, 10);
+        tv.setLayoutParams(params);
+        return tv;
+    }
+
+    private void showDeleteScheduleConfirmation(ScheduleInfo info) {
+        new AlertDialog.Builder(getContext())
+            .setTitle("Eliminar Horario")
+            .setMessage("¿Estás seguro de eliminar esta programación?")
+            .setPositiveButton("Eliminar", (dialog, which) -> {
+                viewModel.performOnlineAction(() -> viewModel.deleteSchedule(info.schedule));
+            })
+            .setNegativeButton("Cancelar", null).show();
+    }
+
+    private void showTimePicker(TextView target) {
+        Calendar c = Calendar.getInstance();
+        int initialHour = c.get(Calendar.HOUR_OF_DAY);
+        int initialMinute = c.get(Calendar.MINUTE);
+
+        // Intentar inicializar con la hora actual del TextView si existe
+        try {
+            String currentText = target.getText().toString();
+            String timePart = currentText.substring(currentText.indexOf(":") + 2);
+            int totalMins = timeToMinutes(timePart);
+            if (totalMins > 0 || timePart.startsWith("00") || timePart.startsWith("12")) {
+                initialHour = totalMins / 60;
+                initialMinute = totalMins % 60;
+            }
+        } catch (Exception ignored) {}
+
+        new TimePickerDialog(getContext(), (view, hour, minute) -> {
+            String ampm = (hour < 12) ? "AM" : "PM";
+            int hour12 = hour % 12;
+            if (hour12 == 0) hour12 = 12;
+            
+            String time = String.format(Locale.getDefault(), "%02d:%02d %s", hour12, minute, ampm);
+            if (target.getText().toString().contains("Inicio")) target.setText("Hora Inicio: " + time);
+            else target.setText("Hora Fin: " + time);
+        }, initialHour, initialMinute, false).show();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+}

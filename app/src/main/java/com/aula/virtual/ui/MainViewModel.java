@@ -1,0 +1,645 @@
+package com.aula.virtual.ui;
+
+import android.app.Application;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import com.aula.virtual.data.CommentInfo;
+import com.aula.virtual.data.ScheduleInfo;
+import com.aula.virtual.data.StudentGradeInfo;
+import com.aula.virtual.data.StudentInSubjectInfo;
+import com.aula.virtual.data.VirtualAulaRepository;
+import com.aula.virtual.data.entity.BlogComment;
+import com.aula.virtual.data.entity.BlogEntry;
+import com.aula.virtual.data.entity.Enrollment;
+import com.aula.virtual.data.entity.Facility;
+import com.aula.virtual.data.entity.FacilitySchedule;
+import com.aula.virtual.data.entity.Faculty;
+import com.aula.virtual.data.entity.Subject;
+import com.aula.virtual.data.entity.User;
+import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class MainViewModel extends AndroidViewModel {
+    private final VirtualAulaRepository repository;
+    private final MutableLiveData<List<User>> allStudents = new MutableLiveData<>();
+    private final MutableLiveData<List<User>> allAdmins = new MutableLiveData<>();
+    private final MutableLiveData<List<User>> allProfessors = new MutableLiveData<>();
+    private final MutableLiveData<List<Subject>> allSubjects = new MutableLiveData<>();
+    private final MutableLiveData<List<Faculty>> allFaculties = new MutableLiveData<>();
+    private final MutableLiveData<List<StudentGradeInfo>> currentStudentGrades = new MutableLiveData<>();
+    private final MutableLiveData<User> currentUser = new MutableLiveData<>();
+    private User adminUserBeforeImpersonation = null;
+
+    private final MutableLiveData<User> selectedUser = new MutableLiveData<>();
+    private final MutableLiveData<Subject> selectedSubject = new MutableLiveData<>();
+    private final MutableLiveData<Faculty> selectedFaculty = new MutableLiveData<>();
+    private final MutableLiveData<Enrollment> selectedEnrollment = new MutableLiveData<>();
+    private final MutableLiveData<List<BlogEntry>> subjectBlog = new MutableLiveData<>();
+    private final MutableLiveData<List<CommentInfo>> blogComments = new MutableLiveData<>();
+    private final MutableLiveData<List<Subject>> professorSubjects = new MutableLiveData<>();
+    private final MutableLiveData<List<StudentGradeInfo>> subjectStudents = new MutableLiveData<>();
+    private final MutableLiveData<List<User>> subjectParticipants = new MutableLiveData<>();
+    private final MutableLiveData<List<Facility>> allFacilities = new MutableLiveData<>();
+    private final MutableLiveData<List<ScheduleInfo>> facilitySchedules = new MutableLiveData<>();
+    private final MutableLiveData<List<ScheduleInfo>> professorSchedulesList = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isServerConnected = new MutableLiveData<>(true);
+    private final MutableLiveData<String> modificationError = new MutableLiveData<>();
+
+    public MainViewModel(Application application) {
+        super(application);
+        repository = new VirtualAulaRepository(application.getApplicationContext());
+        repository.setConnectionStatusListener(connected -> isServerConnected.postValue(connected));
+        refreshData();
+    }
+
+    public void refreshData() {
+        fetchStudents();
+        fetchAdmins();
+        fetchProfessors();
+        fetchSubjects();
+        fetchFaculties();
+        fetchFacilities();
+    }
+
+    public LiveData<List<User>> getAllStudents() { return allStudents; }
+    public LiveData<List<User>> getAllAdmins() { return allAdmins; }
+    public LiveData<List<User>> getAllProfessors() { return allProfessors; }
+    public LiveData<List<Subject>> getAllSubjects() { return allSubjects; }
+    public LiveData<List<Faculty>> getAllFaculties() { return allFaculties; }
+    public LiveData<User> getCurrentUser() { return currentUser; }
+    public void setCurrentUser(User user) { currentUser.setValue(user); }
+    
+    public void startImpersonation(User student) {
+        adminUserBeforeImpersonation = currentUser.getValue();
+        currentUser.setValue(student);
+    }
+
+    public void stopImpersonation() {
+        if (adminUserBeforeImpersonation != null) {
+            currentUser.setValue(adminUserBeforeImpersonation);
+            adminUserBeforeImpersonation = null;
+        }
+    }
+
+    public boolean isImpersonating() {
+        return adminUserBeforeImpersonation != null;
+    }
+
+    public void logout() {
+        currentUser.postValue(null);
+        adminUserBeforeImpersonation = null;
+        selectedUser.postValue(null);
+        selectedSubject.postValue(null);
+        selectedFaculty.postValue(null);
+        selectedEnrollment.postValue(null);
+        subjectBlog.postValue(null);
+    }
+
+    public LiveData<User> getSelectedUser() { return selectedUser; }
+    public LiveData<Subject> getSelectedSubject() { return selectedSubject; }
+    public LiveData<Faculty> getSelectedFaculty() { return selectedFaculty; }
+    public LiveData<Enrollment> getSelectedEnrollment() { return selectedEnrollment; }
+    public LiveData<List<BlogEntry>> getSubjectBlog() { return subjectBlog; }
+    public LiveData<List<CommentInfo>> getBlogComments() { return blogComments; }
+    public LiveData<Boolean> isServerConnected() { return isServerConnected; }
+    public LiveData<String> getModificationError() { return modificationError; }
+
+    public void clearModificationError() { modificationError.setValue(null); }
+
+    public boolean performOnlineAction(Runnable action) {
+        if (Boolean.TRUE.equals(isServerConnected.getValue())) {
+            action.run();
+            return true;
+        } else {
+            modificationError.setValue("Operación no permitida: fuera de línea o sin conexión con el servidor.");
+            return false;
+        }
+    }
+
+    public LiveData<List<Facility>> getAllFacilities() { return allFacilities; }
+
+    private void fetchFacilities() {
+        repository.getAllFacilities(new Callback<List<Facility>>() {
+            @Override public void onResponse(@NonNull Call<List<Facility>> call, @NonNull Response<List<Facility>> response) {
+                if (response.isSuccessful()) allFacilities.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<Facility>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void insertFacility(Facility facility) {
+        repository.insertFacility(facility, new Callback<Facility>() {
+            @Override public void onResponse(@NonNull Call<Facility> call, @NonNull Response<Facility> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Facility> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void updateFacility(Facility facility) {
+        repository.updateFacility(facility, new Callback<Facility>() {
+            @Override public void onResponse(@NonNull Call<Facility> call, @NonNull Response<Facility> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Facility> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void deleteFacility(int facId) {
+        repository.deleteFacility(facId, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public LiveData<List<ScheduleInfo>> getFacilitySchedules(int facId) {
+        fetchSchedules(facId);
+        return facilitySchedules;
+    }
+
+    public void fetchSchedules(int facId) {
+        repository.getFacilitySchedules(facId, new Callback<List<ScheduleInfo>>() {
+            @Override public void onResponse(@NonNull Call<List<ScheduleInfo>> call, @NonNull Response<List<ScheduleInfo>> response) {
+                if (response.isSuccessful()) facilitySchedules.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<ScheduleInfo>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public LiveData<List<ScheduleInfo>> getStudentSchedules(int studentId) {
+        repository.getStudentSchedules(studentId, new Callback<List<ScheduleInfo>>() {
+            @Override public void onResponse(@NonNull Call<List<ScheduleInfo>> call, @NonNull Response<List<ScheduleInfo>> response) {
+                if (response.isSuccessful()) facilitySchedules.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<ScheduleInfo>> call, @NonNull Throwable t) {}
+        });
+        return facilitySchedules;
+    }
+
+    public LiveData<List<ScheduleInfo>> getProfessorSchedules(int profId) {
+        repository.getProfessorSchedules(profId, new Callback<List<ScheduleInfo>>() {
+            @Override public void onResponse(@NonNull Call<List<ScheduleInfo>> call, @NonNull Response<List<ScheduleInfo>> response) {
+                if (response.isSuccessful()) professorSchedulesList.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<ScheduleInfo>> call, @NonNull Throwable t) {}
+        });
+        return professorSchedulesList;
+    }
+
+    public void insertSchedule(FacilitySchedule schedule) {
+        repository.insertSchedule(schedule, new Callback<FacilitySchedule>() {
+            @Override public void onResponse(@NonNull Call<FacilitySchedule> call, @NonNull Response<FacilitySchedule> response) { fetchSchedules(schedule.facilityId); }
+            @Override public void onFailure(@NonNull Call<FacilitySchedule> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void updateSchedule(FacilitySchedule schedule) {
+        repository.updateSchedule(schedule, new Callback<FacilitySchedule>() {
+            @Override public void onResponse(@NonNull Call<FacilitySchedule> call, @NonNull Response<FacilitySchedule> response) { fetchSchedules(schedule.facilityId); }
+            @Override public void onFailure(@NonNull Call<FacilitySchedule> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void deleteSchedule(FacilitySchedule schedule) {
+        repository.deleteSchedule(schedule.id, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) { fetchSchedules(schedule.facilityId); }
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void updateUserSubjectColor(int userId, int subjectId, String color) {
+        repository.updateUserSubjectColor(userId, subjectId, color, new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                User user = currentUser.getValue();
+                if (user != null) {
+                    if ("PROFESSOR".equals(user.role)) {
+                        getProfessorSchedules(user.id);
+                    } else if ("STUDENT".equals(user.role)) {
+                        getStudentSchedules(user.id);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                User user = currentUser.getValue();
+                if (user != null) {
+                    if ("PROFESSOR".equals(user.role)) {
+                        getProfessorSchedules(user.id);
+                    } else if ("STUDENT".equals(user.role)) {
+                        getStudentSchedules(user.id);
+                    }
+                }
+            }
+        });
+    }
+
+    public void getUserSubjectColor(int userId, int subjectId, DataCallback<String> callback) {
+        repository.getUserSubjectColor(userId, subjectId, new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.body() != null) callback.onResult(response.body());
+                else callback.onResult("BLUE");
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                callback.onResult("BLUE");
+            }
+        });
+    }
+
+    public void fetchBlogComments(int entryId) {
+        repository.getBlogComments(entryId, new Callback<List<CommentInfo>>() {
+            @Override public void onResponse(@NonNull Call<List<CommentInfo>> call, @NonNull Response<List<CommentInfo>> response) {
+                if (response.isSuccessful()) blogComments.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<CommentInfo>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void insertBlogComment(BlogComment comment) {
+        repository.insertBlogComment(comment, new Callback<BlogComment>() {
+            @Override public void onResponse(@NonNull Call<BlogComment> call, @NonNull Response<BlogComment> response) {
+                if (response.isSuccessful()) fetchBlogComments(comment.blogEntryId);
+            }
+            @Override public void onFailure(@NonNull Call<BlogComment> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void deleteBlogComment(BlogComment comment) {
+        repository.deleteBlogComment(comment.id, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) fetchBlogComments(comment.blogEntryId);
+            }
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void clearBlogDiscussion(int entryId) {
+        repository.clearBlogDiscussion(entryId, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) fetchBlogComments(entryId);
+            }
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public LiveData<List<Subject>> getSubjectsByProfessor(int professorId) {
+        repository.getSubjectsByProfessor(professorId, new Callback<List<Subject>>() {
+            @Override public void onResponse(@NonNull Call<List<Subject>> call, @NonNull Response<List<Subject>> response) {
+                if (response.isSuccessful()) professorSubjects.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<Subject>> call, @NonNull Throwable t) {}
+        });
+        return professorSubjects;
+    }
+
+    public LiveData<List<StudentGradeInfo>> getStudentsBySubject(int subjectId) {
+        repository.getSubjectEnrollments(subjectId, new Callback<List<StudentGradeInfo>>() {
+            @Override public void onResponse(@NonNull Call<List<StudentGradeInfo>> call, @NonNull Response<List<StudentGradeInfo>> response) {
+                if (response.isSuccessful()) subjectStudents.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<StudentGradeInfo>> call, @NonNull Throwable t) {}
+        });
+        return subjectStudents;
+    }
+
+    public LiveData<List<User>> getSubjectParticipants(int subjectId) {
+        repository.getSubjectParticipants(subjectId, new Callback<List<User>>() {
+            @Override public void onResponse(@NonNull Call<List<User>> call, @NonNull Response<List<User>> response) {
+                if (response.isSuccessful()) subjectParticipants.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<User>> call, @NonNull Throwable t) {}
+        });
+        return subjectParticipants;
+    }
+
+    public void fetchSubjectBlog(int subjectId) {
+        repository.getSubjectBlog(subjectId, new Callback<List<BlogEntry>>() {
+            @Override public void onResponse(@NonNull Call<List<BlogEntry>> call, @NonNull Response<List<BlogEntry>> response) {
+                if (response.isSuccessful()) subjectBlog.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<BlogEntry>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void insertBlogEntry(BlogEntry entry, DataCallback<String> onResult) {
+        repository.insertBlogEntry(entry, new Callback<BlogEntry>() {
+            @Override public void onResponse(@NonNull Call<BlogEntry> call, @NonNull Response<BlogEntry> response) {
+                if (response.isSuccessful()) {
+                    fetchSubjectBlog(entry.subjectId);
+                    onResult.onResult("OK");
+                } else {
+                    onResult.onResult("Error en el servidor: " + response.code());
+                }
+            }
+            @Override public void onFailure(@NonNull Call<BlogEntry> call, @NonNull Throwable t) {
+                onResult.onResult("Error de conexión: No se pudo contactar con el servidor");
+            }
+        });
+    }
+
+    public void updateBlogEntry(BlogEntry entry, DataCallback<String> onResult) {
+        repository.updateBlogEntry(entry, new Callback<BlogEntry>() {
+            @Override public void onResponse(@NonNull Call<BlogEntry> call, @NonNull Response<BlogEntry> response) {
+                if (response.isSuccessful()) {
+                    fetchSubjectBlog(entry.subjectId);
+                    onResult.onResult("OK");
+                } else {
+                    onResult.onResult("Error al actualizar: " + response.code());
+                }
+            }
+            @Override public void onFailure(@NonNull Call<BlogEntry> call, @NonNull Throwable t) {
+                onResult.onResult("Error de conexión");
+            }
+        });
+    }
+
+    public void updateBlogOrder(List<BlogEntry> entries) {
+        repository.reorderBlog(entries, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {}
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void deleteBlogEntry(BlogEntry entry) {
+        repository.deleteBlogEntry(entry.id, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) fetchSubjectBlog(entry.subjectId);
+            }
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    private void fetchStudents() {
+        repository.getAllStudents(new Callback<List<User>>() {
+            @Override public void onResponse(@NonNull Call<List<User>> call, @NonNull Response<List<User>> response) {
+                if (response.isSuccessful() && response.body() != null) allStudents.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<User>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    private void fetchAdmins() {
+        repository.getAllAdmins(new Callback<List<User>>() {
+            @Override public void onResponse(@NonNull Call<List<User>> call, @NonNull Response<List<User>> response) {
+                if (response.isSuccessful() && response.body() != null) allAdmins.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<User>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    private void fetchProfessors() {
+        repository.getAllProfessors(new Callback<List<User>>() {
+            @Override public void onResponse(@NonNull Call<List<User>> call, @NonNull Response<List<User>> response) {
+                if (response.isSuccessful() && response.body() != null) allProfessors.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<User>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    private void fetchSubjects() {
+        repository.getAllSubjects(new Callback<List<Subject>>() {
+            @Override public void onResponse(@NonNull Call<List<Subject>> call, @NonNull Response<List<Subject>> response) {
+                if (response.isSuccessful() && response.body() != null) allSubjects.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<Subject>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    private void fetchFaculties() {
+        repository.getAllFaculties(new Callback<List<Faculty>>() {
+            @Override public void onResponse(@NonNull Call<List<Faculty>> call, @NonNull Response<List<Faculty>> response) {
+                if (response.isSuccessful() && response.body() != null) allFaculties.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<Faculty>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void login(String carnet, String password, LoginCallback callback) {
+        repository.login(carnet, password, new Callback<User>() {
+            @Override public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    currentUser.setValue(response.body());
+                    callback.onSuccess(response.body());
+                } else {
+                    if (response.code() >= 500) {
+                        callback.onError("Error del servidor: Los servicios de datos no responden");
+                    } else {
+                        callback.onError("Credenciales incorrectas");
+                    }
+                }
+            }
+            @Override public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                callback.onError("Error de conexión: No se pudo contactar con el servidor");
+            }
+        });
+    }
+
+    public void insertUser(User user) {
+        repository.insertUser(user, new Callback<User>() {
+            @Override public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void updateUser(User user) {
+        repository.updateUser(user, new Callback<User>() {
+            @Override public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    User updated = response.body();
+                    User current = currentUser.getValue();
+                    if (current != null && current.id == updated.id) {
+                        currentUser.postValue(updated);
+                    }
+                    // Also update selected user for Detail screens
+                    User selected = selectedUser.getValue();
+                    if (selected != null && selected.id == updated.id) {
+                        selectedUser.postValue(updated);
+                    }
+                }
+                refreshData();
+            }
+            @Override public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void deleteUser(User user) {
+        repository.deleteUser(user.id, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void insertSubject(Subject subject) {
+        repository.insertSubject(subject, new Callback<Subject>() {
+            @Override public void onResponse(@NonNull Call<Subject> call, @NonNull Response<Subject> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Subject> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void updateSubject(Subject subject) {
+        repository.updateSubject(subject, new Callback<Subject>() {
+            @Override public void onResponse(@NonNull Call<Subject> call, @NonNull Response<Subject> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Subject> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void deleteSubject(Subject subject) {
+        repository.deleteSubject(subject.id, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void insertFaculty(Faculty faculty) {
+        repository.insertFaculty(faculty, new Callback<Faculty>() {
+            @Override public void onResponse(@NonNull Call<Faculty> call, @NonNull Response<Faculty> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Faculty> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void updateFaculty(Faculty faculty) {
+        repository.updateFaculty(faculty, new Callback<Faculty>() {
+            @Override public void onResponse(@NonNull Call<Faculty> call, @NonNull Response<Faculty> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Faculty> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void deleteFaculty(Faculty faculty) {
+        repository.deleteFaculty(faculty.id, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) { refreshData(); }
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void enrollStudent(int studentId, int subjectId, DataCallback<String> errorCallback) {
+        repository.enrollStudent(new Enrollment(studentId, subjectId), new Callback<Enrollment>() {
+            @Override public void onResponse(@NonNull Call<Enrollment> call, @NonNull Response<Enrollment> response) {
+                if (response.isSuccessful()) {
+                    fetchGradesForStudent(studentId);
+                } else {
+                    errorCallback.onResult("El alumno ya está inscrito o hubo un error");
+                }
+            }
+            @Override public void onFailure(@NonNull Call<Enrollment> call, @NonNull Throwable t) {
+                errorCallback.onResult("Error de conexión");
+            }
+        });
+    }
+
+    public void updateEnrollment(Enrollment enrollment) {
+        repository.updateEnrollment(enrollment, new Callback<Enrollment>() {
+            @Override public void onResponse(@NonNull Call<Enrollment> call, @NonNull Response<Enrollment> response) {
+                if (response.isSuccessful()) fetchGradesForStudent(enrollment.studentId);
+            }
+            @Override public void onFailure(@NonNull Call<Enrollment> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void deleteEnrollment(Enrollment enrollment) {
+        repository.deleteEnrollment(enrollment.id, new Callback<Void>() {
+            @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) fetchGradesForStudent(enrollment.studentId);
+            }
+            @Override public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public LiveData<List<StudentGradeInfo>> getGradeInfoForStudent(int studentId) {
+        fetchGradesForStudent(studentId);
+        return currentStudentGrades;
+    }
+
+    public void fetchGradesForStudent(int studentId) {
+        repository.getGradeInfoForStudent(studentId, new Callback<List<StudentGradeInfo>>() {
+            @Override public void onResponse(@NonNull Call<List<StudentGradeInfo>> call, @NonNull Response<List<StudentGradeInfo>> response) {
+                if (response.isSuccessful() && response.body() != null) currentStudentGrades.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<List<StudentGradeInfo>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void getUserById(int id, DataCallback<User> callback) {
+        repository.getUserById(id, new Callback<User>() {
+            @Override public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) { if (response.isSuccessful()) callback.onResult(response.body()); }
+            @Override public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void fetchUserById(int id) {
+        selectedUser.setValue(null);
+        repository.getUserById(id, new Callback<User>() {
+            @Override public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) selectedUser.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void getSubjectById(int id, DataCallback<Subject> callback) {
+        repository.getSubjectById(id, new Callback<Subject>() {
+            @Override public void onResponse(@NonNull Call<Subject> call, @NonNull Response<Subject> response) { if (response.isSuccessful()) callback.onResult(response.body()); }
+            @Override public void onFailure(@NonNull Call<Subject> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void fetchSubjectById(int id) {
+        selectedSubject.setValue(null);
+        repository.getSubjectById(id, new Callback<Subject>() {
+            @Override public void onResponse(@NonNull Call<Subject> call, @NonNull Response<Subject> response) {
+                if (response.isSuccessful() && response.body() != null) selectedSubject.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<Subject> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void getFacultyById(int id, DataCallback<Faculty> callback) {
+        repository.getFacultyById(id, new Callback<Faculty>() {
+            @Override public void onResponse(@NonNull Call<Faculty> call, @NonNull Response<Faculty> response) { if (response.isSuccessful()) callback.onResult(response.body()); }
+            @Override public void onFailure(@NonNull Call<Faculty> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void fetchFacultyById(int id) {
+        selectedFaculty.setValue(null);
+        repository.getFacultyById(id, new Callback<Faculty>() {
+            @Override public void onResponse(@NonNull Call<Faculty> call, @NonNull Response<Faculty> response) {
+                if (response.isSuccessful() && response.body() != null) selectedFaculty.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<Faculty> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void getEnrollmentById(int id, DataCallback<Enrollment> callback) {
+        repository.getEnrollmentById(id, new Callback<Enrollment>() {
+            @Override public void onResponse(@NonNull Call<Enrollment> call, @NonNull Response<Enrollment> response) { if (response.isSuccessful()) callback.onResult(response.body()); }
+            @Override public void onFailure(@NonNull Call<Enrollment> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void fetchEnrollmentById(int id) {
+        selectedEnrollment.setValue(null);
+        repository.getEnrollmentById(id, new Callback<Enrollment>() {
+            @Override public void onResponse(@NonNull Call<Enrollment> call, @NonNull Response<Enrollment> response) {
+                if (response.isSuccessful() && response.body() != null) selectedEnrollment.setValue(response.body());
+            }
+            @Override public void onFailure(@NonNull Call<Enrollment> call, @NonNull Throwable t) {}
+        });
+    }
+
+    public void downloadAllDataForOffline(VirtualAulaRepository.SyncCallback callback) {
+        repository.downloadAllDataForOffline(callback);
+    }
+
+    public interface LoginCallback {
+        void onSuccess(User user);
+        void onError(String message);
+    }
+
+    public interface DataCallback<T> {
+        void onResult(T data);
+    }
+}

@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Background Circle -->
+    <path
+        android:fillColor="?attr/colorPrimary"
+        android:pathData="M54,54m-45,0a45,45 0,1 1,90 0a45,45 0,1 1,-90 0" />
+    <!-- School Icon (Cap) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,32L24,44L54,56L79,44V59H84V44L54,32ZM34,51.33V58.33C34,64.22 42.95,69 54,69C65.05,69 74,64.22 74,58.33V51.33L54,60.33L34,51.33Z" />
+    <!-- Grade Badge (Small Circle with A+) -->
+    <path
+        android:fillColor="@color/bs_success"
+        android:pathData="M80,75m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0" />
+    <!-- A+ Text representation (paths) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M78,71H82L85,81H81.5L80,77.5H76.5L75,81H71.5L78,71ZM79,74.5L77,76.5H81L79,74.5ZM86,74V76H84V78H86V80H88V78H90V76H88V74H86Z" />
+</vector>
