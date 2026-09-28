@@ -11,43 +11,6 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <GridLayout
-            android:id="@+id/layoutTopButtons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:columnCount="2"
-            android:layout_marginBottom="12dp">
-
-            <Button
-                android:id="@+id/btnManageStudents"
-                style="@style/Widget.Bootstrap.Button.Primary"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="4dp"
-                android:text="Alumnos y Notas"
-                android:textAllCaps="false"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:backgroundTint="@color/bs_primary"
-                android:visibility="gone"/>
-
-            <Button
-                android:id="@+id/btnManageBlog"
-                style="@style/Widget.Bootstrap.Button.Primary"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="4dp"
-                android:text="Foro de la Materia"
-                android:textAllCaps="false"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:backgroundTint="@color/bs_info"
-                android:visibility="gone"/>
-
-        </GridLayout>
-
         <!-- 1. Notas -->
         <LinearLayout
             android:id="@+id/layoutStudentGrades"
@@ -470,6 +433,34 @@
                 android:layout_margin="4dp"
                 android:text="Eliminar Registro"
                 android:textAllCaps="false"/>
+
+            <Button
+                android:id="@+id/btnManageStudents"
+                style="@style/Widget.Bootstrap.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:text="Alumnos y Notas"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:backgroundTint="@color/bs_primary"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/btnManageBlog"
+                style="@style/Widget.Bootstrap.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:text="Foro de la Materia"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:backgroundTint="@color/bs_info"
+                android:visibility="gone"/>
 
             <Button
                 android:id="@+id/btnManageGrades"
