@@ -17,6 +17,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.aula.virtual.ui.MainViewModel;
+import android.widget.LinearLayout;
+import com.aula.virtual.ui.MainViewModel;
 import com.aula.virtual.ui.ThemeHelper;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -32,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         setTheme(ThemeHelper.getAccentTheme(this));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        applyNavbarPosition();
 
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
@@ -203,5 +207,25 @@ public class MainActivity extends AppCompatActivity {
         return id == R.id.adminHomeFragment || 
                id == R.id.studentHomeFragment || 
                id == R.id.professorHomeFragment;
+    }
+
+    private void applyNavbarPosition() {
+        LinearLayout rootLayout = findViewById(R.id.mainRootLayout);
+        View appBarLayout = findViewById(R.id.appBarLayout);
+        View navHostFragment = findViewById(R.id.nav_host_fragment);
+
+        if (rootLayout != null && appBarLayout != null && navHostFragment != null) {
+            String position = ThemeHelper.getNavbarPosition(this);
+            rootLayout.removeView(appBarLayout);
+            rootLayout.removeView(navHostFragment);
+
+            if (ThemeHelper.NAVBAR_POSITION_BOTTOM.equals(position)) {
+                rootLayout.addView(navHostFragment);
+                rootLayout.addView(appBarLayout);
+            } else {
+                rootLayout.addView(appBarLayout);
+                rootLayout.addView(navHostFragment);
+            }
+        }
     }
 }

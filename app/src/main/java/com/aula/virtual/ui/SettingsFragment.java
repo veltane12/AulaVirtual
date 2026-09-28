@@ -45,6 +45,7 @@ public class SettingsFragment extends Fragment {
         });
 
         setupAccentColorSelector();
+        setupNavbarPositionSelector();
         binding.btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
         binding.btnDownloadOfflineData.setOnClickListener(v -> downloadOfflineData());
 
@@ -130,6 +131,25 @@ public class SettingsFragment extends Fragment {
     private void changeColor(String colorName) {
         ThemeHelper.setAccentColor(requireContext(), colorName);
         requireActivity().recreate();
+    }
+
+    private void setupNavbarPositionSelector() {
+        String currentPos = ThemeHelper.getNavbarPosition(requireContext());
+        if (ThemeHelper.NAVBAR_POSITION_BOTTOM.equals(currentPos)) {
+            binding.toggleNavbarPosition.check(R.id.btnNavPositionBottom);
+        } else {
+            binding.toggleNavbarPosition.check(R.id.btnNavPositionTop);
+        }
+
+        binding.toggleNavbarPosition.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                String newPos = (checkedId == R.id.btnNavPositionBottom) ? ThemeHelper.NAVBAR_POSITION_BOTTOM : ThemeHelper.NAVBAR_POSITION_TOP;
+                if (!newPos.equals(ThemeHelper.getNavbarPosition(requireContext()))) {
+                    ThemeHelper.setNavbarPosition(requireContext(), newPos);
+                    requireActivity().recreate();
+                }
+            }
+        });
     }
 
     private void showChangePasswordDialog() {

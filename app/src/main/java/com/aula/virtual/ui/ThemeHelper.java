@@ -11,6 +11,20 @@ public class ThemeHelper {
     private static final String PREFS_NAME = "theme_prefs";
     private static final String KEY_IS_DARK_MODE = "is_dark_mode";
     private static final String KEY_ACCENT_COLOR = "accent_color";
+    private static final String KEY_NAVBAR_POSITION = "navbar_position";
+
+    public static final String NAVBAR_POSITION_TOP = "TOP";
+    public static final String NAVBAR_POSITION_BOTTOM = "BOTTOM";
+
+    public static String getNavbarPosition(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(KEY_NAVBAR_POSITION, NAVBAR_POSITION_TOP);
+    }
+
+    public static void setNavbarPosition(Context context, String position) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putString(KEY_NAVBAR_POSITION, position).apply();
+    }
 
     public static void applyTheme(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
