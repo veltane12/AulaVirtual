@@ -137,29 +137,36 @@ public class AdminFacilityTimetableFragment extends Fragment {
 
         final boolean[] dialogShown = {false};
         viewModel.getSubjectById(info.schedule.subjectId, subject -> {
-            if (getContext() == null || dialogShown[0]) return;
-            dialogShown[0] = true;
-            requireActivity().runOnUiThread(() -> {
-                StringBuilder details = new StringBuilder();
-                details.append("📚 Materia: ").append(info.subjectName != null ? info.subjectName : "N/A").append("\n");
-                if (subject != null) {
-                    if (subject.description != null && !subject.description.isEmpty()) {
-                        details.append("📝 Descripción: ").append(subject.description).append("\n");
+            viewModel.getFacilityById(info.schedule.facilityId, facility -> {
+                if (getContext() == null || dialogShown[0]) return;
+                dialogShown[0] = true;
+                requireActivity().runOnUiThread(() -> {
+                    StringBuilder details = new StringBuilder();
+                    details.append("📚 Materia: ").append(info.subjectName != null ? info.subjectName : "N/A").append("\n");
+                    if (subject != null) {
+                        if (subject.description != null && !subject.description.isEmpty()) {
+                            details.append("📝 Descripción: ").append(subject.description).append("\n");
+                        }
                     }
-                    if (subject.faculty != null && !subject.faculty.isEmpty()) {
-                        details.append("🏛️ Facultad: ").append(subject.faculty).append("\n");
+                    if (facility != null && facility.name != null && !facility.name.isEmpty()) {
+                        details.append("🏢 Instalación: ").append(facility.name).append("\n");
                     }
-                    details.append("📌 Sección: ").append(subject.section != null ? subject.section : "01").append("\n");
-                }
-                details.append("👨‍🏫 Profesor: ").append(info.professorName != null ? info.professorName : "N/A").append("\n");
-                details.append("📅 Días: ").append(info.schedule.days != null ? info.schedule.days : "N/A").append("\n");
-                details.append("⏰ Hora: ").append(info.schedule.startTime).append(" - ").append(info.schedule.endTime);
+                    if (subject != null) {
+                        if (subject.faculty != null && !subject.faculty.isEmpty()) {
+                            details.append("🏛️ Facultad: ").append(subject.faculty).append("\n");
+                        }
+                        details.append("📌 Sección: ").append(subject.section != null ? subject.section : "01").append("\n");
+                    }
+                    details.append("👨‍🏫 Profesor: ").append(info.professorName != null ? info.professorName : "N/A").append("\n");
+                    details.append("📅 Días: ").append(info.schedule.days != null ? info.schedule.days : "N/A").append("\n");
+                    details.append("⏰ Hora: ").append(info.schedule.startTime).append(" - ").append(info.schedule.endTime);
 
-                new MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Detalle de la Clase")
-                    .setMessage(details.toString())
-                    .setPositiveButton("Cerrar", null)
-                    .show();
+                    new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Detalle de la Clase")
+                        .setMessage(details.toString())
+                        .setPositiveButton("Cerrar", null)
+                        .show();
+                });
             });
         });
     }

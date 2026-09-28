@@ -136,6 +136,9 @@ public interface ApiService {
     @GET("facilities")
     Call<List<Facility>> getFacilities();
 
+    @GET("facilities/{id}")
+    Call<Facility> getFacilityById(@Path("id") int id);
+
     @POST("facilities")
     Call<Facility> createFacility(@Body Facility facility);
 

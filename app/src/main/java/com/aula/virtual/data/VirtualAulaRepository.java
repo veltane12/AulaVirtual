@@ -788,6 +788,18 @@ public class VirtualAulaRepository {
         performCall(apiService.getFacultyById(id), callback);
     }
 
+    public void getFacilityById(int id, Callback<Facility> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                Facility cached = db.facilityDao().getFacilityById(id);
+                if (cached != null) {
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(cached)));
+                }
+            });
+        }
+        performCall(apiService.getFacilityById(id), callback);
+    }
+
     public void getEnrollmentById(int id, Callback<Enrollment> callback) {
         if (db != null) {
             executor.execute(() -> {

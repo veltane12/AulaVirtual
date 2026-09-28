@@ -604,6 +604,18 @@ public class MainViewModel extends AndroidViewModel {
         });
     }
 
+    public void getFacilityById(int id, DataCallback<Facility> callback) {
+        repository.getFacilityById(id, new Callback<Facility>() {
+            @Override public void onResponse(@NonNull Call<Facility> call, @NonNull Response<Facility> response) {
+                if (response.isSuccessful() && response.body() != null) callback.onResult(response.body());
+                else callback.onResult(null);
+            }
+            @Override public void onFailure(@NonNull Call<Facility> call, @NonNull Throwable t) {
+                callback.onResult(null);
+            }
+        });
+    }
+
     public void fetchFacultyById(int id) {
         selectedFaculty.setValue(null);
         repository.getFacultyById(id, new Callback<Faculty>() {
