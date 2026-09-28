@@ -103,7 +103,8 @@ public class AdminDetailFragment extends Fragment {
         
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
-        binding.btnImpersonate.setOnClickListener(v -> impersonateUser());
+        binding.cardProfileImage.setOnClickListener(v -> showImpersonateConfirmationDialog());
+        binding.cardImpersonateIndicator.setOnClickListener(v -> showImpersonateConfirmationDialog());
 
         setupCopyButtons();
     }
@@ -121,6 +122,16 @@ public class AdminDetailFragment extends Fragment {
         binding.btnCopyField3.setOnClickListener(v -> ClipboardUtils.copyToClipboard(getContext(), "Contraseña", binding.etField3.getText().toString()));
         binding.btnCopyAddress.setOnClickListener(v -> ClipboardUtils.copyToClipboard(getContext(), "Dirección", binding.etAddress.getText().toString()));
         binding.btnCopyPersonalEmail.setOnClickListener(v -> ClipboardUtils.copyToClipboard(getContext(), "Correo Personal", binding.etPersonalEmail.getText().toString()));
+    }
+
+    private void showImpersonateConfirmationDialog() {
+        if (admin == null || !"PROFESSOR".equals(admin.role)) return;
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Acceder como Profesor")
+                .setMessage("¿Deseas ingresar a la aplicación utilizando el perfil y menú de " + admin.name + "?")
+                .setPositiveButton("Acceder", (dialog, which) -> impersonateUser())
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     private void impersonateUser() {
@@ -194,11 +205,12 @@ public class AdminDetailFragment extends Fragment {
                     // Show copy/toggle buttons for both Admin and Professor management
                     binding.layoutCopyToggles.setVisibility(View.VISIBLE);
 
-                    // Impersonation is only for non-master admins auditing professors
                     if ("PROFESSOR".equals(admin.role)) {
-                        binding.btnImpersonate.setVisibility(View.VISIBLE);
-                        binding.btnImpersonate.setText("Ver como Profesor");
+                        binding.layoutProfileHeader.setVisibility(View.VISIBLE);
+                        binding.cardImpersonateIndicator.setVisibility(View.VISIBLE);
+                        binding.btnImpersonate.setVisibility(View.GONE);
                     } else {
+                        binding.cardImpersonateIndicator.setVisibility(View.GONE);
                         binding.btnImpersonate.setVisibility(View.GONE);
                     }
                 } else {
@@ -207,6 +219,7 @@ public class AdminDetailFragment extends Fragment {
                     binding.layoutAddress.setVisibility(View.GONE);
                     binding.layoutPersonalEmail.setVisibility(View.GONE);
                     binding.switchLockPhoto.setVisibility(View.GONE);
+                    binding.cardImpersonateIndicator.setVisibility(View.GONE);
                     binding.btnImpersonate.setVisibility(View.GONE);
                 }
 

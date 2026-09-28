@@ -109,12 +109,13 @@ public class StudentDetailFragment extends Fragment {
         binding.switchLockPhoto.setVisibility(View.VISIBLE);
         
         binding.btnManageGrades.setVisibility(View.VISIBLE);
-        binding.btnImpersonate.setVisibility(View.VISIBLE);
+        binding.btnImpersonate.setVisibility(View.GONE);
 
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
         binding.btnManageGrades.setOnClickListener(v -> navigateToGrades());
-        binding.btnImpersonate.setOnClickListener(v -> impersonateStudent());
+        binding.cardProfileImage.setOnClickListener(v -> showImpersonateConfirmationDialog());
+        binding.cardImpersonateIndicator.setOnClickListener(v -> showImpersonateConfirmationDialog());
 
         setupCopyButtons();
     }
@@ -158,6 +159,9 @@ public class StudentDetailFragment extends Fragment {
                 
                 boolean locked = student.can_change_photo != null && student.can_change_photo == 0;
                 binding.switchLockPhoto.setChecked(locked);
+
+                binding.layoutProfileHeader.setVisibility(View.VISIBLE);
+                binding.cardImpersonateIndicator.setVisibility(View.VISIBLE);
 
                 int paddingPx = (int) (16 * getResources().getDisplayMetrics().density);
                 ImageUtils.setProfileImage(binding.ivProfileImageDetail, student.profile_image, paddingPx);
@@ -254,13 +258,23 @@ public class StudentDetailFragment extends Fragment {
     private void navigateToGrades() {
         Bundle args = new Bundle();
         args.putInt("studentId", student.id);
-        Navigation.findNavController(requireView()).navigate(com.aula.virtual.R.id.action_studentDetailFragment_to_adminEnrollmentListFragment, args);
+        Navigation.findNavController(requireView()).navigate(R.id.action_studentDetailFragment_to_adminEnrollmentListFragment, args);
+    }
+
+    private void showImpersonateConfirmationDialog() {
+        if (student == null) return;
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Acceder como Estudiante")
+                .setMessage("¿Deseas ingresar a la aplicación utilizando el perfil y menú de " + student.name + "?")
+                .setPositiveButton("Acceder", (dialog, which) -> impersonateStudent())
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     private void impersonateStudent() {
         if (student != null) {
             viewModel.startImpersonation(student);
-            Navigation.findNavController(requireView()).navigate(com.aula.virtual.R.id.action_studentDetailFragment_to_studentHomeFragment);
+            Navigation.findNavController(requireView()).navigate(R.id.action_studentDetailFragment_to_studentHomeFragment);
         }
     }
 

@@ -142,25 +142,59 @@
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardProfileImage"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:cardCornerRadius="50dp"
-            app:cardElevation="2dp"
+        <RelativeLayout
+            android:id="@+id/layoutProfileHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="24dp"
             android:visibility="gone">
-            <ImageView
-                android:id="@+id/ivProfileImageDetail"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_person"
-                android:scaleType="centerCrop"
-                app:tint="?attr/colorPrimary"
-                android:padding="16dp"
-                android:contentDescription="Foto de perfil"/>
-        </androidx.cardview.widget.CardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardProfileImage"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="3dp"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView
+                    android:id="@+id/ivProfileImageDetail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_person"
+                    android:scaleType="centerCrop"
+                    app:tint="?attr/colorPrimary"
+                    android:padding="16dp"
+                    android:contentDescription="Foto de perfil"/>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardImpersonateIndicator"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignBottom="@id/cardProfileImage"
+                android:layout_alignEnd="@id/cardProfileImage"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="?attr/colorPrimary"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_login"
+                    android:padding="6dp"
+                    app:tint="@color/white"
+                    android:contentDescription="Acceder al perfil"/>
+            </com.google.android.material.card.MaterialCardView>
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
