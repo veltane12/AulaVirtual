@@ -1400,74 +1400,97 @@ public class VirtualAulaRepository {
             executor.execute(() -> {
                 try {
                     List<Notification> cached = db.notificationDao().getAllNotifications();
-                    mainHandler.post(() -> callback.onResponse(null, Response.success(cached != null ? cached : new ArrayList<>())));
-                } catch (Exception e) {
-                    mainHandler.post(() -> callback.onResponse(null, Response.success(new ArrayList<>())));
-                }
+                    if (cached != null && !cached.isEmpty()) {
+                        mainHandler.post(() -> callback.onResponse(null, Response.success(cached)));
+                    }
+                } catch (Exception e) { e.printStackTrace(); }
             });
-        } else {
-            callback.onResponse(null, Response.success(new ArrayList<>()));
         }
+        performCall(apiService.getNotifications(), new Callback<List<Notification>>() {
+            @Override
+            public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
+                if (response.isSuccessful() && response.body() != null && db != null) {
+                    List<Notification> notifications = response.body();
+                    executor.execute(() -> {
+                        try { db.notificationDao().insertAll(notifications); } catch (Exception e) { e.printStackTrace(); }
+                    });
+                }
+                callback.onResponse(call, response);
+            }
+
+            @Override
+            public void onFailure(Call<List<Notification>> call, Throwable t) {
+                if (db != null) {
+                    executor.execute(() -> {
+                        try {
+                            List<Notification> cached = db.notificationDao().getAllNotifications();
+                            mainHandler.post(() -> callback.onResponse(call, Response.success(cached != null ? cached : new ArrayList<>())));
+                        } catch (Exception e) {
+                            mainHandler.post(() -> callback.onFailure(call, t));
+                        }
+                    });
+                } else {
+                    callback.onFailure(call, t);
+                }
+            }
+        });
     }
 
     public void insertNotification(Notification notification, Callback<Void> callback) {
-        if (db != null) {
-            executor.execute(() -> {
-                try {
-                    db.notificationDao().insertNotification(notification);
-                    mainHandler.post(() -> {
-                        if (callback != null) callback.onResponse(null, Response.success(null));
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    mainHandler.post(() -> {
-                        if (callback != null) callback.onFailure(null, e);
-                    });
+        performCall(apiService.createNotification(notification), new Callback<Notification>() {
+            @Override
+            public void onResponse(Call<Notification> call, Response<Notification> response) {
+                if (response.isSuccessful() && response.body() != null && db != null) {
+                    Notification saved = response.body();
+                    executor.execute(() -> db.notificationDao().insertNotification(saved));
+                } else if (db != null) {
+                    executor.execute(() -> db.notificationDao().insertNotification(notification));
                 }
-            });
-        } else {
-            if (callback != null) callback.onResponse(null, Response.success(null));
-        }
+                if (callback != null) callback.onResponse(null, Response.success(null));
+            }
+
+            @Override
+            public void onFailure(Call<Notification> call, Throwable t) {
+                if (db != null) {
+                    executor.execute(() -> db.notificationDao().insertNotification(notification));
+                }
+                if (callback != null) callback.onResponse(null, Response.success(null));
+            }
+        });
     }
 
     public void updateNotification(Notification notification, Callback<Void> callback) {
         if (db != null) {
-            executor.execute(() -> {
-                try {
-                    db.notificationDao().updateNotification(notification);
-                    mainHandler.post(() -> {
-                        if (callback != null) callback.onResponse(null, Response.success(null));
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    mainHandler.post(() -> {
-                        if (callback != null) callback.onFailure(null, e);
-                    });
-                }
-            });
-        } else {
-            if (callback != null) callback.onResponse(null, Response.success(null));
+            executor.execute(() -> db.notificationDao().updateNotification(notification));
         }
+        performCall(apiService.updateNotification(notification.id, notification), new Callback<Notification>() {
+            @Override
+            public void onResponse(Call<Notification> call, Response<Notification> response) {
+                if (callback != null) callback.onResponse(null, Response.success(null));
+            }
+
+            @Override
+            public void onFailure(Call<Notification> call, Throwable t) {
+                if (callback != null) callback.onResponse(null, Response.success(null));
+            }
+        });
     }
 
     public void deleteNotification(int id, Callback<Void> callback) {
         if (db != null) {
-            executor.execute(() -> {
-                try {
-                    db.notificationDao().deleteNotificationById(id);
-                    mainHandler.post(() -> {
-                        if (callback != null) callback.onResponse(null, Response.success(null));
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    mainHandler.post(() -> {
-                        if (callback != null) callback.onFailure(null, e);
-                    });
-                }
-            });
-        } else {
-            if (callback != null) callback.onResponse(null, Response.success(null));
+            executor.execute(() -> db.notificationDao().deleteNotificationById(id));
         }
+        performCall(apiService.deleteNotification(id), new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (callback != null) callback.onResponse(null, Response.success(null));
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                if (callback != null) callback.onResponse(null, Response.success(null));
+            }
+        });
     }
 
     // --- Synchronize all data from SQL Server for Offline use ---

@@ -100,6 +100,16 @@ class FacilityScheduleDB(Base):
     endTime = Column(String(10))
     color = Column(String(50), default="BLUE")
 
+class NotificationDB(Base):
+    __tablename__ = "notifications"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    targetType = Column(String(50), nullable=False)
+    targetValue = Column(String(255), nullable=True)
+    senderName = Column(String(255), nullable=False)
+    timestamp = Column(String(100), nullable=False)
+
 # Crear tablas si no existen
 Base.metadata.create_all(bind=engine)
 
@@ -226,6 +236,19 @@ class CommentInfo(BaseModel):
     userName: str
     userRole: str
     userPhoto: Optional[str] = None
+
+class NotificationBase(BaseModel):
+    title: str
+    message: str
+    targetType: str
+    targetValue: Optional[str] = None
+    senderName: str
+    timestamp: str
+
+class NotificationSchema(NotificationBase):
+    id: int
+    class Config:
+        from_attributes = True
 
 # --- API FastAPI ---
 
@@ -763,6 +786,39 @@ def clear_blog_discussion(entry_id: int, db: Session = Depends(get_db)):
     db.query(BlogCommentDB).filter(BlogCommentDB.blogEntryId == entry_id).delete()
     db.commit()
     return {"message": "Conversación vaciada"}
+
+# --- Notifications ---
+@app.get("/notifications", response_model=List[NotificationSchema])
+def get_notifications(db: Session = Depends(get_db)):
+    return db.query(NotificationDB).order_by(NotificationDB.id.desc()).all()
+
+@app.post("/notifications", response_model=NotificationSchema)
+def create_notification(notification: NotificationBase, db: Session = Depends(get_db)):
+    db_notif = NotificationDB(**notification.dict())
+    db.add(db_notif)
+    db.commit()
+    db.refresh(db_notif)
+    return db_notif
+
+@app.put("/notifications/{id}", response_model=NotificationSchema)
+def update_notification(id: int, notification: NotificationBase, db: Session = Depends(get_db)):
+    db_notif = db.query(NotificationDB).filter(NotificationDB.id == id).first()
+    if not db_notif:
+        raise HTTPException(status_code=404, detail="Notificación no encontrada")
+    for key, value in notification.dict().items():
+        setattr(db_notif, key, value)
+    db.commit()
+    db.refresh(db_notif)
+    return db_notif
+
+@app.delete("/notifications/{id}")
+def delete_notification(id: int, db: Session = Depends(get_db)):
+    db_notif = db.query(NotificationDB).filter(NotificationDB.id == id).first()
+    if not db_notif:
+        raise HTTPException(status_code=404, detail="Notificación no encontrada")
+    db.delete(db_notif)
+    db.commit()
+    return {"message": "Notificación eliminada"}
 
 @app.get("/subjects/{sub_id}/participants", response_model=List[User])
 def get_subject_participants(sub_id: int, db: Session = Depends(get_db)):

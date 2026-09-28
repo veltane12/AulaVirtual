@@ -6,6 +6,7 @@ import com.aula.virtual.data.entity.Facility;
 import com.aula.virtual.data.entity.FacilitySchedule;
 import com.aula.virtual.data.entity.Enrollment;
 import com.aula.virtual.data.entity.Faculty;
+import com.aula.virtual.data.entity.Notification;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
 
@@ -173,4 +174,17 @@ public interface ApiService {
 
     @DELETE("blog/entries/{id}/comments")
     Call<Void> clearBlogDiscussion(@Path("id") int entryId);
+
+    // --- Notifications ---
+    @GET("notifications")
+    Call<List<Notification>> getNotifications();
+
+    @POST("notifications")
+    Call<Notification> createNotification(@Body Notification notification);
+
+    @PUT("notifications/{id}")
+    Call<Notification> updateNotification(@Path("id") int id, @Body Notification notification);
+
+    @DELETE("notifications/{id}")
+    Call<Void> deleteNotification(@Path("id") int id);
 }

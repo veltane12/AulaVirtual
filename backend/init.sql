@@ -124,6 +124,17 @@ CREATE TABLE IF NOT EXISTS facility_schedules (
     FOREIGN KEY (professorId) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Tabla de Notificaciones y Avisos: Almacena avisos por canal y globales
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,          -- Identificador único interno
+    title VARCHAR(255) NOT NULL,                -- Título del aviso
+    message TEXT NOT NULL,                      -- Cuerpo del mensaje
+    targetType VARCHAR(50) NOT NULL,            -- Destinatario: 'ALL', 'ROLE_STUDENTS', 'ROLE_PROFESSORS', 'ROLE_ADMINS', 'FACULTY', 'SUBJECT', 'FACILITY'
+    targetValue VARCHAR(255) NULL,              -- Valor específico (Nombre de facultad, materia o instalación)
+    senderName VARCHAR(255) NOT NULL,           -- Nombre del usuario emisor
+    timestamp VARCHAR(100) NOT NULL             -- Fecha y hora de envío
+);
+
 -- Triggers de Validación de Límites y Traslape de Horarios para evitar colisiones
 DELIMITER //
 
