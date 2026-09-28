@@ -8,6 +8,8 @@ import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import com.aula.virtual.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -25,23 +27,34 @@ public class ImageUtils {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_crop_image, null);
         CropImageView cropImageView = dialogView.findViewById(R.id.cropImageView);
         View btnRotate = dialogView.findViewById(R.id.btnRotate90);
+        View btnCancel = dialogView.findViewById(R.id.btnCropCancel);
+        View btnSave = dialogView.findViewById(R.id.btnCropSave);
 
         cropImageView.setImageBitmap(rawBitmap);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .create();
 
         if (btnRotate != null) {
             btnRotate.setOnClickListener(v -> cropImageView.rotate90Degrees());
         }
 
-        new MaterialAlertDialogBuilder(context)
-                .setView(dialogView)
-                .setPositiveButton("Guardar", (dialog, which) -> {
-                    Bitmap cropped = cropImageView.getCroppedBitmap();
-                    if (cropped != null && listener != null) {
-                        listener.onCropped(cropped);
-                    }
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
+        if (btnCancel != null) {
+            btnCancel.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        if (btnSave != null) {
+            btnSave.setOnClickListener(v -> {
+                Bitmap cropped = cropImageView.getCroppedBitmap();
+                if (cropped != null && listener != null) {
+                    listener.onCropped(cropped);
+                }
+                dialog.dismiss();
+            });
+        }
+
+        dialog.show();
     }
 
     public static String bitmapToBase64(Bitmap bitmap) {

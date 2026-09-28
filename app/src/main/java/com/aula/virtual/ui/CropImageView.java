@@ -99,6 +99,7 @@ public class CropImageView extends View {
 
         matrix.postScale(scale, scale);
         matrix.postTranslate(focusX, focusY);
+        checkAndClampBounds();
     }
 
     private float getCurrentScale() {
@@ -107,6 +108,55 @@ public class CropImageView extends View {
         float scaleX = values[Matrix.MSCALE_X];
         float skewY = values[Matrix.MSKEW_Y];
         return (float) Math.sqrt(scaleX * scaleX + skewY * skewY);
+    }
+
+    private void checkAndClampBounds() {
+        if (rotatedBitmap == null || getWidth() == 0 || getHeight() == 0) return;
+
+        float viewW = getWidth();
+        float viewH = getHeight();
+        float radius = Math.min(viewW, viewH) * 0.40f;
+        float diameter = radius * 2f;
+
+        float cropLeft = (viewW / 2f) - radius;
+        float cropTop = (viewH / 2f) - radius;
+        float cropRight = (viewW / 2f) + radius;
+        float cropBottom = (viewH / 2f) + radius;
+
+        float imgW = rotatedBitmap.getWidth();
+        float imgH = rotatedBitmap.getHeight();
+
+        // Ensure minimum scale covers the crop diameter completely
+        float minScale = Math.max(diameter / imgW, diameter / imgH);
+        float currentScale = getCurrentScale();
+
+        if (currentScale < minScale) {
+            float scaleCorrection = minScale / currentScale;
+            matrix.postScale(scaleCorrection, scaleCorrection, viewW / 2f, viewH / 2f);
+        }
+
+        // Clamp translation so crop circle is ALWAYS inside image bounds
+        RectF imgRect = new RectF(0, 0, imgW, imgH);
+        matrix.mapRect(imgRect);
+
+        float deltaX = 0f;
+        float deltaY = 0f;
+
+        if (imgRect.left > cropLeft) {
+            deltaX = cropLeft - imgRect.left;
+        } else if (imgRect.right < cropRight) {
+            deltaX = cropRight - imgRect.right;
+        }
+
+        if (imgRect.top > cropTop) {
+            deltaY = cropTop - imgRect.top;
+        } else if (imgRect.bottom < cropBottom) {
+            deltaY = cropBottom - imgRect.bottom;
+        }
+
+        if (deltaX != 0 || deltaY != 0) {
+            matrix.postTranslate(deltaX, deltaY);
+        }
     }
 
     @Override
@@ -165,6 +215,7 @@ public class CropImageView extends View {
 
                         if (Math.abs(dx) > 0.2f || Math.abs(dy) > 0.2f) {
                             matrix.postTranslate(dx, dy);
+                            checkAndClampBounds();
                             lastTouchX = x;
                             lastTouchY = y;
                             invalidate();
@@ -190,6 +241,8 @@ public class CropImageView extends View {
             case MotionEvent.ACTION_CANCEL: {
                 activePointerId = MotionEvent.INVALID_POINTER_ID;
                 isDragging = false;
+                checkAndClampBounds();
+                invalidate();
                 break;
             }
         }
@@ -211,6 +264,7 @@ public class CropImageView extends View {
             }
 
             matrix.postScale(scale, scale, detector.getFocusX(), detector.getFocusY());
+            checkAndClampBounds();
             invalidate();
             return true;
         }
