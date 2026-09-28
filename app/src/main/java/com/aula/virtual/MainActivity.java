@@ -411,7 +411,8 @@ public class MainActivity extends AppCompatActivity {
                         showNotificationsDialog();
                     });
                 })
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton("Cancelar", (dialog, which) -> showNotificationsDialog())
+                .setOnCancelListener(dialog -> showNotificationsDialog())
                 .show();
     }
 
@@ -602,7 +603,8 @@ public class MainActivity extends AppCompatActivity {
 
         builder.setView(layout);
         builder.setPositiveButton(isEditing ? "Guardar" : "Enviar", null);
-        builder.setNegativeButton("Cancelar", null);
+        builder.setNegativeButton("Cancelar", (dialog, which) -> showNotificationsDialog());
+        builder.setOnCancelListener(dialog -> showNotificationsDialog());
 
         activeCreateNotificationDialog = builder.create();
         activeCreateNotificationDialog.setOnDismissListener(d -> activeCreateNotificationDialog = null);
