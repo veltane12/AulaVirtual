@@ -198,17 +198,19 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         dialog.show();
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            boolean isValid = true;
+
             if (selectedSubId[0] == -1) {
                 tvSubject.setError("Debe seleccionar una materia");
-                return;
+                isValid = false;
             }
             if (selectedProfId[0] == -1) {
                 tvProfessor.setError("Debe seleccionar un profesor");
-                return;
+                isValid = false;
             }
             if (selectedDays[0].isEmpty()) {
                 tvDays.setError("Debe seleccionar al menos un día");
-                return;
+                isValid = false;
             }
 
             String startStr = tvStart.getText().toString();
@@ -216,10 +218,19 @@ public class AdminFacilitySchedulesFragment extends Fragment {
 
             if (startStr.contains("Click") || startStr.contains("Seleccionar")) {
                 tvStart.setError("Debe seleccionar la hora de inicio");
-                return;
+                isValid = false;
             }
             if (endStr.contains("Click") || endStr.contains("Seleccionar")) {
                 tvEnd.setError("Debe seleccionar la hora de fin");
+                isValid = false;
+            }
+
+            if (selectedColor[0] == null) {
+                tvColor.setError("Debe seleccionar un color");
+                isValid = false;
+            }
+
+            if (!isValid) {
                 return;
             }
 
