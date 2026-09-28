@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -185,6 +186,18 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void hideKeyboard() {
+        View view = getCurrentFocus();
+        if (view == null) {
+            view = new View(this);
+        }
+        InputMethodManager imm =
+                (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
     private void dismissActiveNotificationsDialog() {
         if (activeNotificationsDialog != null) {
             try {
@@ -197,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNotificationsDialog() {
+        hideKeyboard();
         dismissActiveNotificationsDialog();
 
         User currentUser = viewModel.getCurrentUser().getValue();
@@ -549,6 +563,7 @@ public class MainActivity extends AppCompatActivity {
         activeCreateNotificationDialog.show();
 
         activeCreateNotificationDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            hideKeyboard();
             String title = etTitle.getText().toString().trim();
             String message = etMessage.getText().toString().trim();
 
