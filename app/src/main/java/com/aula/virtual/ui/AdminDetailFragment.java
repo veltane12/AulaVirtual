@@ -204,9 +204,9 @@ public class AdminDetailFragment extends Fragment {
 
                     // Show copy/toggle buttons for both Admin and Professor management
                     binding.layoutCopyToggles.setVisibility(View.VISIBLE);
+                    binding.layoutProfileHeader.setVisibility(View.VISIBLE);
 
                     if ("PROFESSOR".equals(admin.role)) {
-                        binding.layoutProfileHeader.setVisibility(View.VISIBLE);
                         binding.cardImpersonateIndicator.setVisibility(View.VISIBLE);
                         binding.btnImpersonate.setVisibility(View.GONE);
                     } else {
