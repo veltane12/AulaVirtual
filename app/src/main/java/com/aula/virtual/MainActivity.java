@@ -4,6 +4,7 @@ import androidx.appcompat.app.AlertDialog;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -279,12 +280,20 @@ public class MainActivity extends AppCompatActivity {
                 tvEmpty.setTextColor(0xFF757575);
                 container.addView(tvEmpty);
             } else {
+                boolean isDark = ThemeHelper.isDarkMode(this);
+                TypedValue typedValue = new TypedValue();
+                getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+                int primaryTextColor = typedValue.data;
+                getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
+                int secondaryTextColor = typedValue.data;
+
                 for (Notification n : userNotifs) {
                     MaterialCardView card = new MaterialCardView(this);
                     card.setCardElevation(2f);
                     card.setRadius(12f);
                     card.setStrokeWidth(1);
-                    card.setStrokeColor(0xFFCCCCCC);
+                    card.setStrokeColor(isDark ? 0xFF333333 : 0xFFCCCCCC);
+                    card.setCardBackgroundColor(isDark ? 0xFF1E1E1E : 0xFFFFFFFF);
                     
                     LinearLayout cardLayout = new LinearLayout(this);
                     cardLayout.setOrientation(LinearLayout.VERTICAL);
@@ -294,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
                     tvTitle.setText(n.title != null ? n.title : "Notificación");
                     tvTitle.setTextSize(15);
                     tvTitle.setTypeface(null, Typeface.BOLD);
-                    tvTitle.setTextColor(0xFF111111);
+                    tvTitle.setTextColor(primaryTextColor);
 
                     TextView tvTargetTag = new TextView(this);
                     tvTargetTag.setTextSize(11);
@@ -304,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
                     TextView tvMsg = new TextView(this);
                     tvMsg.setText(n.message != null ? n.message : "");
                     tvMsg.setTextSize(13);
+                    tvMsg.setTextColor(primaryTextColor);
                     tvMsg.setPadding(0, 6, 0, 6);
 
                     TextView tvSender = new TextView(this);
@@ -311,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
                                        (n.timestamp != null ? " • " + n.timestamp : "");
                     tvSender.setText(senderStr);
                     tvSender.setTextSize(11);
-                    tvSender.setTextColor(0xFF666666);
+                    tvSender.setTextColor(secondaryTextColor);
 
                     cardLayout.addView(tvTitle);
                     cardLayout.addView(tvTargetTag);
