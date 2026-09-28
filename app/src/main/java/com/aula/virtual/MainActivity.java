@@ -16,6 +16,8 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
@@ -343,6 +345,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private <T> void observeOnce(LiveData<T> liveData, Observer<T> observer) {
+        liveData.observe(this, new Observer<T>() {
+            @Override
+            public void onChanged(T t) {
+                if (t != null) {
+                    liveData.removeObserver(this);
+                    observer.onChanged(t);
+                }
+            }
+        });
+    }
+
     private void showCreateNotificationDialog() {
         User currentUser = viewModel.getCurrentUser().getValue();
         if (currentUser == null) return;
@@ -393,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
                         targetValue[0] = null;
                         DialogUtils.setOptionState(tvTarget, "Destinatarios: ⚙️ Todos los Administradores", false, this);
                     } else if (which == 4) {
-                        viewModel.getAllFaculties().observe(this, faculties -> {
+                        observeOnce(viewModel.getAllFaculties(), faculties -> {
                             if (faculties != null && !faculties.isEmpty()) {
                                 String[] facNames = faculties.stream().map(f -> f.name).toArray(String[]::new);
                                 new MaterialAlertDialogBuilder(this)
@@ -408,7 +422,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     } else if (which == 5) {
-                        viewModel.getAllSubjects().observe(this, subjects -> {
+                        observeOnce(viewModel.getAllSubjects(), subjects -> {
                             if (subjects != null && !subjects.isEmpty()) {
                                 String[] subNames = subjects.stream().map(s -> s.name).toArray(String[]::new);
                                 new MaterialAlertDialogBuilder(this)
@@ -423,7 +437,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     } else if (which == 6) {
-                        viewModel.getAllFacilities().observe(this, facilities -> {
+                        observeOnce(viewModel.getAllFacilities(), facilities -> {
                             if (facilities != null && !facilities.isEmpty()) {
                                 String[] facNames = facilities.stream().map(f -> f.name).toArray(String[]::new);
                                 new MaterialAlertDialogBuilder(this)
