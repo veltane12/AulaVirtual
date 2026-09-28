@@ -5,12 +5,15 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.app.ProgressDialog;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -157,28 +160,78 @@ public class SettingsFragment extends Fragment {
         if (currentUser == null) return;
 
         MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Cambiar Contraseña");
-
         LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
+
+        final EditText etCurrentPass = DialogUtils.createStyledEditText(requireContext(), "Contraseña Actual", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(etCurrentPass);
 
         final EditText etNewPass = DialogUtils.createStyledEditText(requireContext(), "Nueva Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etNewPass);
 
-        final EditText etConfirmPass = DialogUtils.createStyledEditText(requireContext(), "Confirmar Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        final TextView tvStrength = new TextView(getContext());
+        tvStrength.setTextSize(12);
+        tvStrength.setVisibility(View.GONE);
+        layout.addView(tvStrength);
+
+        etNewPass.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 0) {
+                    tvStrength.setVisibility(View.GONE);
+                } else {
+                    tvStrength.setVisibility(View.VISIBLE);
+                    ValidationUtils.PasswordStrength strength = ValidationUtils.getPasswordStrength(s.toString());
+                    tvStrength.setText(strength.label);
+                    tvStrength.setTextColor(strength.color);
+                }
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        final EditText etConfirmPass = DialogUtils.createStyledEditText(requireContext(), "Confirmar Nueva Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etConfirmPass);
 
         builder.setView(layout);
-        builder.setPositiveButton("Actualizar", (dialog, which) -> {
+        builder.setPositiveButton("Actualizar", null);
+        builder.setNegativeButton("Cancelar", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String currentPass = etCurrentPass.getText().toString();
             String newPass = etNewPass.getText().toString();
-            if (newPass.equals(etConfirmPass.getText().toString()) && !newPass.isEmpty()) {
+            String confirmPass = etConfirmPass.getText().toString();
+
+            boolean isValid = true;
+
+            if (!currentPass.equals(currentUser.password)) {
+                etCurrentPass.setError("Contraseña actual incorrecta");
+                isValid = false;
+            }
+
+            if (newPass.isEmpty()) {
+                etNewPass.setError("Ingrese la nueva contraseña");
+                isValid = false;
+            } else if (ValidationUtils.getPasswordStrength(newPass) == ValidationUtils.PasswordStrength.WEAK) {
+                etNewPass.setError("Contraseña demasiado débil");
+                isValid = false;
+            }
+
+            if (!newPass.equals(confirmPass)) {
+                etConfirmPass.setError("Las contraseñas no coinciden");
+                isValid = false;
+            }
+
+            if (isValid) {
                 viewModel.performOnlineAction(() -> {
                     currentUser.password = newPass;
                     viewModel.updateUser(currentUser);
-                    Toast.makeText(getContext(), "Contraseña actualizada", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Contraseña actualizada exitosamente", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
                 });
             }
         });
-        builder.setNegativeButton("Cancelar", null);
-        builder.show();
     }
 
     private void downloadOfflineData() {
