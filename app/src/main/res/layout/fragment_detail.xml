@@ -11,18 +11,42 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <Button
-            android:id="@+id/btnManageStudents"
-            style="@style/Widget.Bootstrap.Button.Primary"
+        <GridLayout
+            android:id="@+id/layoutTopButtons"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginBottom="16dp"
-            android:text="Alumnos y Notas"
-            android:textAllCaps="false"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:backgroundTint="@color/bs_primary"
-            android:visibility="gone"/>
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:layout_marginBottom="12dp">
+
+            <Button
+                android:id="@+id/btnManageStudents"
+                style="@style/Widget.Bootstrap.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:text="Alumnos y Notas"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:backgroundTint="@color/bs_primary"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/btnManageBlog"
+                style="@style/Widget.Bootstrap.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:text="Foro de la Materia"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:backgroundTint="@color/bs_info"
+                android:visibility="gone"/>
+
+        </GridLayout>
 
         <!-- 1. Notas -->
         <LinearLayout
@@ -106,19 +130,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 2. Botón de Foro -->
-        <Button
-            android:id="@+id/btnManageBlog"
-            style="@style/Widget.Bootstrap.Button.Primary"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginBottom="16dp"
-            android:text="Foro de la Materia"
-            android:textAllCaps="false"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:backgroundTint="@color/bs_info"
-            android:visibility="gone"/>
+
 
         <!-- 3. Detalle Materia -->
         <TextView
@@ -395,44 +407,57 @@
             </LinearLayout>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnSave"
-            style="@style/Widget.Bootstrap.Button.Success"
+        <GridLayout
+            android:id="@+id/layoutActionButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="Guardar Cambios"
-            android:textAllCaps="false"/>
+            android:columnCount="2"
+            android:layout_marginTop="24dp">
 
-        <Button
-            android:id="@+id/btnDelete"
-            style="@style/Widget.Bootstrap.Button.Danger"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Eliminar Registro"
-            android:textAllCaps="false"/>
+            <Button
+                android:id="@+id/btnSave"
+                style="@style/Widget.Bootstrap.Button.Success"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:text="Guardar Cambios"
+                android:textAllCaps="false"/>
 
-        <Button
-            android:id="@+id/btnManageGrades"
-            style="@style/Widget.Bootstrap.Button.Primary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Gestionar"
-            android:textAllCaps="false"
-            android:visibility="gone"/>
+            <Button
+                android:id="@+id/btnDelete"
+                style="@style/Widget.Bootstrap.Button.Danger"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:text="Eliminar Registro"
+                android:textAllCaps="false"/>
 
-        <Button
-            android:id="@+id/btnImpersonate"
-            style="@style/Widget.Bootstrap.Button.Primary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Ver como Estudiante"
-            android:textAllCaps="false"
-            android:backgroundTint="@color/bs_info"
-            android:visibility="gone"/>
+            <Button
+                android:id="@+id/btnManageGrades"
+                style="@style/Widget.Bootstrap.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:text="Gestionar"
+                android:textAllCaps="false"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/btnImpersonate"
+                style="@style/Widget.Bootstrap.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:text="Ver como Estudiante"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/bs_info"
+                android:visibility="gone"/>
+
+        </GridLayout>
 
     </LinearLayout>
 </ScrollView>
