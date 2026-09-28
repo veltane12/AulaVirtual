@@ -26,15 +26,15 @@
                 android:layout_height="match_parent"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:visibility="gone"
                 tools:visibility="visible">
 
                 <ImageButton
                     android:id="@+id/btnNavBack"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:scaleType="centerInside"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_back"
@@ -42,9 +42,19 @@
                     android:contentDescription="Atrás" />
 
                 <ImageButton
+                    android:id="@+id/btnNavRefresh"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:scaleType="centerInside"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_refresh"
+                    app:tint="?attr/colorOnPrimary"
+                    android:contentDescription="Recargar página" />
+
+                <ImageButton
                     android:id="@+id/btnNavHome"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:scaleType="centerInside"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_home"
@@ -57,6 +67,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:textColor="?attr/colorOnPrimary"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -65,13 +76,14 @@
                     tools:text="Inicio" />
 
                 <ImageButton
-                    android:id="@+id/btnNavRefresh"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:id="@+id/btnNavNotification"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:scaleType="centerInside"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_refresh"
+                    android:src="@drawable/ic_notification"
                     app:tint="?attr/colorOnPrimary"
-                    android:contentDescription="Actualizar" />
+                    android:contentDescription="Notificaciones" />
 
             </LinearLayout>
 

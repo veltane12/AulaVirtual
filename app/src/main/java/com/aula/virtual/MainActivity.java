@@ -16,6 +16,8 @@ import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import com.aula.virtual.data.entity.User;
 import com.aula.virtual.ui.MainViewModel;
 import android.widget.LinearLayout;
 import com.aula.virtual.ui.MainViewModel;
@@ -23,6 +25,9 @@ import com.aula.virtual.ui.ThemeHelper;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import androidx.appcompat.widget.Toolbar;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private NavController navController;
@@ -66,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnBack = findViewById(R.id.btnNavBack);
         TextView tvNavTitle = findViewById(R.id.tvNavTitle);
         ImageButton btnRefresh = findViewById(R.id.btnNavRefresh);
+        ImageButton btnNotification = findViewById(R.id.btnNavNotification);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -93,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
             refreshCurrentDestination();
             Toast.makeText(this, "Actualizando...", Toast.LENGTH_SHORT).show();
         });
+        if (btnNotification != null) {
+            btnNotification.setOnClickListener(v -> showNotificationsDialog());
+        }
 
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             int id = destination.getId();
@@ -173,6 +182,40 @@ public class MainActivity extends AppCompatActivity {
                 .setMessage("¿Estás seguro de que deseas salir de la aplicación?")
                 .setPositiveButton("Sí", (dialog, which) -> finish())
                 .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void showNotificationsDialog() {
+        User currentUser = viewModel.getCurrentUser().getValue();
+        List<String> notifications = new ArrayList<>();
+
+        boolean isConnected = Boolean.TRUE.equals(viewModel.isServerConnected().getValue());
+        if (!isConnected) {
+            notifications.add("⚠️ Servidor fuera de línea: Estás trabajando en modo local.");
+        } else {
+            notifications.add("🟢 Servidor en línea: Datos sincronizados correctamente con MySQL.");
+        }
+
+        if (currentUser != null) {
+            notifications.add("👤 Usuario activo: " + currentUser.name + " (" + currentUser.carnet + ")");
+            if ("STUDENT".equals(currentUser.role)) {
+                notifications.add("📚 Asignaciones: Revisa el Foro de tus materias para ver tareas y avisos.");
+                notifications.add("📊 Calificaciones: Tienes materias registradas en este período.");
+            } else if ("PROFESSOR".equals(currentUser.role)) {
+                notifications.add("👨‍🏫 Portal Docente: Puedes gestionar calificaciones y publicar en el foro de tus materias.");
+            } else if ("ADMIN".equals(currentUser.role)) {
+                notifications.add("⚙️ Portal Administrativo: Control activo de facultades, asignaturas, docentes y alumnos.");
+            }
+        } else {
+            notifications.add("🔑 Inicia sesión para ver avisos y notificaciones de tu cuenta.");
+        }
+
+        String[] notifArray = notifications.toArray(new String[0]);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("🔔 Notificaciones y Avisos")
+                .setItems(notifArray, null)
+                .setPositiveButton("Entendido", null)
                 .show();
     }
 
