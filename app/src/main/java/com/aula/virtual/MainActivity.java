@@ -11,6 +11,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
@@ -184,20 +185,25 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showNotificationsDialog() {
-        if (activeNotificationsDialog != null && activeNotificationsDialog.isShowing()) {
-            activeNotificationsDialog.dismiss();
+    private void dismissActiveNotificationsDialog() {
+        if (activeNotificationsDialog != null) {
+            try {
+                if (activeNotificationsDialog.isShowing()) {
+                    activeNotificationsDialog.dismiss();
+                }
+            } catch (Exception ignored) {}
             activeNotificationsDialog = null;
         }
+    }
+
+    private void showNotificationsDialog() {
+        dismissActiveNotificationsDialog();
 
         User currentUser = viewModel.getCurrentUser().getValue();
         viewModel.fetchNotifications();
 
         observeOnce(viewModel.getAllNotifications(), allNotifs -> {
-            if (activeNotificationsDialog != null && activeNotificationsDialog.isShowing()) {
-                activeNotificationsDialog.dismiss();
-                activeNotificationsDialog = null;
-            }
+            dismissActiveNotificationsDialog();
 
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
             builder.setTitle("🔔 Notificaciones y Avisos");
@@ -223,7 +229,10 @@ public class MainActivity extends AppCompatActivity {
                 MaterialButton btnCreate = new MaterialButton(this);
                 btnCreate.setText("➕ Crear y Enviar Notificación");
                 btnCreate.setAllCaps(false);
-                btnCreate.setOnClickListener(v -> showCreateNotificationDialog(null));
+                btnCreate.setOnClickListener(v -> {
+                    dismissActiveNotificationsDialog();
+                    showCreateNotificationDialog(null);
+                });
                 container.addView(btnCreate);
             }
 
@@ -287,14 +296,20 @@ public class MainActivity extends AppCompatActivity {
                         btnEdit.setText("✏️ Editar");
                         btnEdit.setTextSize(12);
                         btnEdit.setAllCaps(false);
-                        btnEdit.setOnClickListener(v -> showCreateNotificationDialog(n));
+                        btnEdit.setOnClickListener(v -> {
+                            dismissActiveNotificationsDialog();
+                            showCreateNotificationDialog(n);
+                        });
 
                         MaterialButton btnDelete = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
                         btnDelete.setText("🗑️ Eliminar");
                         btnDelete.setTextColor(0xFFD32F2F);
                         btnDelete.setTextSize(12);
                         btnDelete.setAllCaps(false);
-                        btnDelete.setOnClickListener(v -> showDeleteNotificationConfirmation(n));
+                        btnDelete.setOnClickListener(v -> {
+                            dismissActiveNotificationsDialog();
+                            showDeleteNotificationConfirmation(n);
+                        });
 
                         actionLayout.addView(btnEdit);
                         actionLayout.addView(btnDelete);
@@ -312,7 +327,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            builder.setView(container);
+            ScrollView scrollView = new ScrollView(this);
+            scrollView.addView(container);
+
+            builder.setView(scrollView);
             builder.setPositiveButton("Cerrar", null);
 
             activeNotificationsDialog = builder.create();
@@ -323,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showDeleteNotificationConfirmation(Notification n) {
         if (n == null) return;
+        dismissActiveNotificationsDialog();
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Eliminar Notificación")
                 .setMessage("¿Estás seguro de que deseas eliminar esta notificación?")
