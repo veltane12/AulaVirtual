@@ -115,7 +115,6 @@ public class StudentDetailFragment extends Fragment {
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
         binding.btnManageGrades.setOnClickListener(v -> navigateToGrades());
         binding.cardProfileImage.setOnClickListener(v -> showImpersonateConfirmationDialog());
-        binding.cardImpersonateIndicator.setOnClickListener(v -> showImpersonateConfirmationDialog());
 
         setupCopyButtons();
     }

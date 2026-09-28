@@ -134,7 +134,7 @@
                 android:id="@+id/iconReturn"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_search"
+                android:src="@drawable/ic_logout"
                 app:tint="@color/bs_info"/>
             <TextView
                 android:layout_width="wrap_content"

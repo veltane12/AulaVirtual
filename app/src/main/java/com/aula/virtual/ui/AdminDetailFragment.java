@@ -104,7 +104,6 @@ public class AdminDetailFragment extends Fragment {
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
         binding.cardProfileImage.setOnClickListener(v -> showImpersonateConfirmationDialog());
-        binding.cardImpersonateIndicator.setOnClickListener(v -> showImpersonateConfirmationDialog());
 
         setupCopyButtons();
     }

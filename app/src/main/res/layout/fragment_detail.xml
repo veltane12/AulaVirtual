@@ -186,9 +186,8 @@
                 app:cardElevation="8dp"
                 app:cardBackgroundColor="?attr/colorPrimary"
                 android:visibility="gone"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
+                android:clickable="false"
+                android:focusable="false">
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
