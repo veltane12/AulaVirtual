@@ -129,9 +129,11 @@ public class NotificationListFragment extends Fragment {
             }
         }
 
-        // Divide into channels
+        // Divide into specific channels
         List<Notification> generalNotifs = new ArrayList<>();
-        List<Notification> roleNotifs = new ArrayList<>();
+        List<Notification> studentNotifs = new ArrayList<>();
+        List<Notification> professorNotifs = new ArrayList<>();
+        List<Notification> adminNotifs = new ArrayList<>();
         List<Notification> facultyNotifs = new ArrayList<>();
         List<Notification> subjectNotifs = new ArrayList<>();
         List<Notification> facilityNotifs = new ArrayList<>();
@@ -142,14 +144,18 @@ public class NotificationListFragment extends Fragment {
                 continue;
             }
             String type = n.targetType.toUpperCase();
-            if ("FACULTY".equals(type)) {
+            if ("ROLE_STUDENTS".equals(type)) {
+                studentNotifs.add(n);
+            } else if ("ROLE_PROFESSORS".equals(type)) {
+                professorNotifs.add(n);
+            } else if ("ROLE_ADMINS".equals(type)) {
+                adminNotifs.add(n);
+            } else if ("FACULTY".equals(type)) {
                 facultyNotifs.add(n);
             } else if ("SUBJECT".equals(type)) {
                 subjectNotifs.add(n);
             } else if ("FACILITY".equals(type)) {
                 facilityNotifs.add(n);
-            } else if (type.startsWith("ROLE_")) {
-                roleNotifs.add(n);
             } else {
                 generalNotifs.add(n);
             }
@@ -157,7 +163,7 @@ public class NotificationListFragment extends Fragment {
 
         // Render Channel Chips
         int activeThemeColor = ThemeHelper.getSubjectColor(requireContext(), ThemeHelper.getAccentColorName(requireContext()));
-        renderChannelChips(generalNotifs, roleNotifs, facultyNotifs, subjectNotifs, facilityNotifs, activeThemeColor);
+        renderChannelChips(generalNotifs, studentNotifs, professorNotifs, adminNotifs, facultyNotifs, subjectNotifs, facilityNotifs, activeThemeColor);
 
         // Render Cards inside List Container
         binding.notificationsContainer.removeAllViews();
@@ -178,16 +184,30 @@ public class NotificationListFragment extends Fragment {
                 hasContent = true;
             }
         }
-        if ("ALL".equals(filter) || "ROLE".equals(filter)) {
-            if (!roleNotifs.isEmpty()) {
-                addChannelHeaderView(binding.notificationsContainer, "👤 Canal por Tipo de Usuario", 0xFF1565C0);
-                renderNotificationCards(binding.notificationsContainer, roleNotifs, primaryTextColor, secondaryTextColor, isDark);
+        if ("ALL".equals(filter) || "ROLE_STUDENTS".equals(filter)) {
+            if (!studentNotifs.isEmpty()) {
+                addChannelHeaderView(binding.notificationsContainer, "👨‍🎓 Canal Estudiantes", 0xFF0288D1);
+                renderNotificationCards(binding.notificationsContainer, studentNotifs, primaryTextColor, secondaryTextColor, isDark);
+                hasContent = true;
+            }
+        }
+        if ("ALL".equals(filter) || "ROLE_PROFESSORS".equals(filter)) {
+            if (!professorNotifs.isEmpty()) {
+                addChannelHeaderView(binding.notificationsContainer, "👨‍🏫 Canal Profesores", 0xFF1565C0);
+                renderNotificationCards(binding.notificationsContainer, professorNotifs, primaryTextColor, secondaryTextColor, isDark);
+                hasContent = true;
+            }
+        }
+        if ("ALL".equals(filter) || "ROLE_ADMINS".equals(filter)) {
+            if (!adminNotifs.isEmpty()) {
+                addChannelHeaderView(binding.notificationsContainer, "⚙️ Canal Administradores", 0xFF00838F);
+                renderNotificationCards(binding.notificationsContainer, adminNotifs, primaryTextColor, secondaryTextColor, isDark);
                 hasContent = true;
             }
         }
         if ("ALL".equals(filter) || "FACULTY".equals(filter)) {
             if (!facultyNotifs.isEmpty()) {
-                addChannelHeaderView(binding.notificationsContainer, "🏫 Canal por Facultad", 0xFF2E7D32);
+                addChannelHeaderView(binding.notificationsContainer, "🏫 Canal por Facultades", 0xFF2E7D32);
                 renderNotificationCards(binding.notificationsContainer, facultyNotifs, primaryTextColor, secondaryTextColor, isDark);
                 hasContent = true;
             }
@@ -216,13 +236,15 @@ public class NotificationListFragment extends Fragment {
         }
     }
 
-    private void renderChannelChips(List<Notification> gen, List<Notification> role, List<Notification> fac, List<Notification> sub, List<Notification> fcl, int activeColor) {
+    private void renderChannelChips(List<Notification> gen, List<Notification> stu, List<Notification> prof, List<Notification> adm, List<Notification> fac, List<Notification> sub, List<Notification> fcl, int activeColor) {
         binding.chipsLayout.removeAllViews();
         List<MaterialButton> chipButtons = new ArrayList<>();
 
         int activeChannelsCount = 0;
         if (!gen.isEmpty()) activeChannelsCount++;
-        if (!role.isEmpty()) activeChannelsCount++;
+        if (!stu.isEmpty()) activeChannelsCount++;
+        if (!prof.isEmpty()) activeChannelsCount++;
+        if (!adm.isEmpty()) activeChannelsCount++;
         if (!fac.isEmpty()) activeChannelsCount++;
         if (!sub.isEmpty()) activeChannelsCount++;
         if (!fcl.isEmpty()) activeChannelsCount++;
@@ -233,11 +255,17 @@ public class NotificationListFragment extends Fragment {
         if (!gen.isEmpty()) {
             addChipButton(binding.chipsLayout, chipButtons, "📢 General", "GENERAL", activeColor);
         }
-        if (!role.isEmpty()) {
-            addChipButton(binding.chipsLayout, chipButtons, "👤 Tipo de Usuario", "ROLE", activeColor);
+        if (!stu.isEmpty()) {
+            addChipButton(binding.chipsLayout, chipButtons, "👨‍🎓 Estudiantes", "ROLE_STUDENTS", activeColor);
+        }
+        if (!prof.isEmpty()) {
+            addChipButton(binding.chipsLayout, chipButtons, "👨‍🏫 Profesores", "ROLE_PROFESSORS", activeColor);
+        }
+        if (!adm.isEmpty()) {
+            addChipButton(binding.chipsLayout, chipButtons, "⚙️ Administradores", "ROLE_ADMINS", activeColor);
         }
         if (!fac.isEmpty()) {
-            addChipButton(binding.chipsLayout, chipButtons, "🏫 Facultad", "FACULTY", activeColor);
+            addChipButton(binding.chipsLayout, chipButtons, "🏫 Facultades", "FACULTY", activeColor);
         }
         if (!sub.isEmpty()) {
             addChipButton(binding.chipsLayout, chipButtons, "📚 Materias", "SUBJECT", activeColor);
