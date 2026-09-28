@@ -186,15 +186,25 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void hideKeyboard() {
-        View view = getCurrentFocus();
-        if (view == null) {
-            view = new View(this);
+    private void hideKeyboard(View view) {
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
         }
-        InputMethodManager imm =
-                (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    private void hideKeyboard() {
+        View focus = getCurrentFocus();
+        if (focus != null) {
+            hideKeyboard(focus);
+        }
+        if (activeCreateNotificationDialog != null && activeCreateNotificationDialog.getWindow() != null) {
+            hideKeyboard(activeCreateNotificationDialog.getWindow().getDecorView());
+        }
+        if (activeNotificationsDialog != null && activeNotificationsDialog.getWindow() != null) {
+            hideKeyboard(activeNotificationsDialog.getWindow().getDecorView());
         }
     }
 
@@ -214,6 +224,42 @@ public class MainActivity extends AppCompatActivity {
         dismissActiveNotificationsDialog();
 
         User currentUser = viewModel.getCurrentUser().getValue();
+        if (currentUser == null) {
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+            builder.setTitle("🔔 Notificaciones y Avisos");
+
+            LinearLayout container = DialogUtils.createDialogContainer(this);
+
+            TextView tvServerStatus = new TextView(this);
+            tvServerStatus.setTextSize(13);
+            tvServerStatus.setPadding(0, 0, 0, 12);
+            boolean isConnected = Boolean.TRUE.equals(viewModel.isServerConnected().getValue());
+            if (isConnected) {
+                tvServerStatus.setText("🟢 Servidor en línea (Sincronizado con MySQL)");
+                tvServerStatus.setTextColor(0xFF2E7D32);
+            } else {
+                tvServerStatus.setText("⚠️ Servidor fuera de línea (Modo Offline)");
+                tvServerStatus.setTextColor(0xFFD32F2F);
+            }
+            container.addView(tvServerStatus);
+
+            TextView tvNotice = new TextView(this);
+            tvNotice.setText("\n🔒 Debe iniciar sesión para poder ver las notificaciones y avisos de su cuenta.\n");
+            tvNotice.setTextSize(14);
+            tvNotice.setGravity(Gravity.CENTER);
+            tvNotice.setTextColor(0xFF757575);
+            tvNotice.setPadding(16, 24, 16, 24);
+            container.addView(tvNotice);
+
+            builder.setView(container);
+            builder.setPositiveButton("Entendido", null);
+
+            activeNotificationsDialog = builder.create();
+            activeNotificationsDialog.setOnDismissListener(dialog -> activeNotificationsDialog = null);
+            activeNotificationsDialog.show();
+            return;
+        }
+
         viewModel.fetchNotifications();
 
         observeOnce(viewModel.getAllNotifications(), allNotifs -> {
@@ -563,6 +609,8 @@ public class MainActivity extends AppCompatActivity {
         activeCreateNotificationDialog.show();
 
         activeCreateNotificationDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            hideKeyboard(etTitle);
+            hideKeyboard(etMessage);
             hideKeyboard();
             String title = etTitle.getText().toString().trim();
             String message = etMessage.getText().toString().trim();
