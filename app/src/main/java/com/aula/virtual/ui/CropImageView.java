@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -18,19 +19,18 @@ public class CropImageView extends View {
     private Bitmap rotatedBitmap;
     private final Matrix matrix = new Matrix();
 
-    private float scaleFactor = 1.0f;
-    private float focusX = 0f;
-    private float focusY = 0f;
     private int rotationDegrees = 0;
 
     private float lastTouchX;
     private float lastTouchY;
+    private int activePointerId = MotionEvent.INVALID_POINTER_ID;
     private boolean isDragging = false;
 
     private ScaleGestureDetector scaleDetector;
-    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint clearPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     public CropImageView(Context context) {
         super(context);
@@ -44,20 +44,20 @@ public class CropImageView extends View {
 
     private void init(Context context) {
         scaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setStrokeWidth(6f);
         borderPaint.setColor(ThemeHelper.getSubjectColor(context, ThemeHelper.getAccentColorName(context)));
 
-        maskPaint.setColor(0x99000000); // Semi-transparent dark overlay
+        maskPaint.setColor(0x99000000); // Dark semi-transparent mask overlay
+
+        clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
     }
 
     public void setImageBitmap(Bitmap bitmap) {
         if (bitmap == null) return;
         this.rawBitmap = bitmap;
         this.rotationDegrees = 0;
-        this.scaleFactor = 1.0f;
-        this.focusX = 0f;
-        this.focusY = 0f;
         updateRotatedBitmap();
         post(this::resetMatrix);
     }
@@ -93,18 +93,20 @@ public class CropImageView extends View {
         float cropRadius = Math.min(viewW, viewH) * 0.40f;
         float cropDiameter = cropRadius * 2f;
 
-        scaleFactor = Math.max(cropDiameter / imgW, cropDiameter / imgH);
+        float scale = Math.max(cropDiameter / imgW, cropDiameter / imgH);
+        float focusX = (viewW - imgW * scale) / 2f;
+        float focusY = (viewH - imgH * scale) / 2f;
 
-        focusX = (viewW - imgW * scaleFactor) / 2f;
-        focusY = (viewH - imgH * scaleFactor) / 2f;
-
-        updateMatrix();
+        matrix.postScale(scale, scale);
+        matrix.postTranslate(focusX, focusY);
     }
 
-    private void updateMatrix() {
-        matrix.reset();
-        matrix.postScale(scaleFactor, scaleFactor);
-        matrix.postTranslate(focusX, focusY);
+    private float getCurrentScale() {
+        float[] values = new float[9];
+        matrix.getValues(values);
+        float scaleX = values[Matrix.MSCALE_X];
+        float skewY = values[Matrix.MSKEW_Y];
+        return (float) Math.sqrt(scaleX * scaleX + skewY * skewY);
     }
 
     @Override
@@ -112,10 +114,10 @@ public class CropImageView extends View {
         super.onDraw(canvas);
         if (rotatedBitmap == null) return;
 
-        // Draw image
+        // Draw transformed image
         canvas.drawBitmap(rotatedBitmap, matrix, paint);
 
-        // Calculate Crop Hole
+        // Calculate Crop Hole dimensions
         float viewW = getWidth();
         float viewH = getHeight();
         float cx = viewW / 2f;
@@ -127,8 +129,6 @@ public class CropImageView extends View {
         canvas.drawRect(0, 0, viewW, viewH, maskPaint);
 
         // Clear circle in center
-        Paint clearPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         canvas.drawCircle(cx, cy, radius, clearPaint);
         canvas.restoreToCount(saveCount);
 
@@ -142,30 +142,56 @@ public class CropImageView extends View {
 
         scaleDetector.onTouchEvent(event);
 
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
-                lastTouchX = event.getX();
-                lastTouchY = event.getY();
+        int action = event.getActionMasked();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN: {
+                int pointerIndex = event.getActionIndex();
+                lastTouchX = event.getX(pointerIndex);
+                lastTouchY = event.getY(pointerIndex);
+                activePointerId = event.getPointerId(0);
                 isDragging = true;
                 break;
+            }
 
-            case MotionEvent.ACTION_MOVE:
+            case MotionEvent.ACTION_MOVE: {
                 if (!scaleDetector.isInProgress() && isDragging) {
-                    float dx = event.getX() - lastTouchX;
-                    float dy = event.getY() - lastTouchY;
-                    focusX += dx;
-                    focusY += dy;
-                    lastTouchX = event.getX();
-                    lastTouchY = event.getY();
-                    updateMatrix();
-                    invalidate();
+                    int pointerIndex = event.findPointerIndex(activePointerId);
+                    if (pointerIndex != -1) {
+                        float x = event.getX(pointerIndex);
+                        float y = event.getY(pointerIndex);
+
+                        float dx = x - lastTouchX;
+                        float dy = y - lastTouchY;
+
+                        if (Math.abs(dx) > 0.2f || Math.abs(dy) > 0.2f) {
+                            matrix.postTranslate(dx, dy);
+                            lastTouchX = x;
+                            lastTouchY = y;
+                            invalidate();
+                        }
+                    }
                 }
                 break;
+            }
+
+            case MotionEvent.ACTION_POINTER_UP: {
+                int pointerIndex = event.getActionIndex();
+                int pointerId = event.getPointerId(pointerIndex);
+                if (pointerId == activePointerId) {
+                    int newPointerIndex = (pointerIndex == 0) ? 1 : 0;
+                    activePointerId = event.getPointerId(newPointerIndex);
+                    lastTouchX = event.getX(newPointerIndex);
+                    lastTouchY = event.getY(newPointerIndex);
+                }
+                break;
+            }
 
             case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_CANCEL: {
+                activePointerId = MotionEvent.INVALID_POINTER_ID;
                 isDragging = false;
                 break;
+            }
         }
         return true;
     }
@@ -174,16 +200,17 @@ public class CropImageView extends View {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             float scale = detector.getScaleFactor();
-            scaleFactor *= scale;
-            scaleFactor = Math.max(0.3f, Math.min(scaleFactor, 5.0f));
+            float currentScale = getCurrentScale();
+            float minScale = 0.2f;
+            float maxScale = 5.0f;
 
-            float focusXTouch = detector.getFocusX();
-            float focusYTouch = detector.getFocusY();
+            if (currentScale * scale < minScale) {
+                scale = minScale / currentScale;
+            } else if (currentScale * scale > maxScale) {
+                scale = maxScale / currentScale;
+            }
 
-            focusX = focusXTouch - (focusXTouch - focusX) * scale;
-            focusY = focusYTouch - (focusYTouch - focusY) * scale;
-
-            updateMatrix();
+            matrix.postScale(scale, scale, detector.getFocusX(), detector.getFocusY());
             invalidate();
             return true;
         }
