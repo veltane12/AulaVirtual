@@ -230,19 +230,6 @@ public class MainActivity extends AppCompatActivity {
 
             LinearLayout container = DialogUtils.createDialogContainer(this);
 
-            TextView tvServerStatus = new TextView(this);
-            tvServerStatus.setTextSize(13);
-            tvServerStatus.setPadding(0, 0, 0, 12);
-            boolean isConnected = Boolean.TRUE.equals(viewModel.isServerConnected().getValue());
-            if (isConnected) {
-                tvServerStatus.setText("🟢 Servidor en línea (Sincronizado con MySQL)");
-                tvServerStatus.setTextColor(0xFF2E7D32);
-            } else {
-                tvServerStatus.setText("⚠️ Servidor fuera de línea (Modo Offline)");
-                tvServerStatus.setTextColor(0xFFD32F2F);
-            }
-            container.addView(tvServerStatus);
-
             TextView tvNotice = new TextView(this);
             tvNotice.setText("\n🔒 Debe iniciar sesión para poder ver las notificaciones y avisos de su cuenta.\n");
             tvNotice.setTextSize(14);
@@ -270,22 +257,8 @@ public class MainActivity extends AppCompatActivity {
 
             LinearLayout container = DialogUtils.createDialogContainer(this);
 
-            // Server Status Header
-            TextView tvServerStatus = new TextView(this);
-            tvServerStatus.setTextSize(13);
-            tvServerStatus.setPadding(0, 0, 0, 12);
-            boolean isConnected = Boolean.TRUE.equals(viewModel.isServerConnected().getValue());
-            if (isConnected) {
-                tvServerStatus.setText("🟢 Servidor en línea (Sincronizado con MySQL)");
-                tvServerStatus.setTextColor(0xFF2E7D32);
-            } else {
-                tvServerStatus.setText("⚠️ Servidor fuera de línea (Modo Offline)");
-                tvServerStatus.setTextColor(0xFFD32F2F);
-            }
-            container.addView(tvServerStatus);
-
             // If Admin: Add button to send new notification
-            if (currentUser != null && "ADMIN".equals(currentUser.role)) {
+            if ("ADMIN".equals(currentUser.role)) {
                 MaterialButton btnCreate = new MaterialButton(this);
                 btnCreate.setText("➕ Crear y Enviar Notificación");
                 btnCreate.setAllCaps(false);
