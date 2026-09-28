@@ -5,14 +5,44 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.Base64;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ImageView;
 import androidx.cardview.widget.CardView;
-
 import com.aula.virtual.R;
-
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.io.ByteArrayOutputStream;
 
 public class ImageUtils {
+
+    public interface OnImageCroppedListener {
+        void onCropped(Bitmap croppedBitmap);
+    }
+
+    public static void showCropAndAdjustDialog(Context context, Bitmap rawBitmap, OnImageCroppedListener listener) {
+        if (context == null || rawBitmap == null) return;
+
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_crop_image, null);
+        CropImageView cropImageView = dialogView.findViewById(R.id.cropImageView);
+        View btnRotate = dialogView.findViewById(R.id.btnRotate90);
+
+        cropImageView.setImageBitmap(rawBitmap);
+
+        if (btnRotate != null) {
+            btnRotate.setOnClickListener(v -> cropImageView.rotate90Degrees());
+        }
+
+        new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setPositiveButton("Guardar", (dialog, which) -> {
+                    Bitmap cropped = cropImageView.getCroppedBitmap();
+                    if (cropped != null && listener != null) {
+                        listener.onCropped(cropped);
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
 
     public static String bitmapToBase64(Bitmap bitmap) {
         if (bitmap == null) return null;

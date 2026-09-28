@@ -31,7 +31,7 @@ public class StudentProfileFragment extends Fragment {
             new ActivityResultContracts.TakePicturePreview(),
             bitmap -> {
                 if (bitmap != null) {
-                    updateProfilePicture(bitmap);
+                    ImageUtils.showCropAndAdjustDialog(requireContext(), bitmap, this::updateProfilePicture);
                 }
             }
     );
@@ -53,7 +53,7 @@ public class StudentProfileFragment extends Fragment {
                 if (uri != null) {
                     try {
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), uri);
-                        updateProfilePicture(bitmap);
+                        ImageUtils.showCropAndAdjustDialog(requireContext(), bitmap, this::updateProfilePicture);
                     } catch (IOException e) {
                         Toast.makeText(getContext(), "Error al cargar imagen", Toast.LENGTH_SHORT).show();
                     }
