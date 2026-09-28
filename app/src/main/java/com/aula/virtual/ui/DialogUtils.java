@@ -1,11 +1,12 @@
 package com.aula.virtual.ui;
 
 import android.content.Context;
-import android.util.TypedValue;
+import android.content.res.Configuration;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import androidx.core.content.ContextCompat;
 import com.aula.virtual.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -34,16 +35,16 @@ public class DialogUtils {
         int paddingV = (int) (12 * context.getResources().getDisplayMetrics().density);
         et.setPadding(paddingH, paddingV, paddingH, paddingV);
         et.setTextSize(15f);
-        et.setBackgroundResource(R.drawable.bg_bootstrap_input);
 
-        TypedValue typedValuePrimary = new TypedValue();
-        if (context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValuePrimary, true)) {
-            et.setTextColor(typedValuePrimary.data);
-        }
-
-        TypedValue typedValueSecondary = new TypedValue();
-        if (context.getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValueSecondary, true)) {
-            et.setHintTextColor(typedValueSecondary.data);
+        boolean isDark = isNightMode(context);
+        if (isDark) {
+            et.setBackgroundResource(R.drawable.bg_bootstrap_input_dark);
+            et.setTextColor(ContextCompat.getColor(context, R.color.white));
+            et.setHintTextColor(ContextCompat.getColor(context, R.color.bs_secondary));
+        } else {
+            et.setBackgroundResource(R.drawable.bg_bootstrap_input);
+            et.setTextColor(ContextCompat.getColor(context, R.color.black));
+            et.setHintTextColor(ContextCompat.getColor(context, R.color.bs_secondary));
         }
 
         if (inputType != 0) {
@@ -67,9 +68,11 @@ public class DialogUtils {
         tv.setTextSize(15f);
         tv.setBackgroundResource(R.drawable.bg_list_item);
 
-        TypedValue typedValuePrimary = new TypedValue();
-        if (context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValuePrimary, true)) {
-            tv.setTextColor(typedValuePrimary.data);
+        boolean isDark = isNightMode(context);
+        if (isDark) {
+            tv.setTextColor(ContextCompat.getColor(context, R.color.white));
+        } else {
+            tv.setTextColor(ContextCompat.getColor(context, R.color.black));
         }
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -79,5 +82,11 @@ public class DialogUtils {
         lp.setMargins(0, marginV, 0, marginV);
         tv.setLayoutParams(lp);
         return tv;
+    }
+
+    private static boolean isNightMode(Context context) {
+        if (ThemeHelper.isDarkMode(context)) return true;
+        int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
     }
 }
