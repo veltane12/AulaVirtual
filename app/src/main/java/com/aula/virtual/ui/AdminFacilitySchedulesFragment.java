@@ -137,6 +137,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         }
         tvSubject.setOnClickListener(v -> showSearchDialog("Materia", (item) -> {
             selectedSubId[0] = item.id;
+            tvSubject.setError(null);
             DialogUtils.setOptionState(tvSubject, "Materia: " + item.text + " (" + item.subtext + ")", false, requireContext());
         }));
         layout.addView(tvSubject);
@@ -147,6 +148,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         }
         tvProfessor.setOnClickListener(v -> showSearchDialog("Profesor", (item) -> {
             selectedProfId[0] = item.id;
+            tvProfessor.setError(null);
             DialogUtils.setOptionState(tvProfessor, "Profesor: " + item.text + " [" + item.subtext.replace("Carnet: ", "") + "]", false, requireContext());
             
             viewModel.getProfessorSchedules(item.id).observe(getViewLifecycleOwner(), schedules -> {
@@ -158,22 +160,32 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         final TextView tvDays = DialogUtils.createDialogOptionButton(requireContext(), selectedDays[0].isEmpty() ? "Seleccionar Días..." : "Días: " + selectedDays[0], selectedDays[0].isEmpty());
         tvDays.setOnClickListener(v -> showDaysPickerDialog(selectedDays[0], result -> {
             selectedDays[0] = result;
+            tvDays.setError(null);
             DialogUtils.setOptionState(tvDays, "Días: " + result, false, requireContext());
         }));
         layout.addView(tvDays);
 
         final TextView tvStart = DialogUtils.createDialogOptionButton(requireContext(), existing != null ? "Hora Inicio: " + existing.startTime : "Hora Inicio (Click aquí)", existing == null);
-        tvStart.setOnClickListener(v -> showTimePicker(tvStart));
+        tvStart.setOnClickListener(v -> {
+            tvStart.setError(null);
+            showTimePicker(tvStart);
+        });
         layout.addView(tvStart);
 
         final TextView tvEnd = DialogUtils.createDialogOptionButton(requireContext(), existing != null ? "Hora Fin: " + existing.endTime : "Hora Fin (Click aquí)", existing == null);
-        tvEnd.setOnClickListener(v -> showTimePicker(tvEnd));
+        tvEnd.setOnClickListener(v -> {
+            tvEnd.setError(null);
+            showTimePicker(tvEnd);
+        });
         layout.addView(tvEnd);
 
-        final String[] selectedColor = {existing != null && existing.color != null ? existing.color : "BLUE"};
-        final TextView tvColor = DialogUtils.createDialogOptionButton(requireContext(), "Color en esta Aula: " + selectedColor[0], false);
-        tvColor.setOnClickListener(v -> showColorPickerDialog(selectedColor[0], colorName -> {
+        final String[] selectedColor = {existing != null ? existing.color : null};
+        final TextView tvColor = DialogUtils.createDialogOptionButton(requireContext(),
+                existing != null && existing.color != null ? "Color en esta Aula: " + existing.color : "Seleccionar Color en esta Aula...",
+                existing == null || existing.color == null);
+        tvColor.setOnClickListener(v -> showColorPickerDialog(selectedColor[0] != null ? selectedColor[0] : "BLUE", colorName -> {
             selectedColor[0] = colorName;
+            tvColor.setError(null);
             DialogUtils.setOptionState(tvColor, "Color en esta Aula: " + colorName, false, requireContext());
         }));
         layout.addView(tvColor);
@@ -187,20 +199,37 @@ public class AdminFacilitySchedulesFragment extends Fragment {
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             if (selectedSubId[0] == -1) {
-                Toast.makeText(getContext(), "Debe seleccionar una materia", Toast.LENGTH_SHORT).show();
+                tvSubject.setError("Debe seleccionar una materia");
                 return;
             }
             if (selectedProfId[0] == -1) {
-                Toast.makeText(getContext(), "Debe seleccionar un profesor", Toast.LENGTH_SHORT).show();
+                tvProfessor.setError("Debe seleccionar un profesor");
                 return;
             }
             if (selectedDays[0].isEmpty()) {
-                Toast.makeText(getContext(), "Debe seleccionar al menos un día", Toast.LENGTH_SHORT).show();
+                tvDays.setError("Debe seleccionar al menos un día");
                 return;
             }
 
-            String start = tvStart.getText().toString().replace("Hora Inicio: ", "");
-            String end = tvEnd.getText().toString().replace("Hora Fin: ", "");
+            String startStr = tvStart.getText().toString();
+            String endStr = tvEnd.getText().toString();
+
+            if (startStr.contains("Click") || startStr.contains("Seleccionar")) {
+                tvStart.setError("Debe seleccionar la hora de inicio");
+                return;
+            }
+            if (endStr.contains("Click") || endStr.contains("Seleccionar")) {
+                tvEnd.setError("Debe seleccionar la hora de fin");
+                return;
+            }
+
+            String start = startStr.replace("Hora Inicio: ", "");
+            String end = endStr.replace("Hora Fin: ", "");
+
+            if (selectedColor[0] == null) {
+                tvColor.setError("Debe seleccionar un color");
+                return;
+            }
 
             if (start.equals("00:00") || end.equals("00:00")) {
                 Toast.makeText(getContext(), "Debe definir un horario válido", Toast.LENGTH_SHORT).show();
