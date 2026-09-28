@@ -55,37 +55,57 @@ cd MyApplication
 
 ---
 
-### Paso 3: Configurar y Levantar el Servidor Backend (FastAPI)
+### Paso 3: Configurar y Levantar el Servidor Backend (Python) desde la Terminal de Android Studio
 
-1. Abre una terminal y navega a la carpeta `backend` del proyecto:
-   ```bash
-   cd backend
-   ```
-2. Crea un entorno virtual de Python (recomendado):
-   - **En Windows (PowerShell/CMD):**
-     ```powershell
-     python -m venv venv
-     .\venv\Scripts\activate
-     ```
-   - **En macOS / Linux:**
-     ```bash
-     python3 -m venv venv
-     source venv/bin/activate
-     ```
-3. Instala las dependencias requeridas de Python:
-   ```bash
-   pip install fastapi uvicorn sqlalchemy mysql-connector-python pydantic
-   ```
-4. Verificación de credenciales de la base de datos:
-   - Revisa el archivo `backend/main.py`.
-   - Por defecto, la conexión se realiza sin contraseña para el usuario `root` de XAMPP:
-     `DATABASE_URL = "mysql+mysqlconnector://root:@localhost/aula_virtual"`
-   - Si tu MySQL en XAMPP tiene contraseña, actualízala en esa línea (ej. `root:tu_password@localhost`).
-5. Ejecuta el servidor backend:
-   ```bash
-   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-   ```
-6. **Verificación:** Abre en tu navegador [http://localhost:8000/docs](http://localhost:8000/docs). Deberías ver la documentación interactiva de la API (Swagger UI).
+Puedes ejecutar todo el servidor backend directamente desde la pestaña **Terminal integrada de Android Studio** sin necesidad de abrir ventanas externas.
+
+#### 1. Abrir la Terminal en Android Studio:
+- En la parte inferior de Android Studio, haz clic en la pestaña **Terminal** (o presiona `Alt + F12` en Windows/Linux, `Option + F12` en Mac).
+
+#### 2. Entrar a la carpeta backend:
+```bash
+cd backend
+```
+
+#### 3. Crear y activar el Entorno Virtual de Python (Recomendado):
+- **En Windows (Terminal de Android Studio / PowerShell):**
+  ```powershell
+  python -m venv venv
+  .\venv\Scripts\activate
+  ```
+- **En macOS / Linux (Terminal de Android Studio):**
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
+  *(Verás que la terminal ahora muestra `(venv)` al inicio de la línea de comandos).*
+
+#### 4. Instalar las dependencias del servidor:
+Copia y ejecuta el siguiente comando para instalar todos los paquetes requeridos:
+```bash
+pip install fastapi uvicorn sqlalchemy mysql-connector-python pydantic
+```
+
+#### 5. Verificar credenciales de la base de datos MySQL:
+Abre desde el explorador de archivos de Android Studio el archivo `backend/main.py` y confirma la cadena de conexión:
+```python
+DATABASE_URL = "mysql+mysqlconnector://root:@localhost/aula_virtual"
+```
+*(Si tu usuario `root` de MySQL en XAMPP tiene contraseña, colócala entre `root:` y `@localhost`, por ejemplo: `root:mi_password@localhost`).*
+
+#### 6. Ejecutar el Servidor Backend:
+Ejecuta el siguiente comando en la Terminal de Android Studio:
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+#### 7. Comprobación del servidor:
+Una vez iniciado, verás un mensaje que dice `Application startup complete` e `Uvicorn running on http://0.0.0.0:8000`.
+Abre tu navegador e ingresa a:
+👉 [http://localhost:8000/docs](http://localhost:8000/docs) (debe cargar la documentación interactiva Swagger UI de FastAPI).
+
+> 💡 **Nota:** Deja esta pestaña de la Terminal de Android Studio abierta mientras estés probando la aplicación para que el servidor permanezca activo.
+
 
 ---
 
