@@ -66,11 +66,13 @@
 
             <Button
                 android:id="@+id/btnCropSave"
-                style="@style/Widget.Bootstrap.Button.Success"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="Guardar"
+                android:textColor="?attr/colorPrimary"
+                android:textStyle="bold"
                 android:textAllCaps="false"/>
 
         </LinearLayout>

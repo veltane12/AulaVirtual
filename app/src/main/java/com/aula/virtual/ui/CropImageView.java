@@ -59,7 +59,19 @@ public class CropImageView extends View {
         this.rawBitmap = bitmap;
         this.rotationDegrees = 0;
         updateRotatedBitmap();
-        post(this::resetMatrix);
+        if (getWidth() > 0 && getHeight() > 0) {
+            resetMatrix();
+        } else {
+            post(this::resetMatrix);
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (changed && rotatedBitmap != null) {
+            resetMatrix();
+        }
     }
 
     public void rotate90Degrees() {
@@ -100,6 +112,7 @@ public class CropImageView extends View {
         matrix.postScale(scale, scale);
         matrix.postTranslate(focusX, focusY);
         checkAndClampBounds();
+        invalidate();
     }
 
     private float getCurrentScale() {
@@ -163,6 +176,10 @@ public class CropImageView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (rotatedBitmap == null) return;
+
+        if (matrix.isIdentity() && getWidth() > 0 && getHeight() > 0) {
+            resetMatrix();
+        }
 
         // Draw transformed image
         canvas.drawBitmap(rotatedBitmap, matrix, paint);
