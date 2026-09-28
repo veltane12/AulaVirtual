@@ -207,21 +207,21 @@ public class NotificationListFragment extends Fragment {
         }
         if ("ALL".equals(filter) || "FACULTY".equals(filter)) {
             if (!facultyNotifs.isEmpty()) {
-                addChannelHeaderView(binding.notificationsContainer, "🏫 Canal por Facultades", 0xFF2E7D32);
+                addChannelHeaderView(binding.notificationsContainer, "🏫 Canal Facultades", 0xFF2E7D32);
                 renderNotificationCards(binding.notificationsContainer, facultyNotifs, primaryTextColor, secondaryTextColor, isDark);
                 hasContent = true;
             }
         }
         if ("ALL".equals(filter) || "SUBJECT".equals(filter)) {
             if (!subjectNotifs.isEmpty()) {
-                addChannelHeaderView(binding.notificationsContainer, "📚 Canal por Materias", 0xFF6A1B9A);
+                addChannelHeaderView(binding.notificationsContainer, "📚 Canal Materias", 0xFF6A1B9A);
                 renderNotificationCards(binding.notificationsContainer, subjectNotifs, primaryTextColor, secondaryTextColor, isDark);
                 hasContent = true;
             }
         }
         if ("ALL".equals(filter) || "FACILITY".equals(filter)) {
             if (!facilityNotifs.isEmpty()) {
-                addChannelHeaderView(binding.notificationsContainer, "🏛️ Canal por Instalaciones", 0xFFE65100);
+                addChannelHeaderView(binding.notificationsContainer, "🏛️ Canal Instalaciones", 0xFFE65100);
                 renderNotificationCards(binding.notificationsContainer, facilityNotifs, primaryTextColor, secondaryTextColor, isDark);
                 hasContent = true;
             }
@@ -643,11 +643,12 @@ public class NotificationListFragment extends Fragment {
             if ("ALL".equals(type)) {
                 result.add(n);
             } else if (user != null) {
-                if ("ROLE_STUDENTS".equals(type) && "STUDENT".equals(user.role)) {
+                if ("ADMIN".equals(user.role)) {
+                    // Administrators can see ALL notifications across all user types
+                    result.add(n);
+                } else if ("ROLE_STUDENTS".equals(type) && "STUDENT".equals(user.role)) {
                     result.add(n);
                 } else if ("ROLE_PROFESSORS".equals(type) && "PROFESSOR".equals(user.role)) {
-                    result.add(n);
-                } else if ("ROLE_ADMINS".equals(type) && "ADMIN".equals(user.role)) {
                     result.add(n);
                 } else if ("FACULTY".equals(type) && user.faculty != null && user.faculty.equalsIgnoreCase(val)) {
                     result.add(n);
