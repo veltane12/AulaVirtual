@@ -449,9 +449,13 @@ public class MainActivity extends AppCompatActivity {
                                         targetType[0] = "FACULTY";
                                         targetValue[0] = facNames[w2];
                                         DialogUtils.setOptionState(tvTarget, "Facultad: " + facNames[w2], false, this);
-                                    }).show();
+                                    })
+                                    .setNegativeButton("Atrás", (d2, w2) -> tvTarget.performClick())
+                                    .setOnCancelListener(d2 -> tvTarget.performClick())
+                                    .show();
                             } else {
                                 Toast.makeText(this, "No hay facultades registradas", Toast.LENGTH_SHORT).show();
+                                tvTarget.performClick();
                             }
                         });
                     } else if (which == 5) {
@@ -464,9 +468,13 @@ public class MainActivity extends AppCompatActivity {
                                         targetType[0] = "SUBJECT";
                                         targetValue[0] = subNames[w2];
                                         DialogUtils.setOptionState(tvTarget, "Materia: " + subNames[w2], false, this);
-                                    }).show();
+                                    })
+                                    .setNegativeButton("Atrás", (d2, w2) -> tvTarget.performClick())
+                                    .setOnCancelListener(d2 -> tvTarget.performClick())
+                                    .show();
                             } else {
                                 Toast.makeText(this, "No hay materias registradas", Toast.LENGTH_SHORT).show();
+                                tvTarget.performClick();
                             }
                         });
                     } else if (which == 6) {
@@ -479,9 +487,13 @@ public class MainActivity extends AppCompatActivity {
                                         targetType[0] = "FACILITY";
                                         targetValue[0] = facNames[w2];
                                         DialogUtils.setOptionState(tvTarget, "Instalación: " + facNames[w2], false, this);
-                                    }).show();
+                                    })
+                                    .setNegativeButton("Atrás", (d2, w2) -> tvTarget.performClick())
+                                    .setOnCancelListener(d2 -> tvTarget.performClick())
+                                    .show();
                             } else {
                                 Toast.makeText(this, "No hay instalaciones registradas", Toast.LENGTH_SHORT).show();
+                                tvTarget.performClick();
                             }
                         });
                     }
