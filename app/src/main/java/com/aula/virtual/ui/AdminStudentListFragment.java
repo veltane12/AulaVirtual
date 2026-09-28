@@ -202,6 +202,7 @@ public class AdminStudentListFragment extends Fragment {
                 .setTitle("Facultades")
                 .setItems(facultyNames, (dialog, which) -> {
                     selectedFaculty[0] = facultyNames[which];
+                    tvFaculty.setError(null);
                     DialogUtils.setOptionState(tvFaculty, "Facultad: " + selectedFaculty[0], false, requireContext());
                 }).show();
         });
@@ -233,7 +234,7 @@ public class AdminStudentListFragment extends Fragment {
                 isValid = false;
             }
             if (selectedFaculty[0] == null) {
-                Toast.makeText(getContext(), "Seleccione una facultad", Toast.LENGTH_SHORT).show();
+                tvFaculty.setError("Seleccione una facultad");
                 isValid = false;
             }
 
