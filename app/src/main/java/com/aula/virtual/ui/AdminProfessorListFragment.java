@@ -163,30 +163,10 @@ public class AdminProfessorListFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Facultad: Docencia (Click para cambiar)", false);
+        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Facultad: Docencia", false);
+        tvFaculty.setClickable(false);
+        tvFaculty.setFocusable(false);
         layout.addView(tvFaculty);
-
-        final String[] facultyNames;
-        List<String> filteredNames = new ArrayList<>();
-        if (availableFaculties != null) {
-            for (Faculty f : availableFaculties) {
-                filteredNames.add(f.name);
-            }
-        }
-        facultyNames = filteredNames.toArray(new String[0]);
-        final String[] selectedFaculty = {"Docencia"};
-
-        tvFaculty.setOnClickListener(v -> {
-            if (facultyNames.length > 0) {
-                new MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Facultades")
-                    .setItems(facultyNames, (dialog, which) -> {
-                        selectedFaculty[0] = facultyNames[which];
-                        tvFaculty.setError(null);
-                        DialogUtils.setOptionState(tvFaculty, "Facultad: " + selectedFaculty[0], false, requireContext());
-                    }).show();
-            }
-        });
 
         final EditText etAddress = DialogUtils.createStyledEditText(requireContext(), "Dirección (Opcional)", 0);
         layout.addView(etAddress);
@@ -224,10 +204,9 @@ public class AdminProfessorListFragment extends Fragment {
                 String fullCarnet = "PROF" + carnet;
                 String address = etAddress.getText().toString().trim();
                 String email = etEmail.getText().toString().trim();
-                String facultyName = selectedFaculty[0] != null ? selectedFaculty[0] : "Docencia";
 
                 viewModel.performOnlineAction(() -> {
-                    User newProf = new User(fullCarnet, name, pass, "PROFESSOR", facultyName);
+                    User newProf = new User(fullCarnet, name, pass, "PROFESSOR", "Docencia");
                     newProf.address = address.isEmpty() ? null : address;
                     newProf.personal_email = email.isEmpty() ? null : email;
                     viewModel.insertUser(newProf);

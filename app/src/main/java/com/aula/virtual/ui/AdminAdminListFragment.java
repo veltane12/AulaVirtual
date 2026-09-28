@@ -179,6 +179,11 @@ public class AdminAdminListFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
+        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Facultad: Administrativa", false);
+        tvFaculty.setClickable(false);
+        tvFaculty.setFocusable(false);
+        layout.addView(tvFaculty);
+
         final EditText etAddress = DialogUtils.createStyledEditText(requireContext(), "Dirección (Opcional)", 0);
         layout.addView(etAddress);
 
