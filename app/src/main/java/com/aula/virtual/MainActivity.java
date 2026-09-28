@@ -46,6 +46,8 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private MainViewModel viewModel;
+    private AlertDialog activeNotificationsDialog = null;
+    private AlertDialog activeCreateNotificationDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,10 +185,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNotificationsDialog() {
+        if (activeNotificationsDialog != null && activeNotificationsDialog.isShowing()) {
+            activeNotificationsDialog.dismiss();
+            activeNotificationsDialog = null;
+        }
+
         User currentUser = viewModel.getCurrentUser().getValue();
         viewModel.fetchNotifications();
 
         observeOnce(viewModel.getAllNotifications(), allNotifs -> {
+            if (activeNotificationsDialog != null && activeNotificationsDialog.isShowing()) {
+                activeNotificationsDialog.dismiss();
+                activeNotificationsDialog = null;
+            }
+
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
             builder.setTitle("🔔 Notificaciones y Avisos");
 
@@ -302,7 +314,10 @@ public class MainActivity extends AppCompatActivity {
 
             builder.setView(container);
             builder.setPositiveButton("Cerrar", null);
-            builder.show();
+
+            activeNotificationsDialog = builder.create();
+            activeNotificationsDialog.setOnDismissListener(dialog -> activeNotificationsDialog = null);
+            activeNotificationsDialog.show();
         });
     }
 
@@ -382,6 +397,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showCreateNotificationDialog(Notification existingNotif) {
+        if (activeCreateNotificationDialog != null && activeCreateNotificationDialog.isShowing()) {
+            activeCreateNotificationDialog.dismiss();
+            activeCreateNotificationDialog = null;
+        }
+
         User currentUser = viewModel.getCurrentUser().getValue();
         if (currentUser == null) return;
 
@@ -505,10 +525,11 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton(isEditing ? "Guardar" : "Enviar", null);
         builder.setNegativeButton("Cancelar", null);
 
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        activeCreateNotificationDialog = builder.create();
+        activeCreateNotificationDialog.setOnDismissListener(d -> activeCreateNotificationDialog = null);
+        activeCreateNotificationDialog.show();
 
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+        activeCreateNotificationDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String title = etTitle.getText().toString().trim();
             String message = etMessage.getText().toString().trim();
 
@@ -530,7 +551,9 @@ public class MainActivity extends AppCompatActivity {
                     existingNotif.targetValue = targetValue[0];
                     viewModel.updateNotification(existingNotif, () -> {
                         Toast.makeText(this, "¡Notificación actualizada con éxito!", Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
+                        if (activeCreateNotificationDialog != null) {
+                            activeCreateNotificationDialog.dismiss();
+                        }
                         showNotificationsDialog();
                     });
                 } else {
@@ -539,7 +562,9 @@ public class MainActivity extends AppCompatActivity {
 
                     viewModel.insertNotification(notif, () -> {
                         Toast.makeText(this, "¡Notificación enviada con éxito!", Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
+                        if (activeCreateNotificationDialog != null) {
+                            activeCreateNotificationDialog.dismiss();
+                        }
                         showNotificationsDialog();
                     });
                 }
