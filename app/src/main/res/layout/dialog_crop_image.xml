@@ -45,6 +45,8 @@
             android:layout_centerVertical="true"
             android:text="Rotar"
             android:textAllCaps="false"
+            app:strokeColor="?attr/colorPrimary"
+            app:strokeWidth="2dp"
             app:icon="@drawable/ic_rotate_wheel"
             app:iconTint="?attr/colorPrimary"
             android:textColor="?attr/colorPrimary"/>

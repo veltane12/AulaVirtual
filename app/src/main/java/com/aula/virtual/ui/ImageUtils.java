@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -12,6 +13,7 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import com.aula.virtual.R;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.io.ByteArrayOutputStream;
 
@@ -36,7 +38,13 @@ public class ImageUtils {
                 .setView(dialogView)
                 .create();
 
-        if (btnRotate != null) {
+        if (btnRotate instanceof MaterialButton) {
+            MaterialButton mb = (MaterialButton) btnRotate;
+            int accentColor = ThemeHelper.getSubjectColor(context, ThemeHelper.getAccentColorName(context));
+            mb.setStrokeColor(ColorStateList.valueOf(accentColor));
+            mb.setStrokeWidth((int) (2 * context.getResources().getDisplayMetrics().density));
+            mb.setOnClickListener(v -> cropImageView.rotate90Degrees());
+        } else if (btnRotate != null) {
             btnRotate.setOnClickListener(v -> cropImageView.rotate90Degrees());
         }
 
