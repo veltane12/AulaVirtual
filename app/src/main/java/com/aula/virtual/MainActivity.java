@@ -317,8 +317,7 @@ public class MainActivity extends AppCompatActivity {
                     tvMsg.setPadding(0, 6, 0, 6);
 
                     TextView tvSender = new TextView(this);
-                    String senderStr = (n.senderName != null ? "Enviado por: " + n.senderName : "") + 
-                                       (n.timestamp != null ? " • " + n.timestamp : "");
+                    String senderStr = (n.timestamp != null ? n.timestamp : "");
                     tvSender.setText(senderStr);
                     tvSender.setTextSize(11);
                     tvSender.setTextColor(secondaryTextColor);
