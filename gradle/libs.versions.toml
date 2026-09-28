@@ -1,16 +1,16 @@
 [versions]
-agp = "9.4.1"
+agp = "8.7.2"
 junit = "4.13.2"
-junitVersion = "1.3.0"
-espressoCore = "3.7.0"
-appcompat = "1.6.1"
-material = "1.10.0"
-activityKtx = "1.13.0"
-constraintlayout = "2.1.4"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+appcompat = "1.7.0"
+material = "1.12.0"
+activityKtx = "1.9.3"
+constraintlayout = "2.2.0"
 room = "2.6.1"
-navigation = "2.8.0"
-lifecycle = "2.8.5"
-retrofit = "2.9.0"
+navigation = "2.8.3"
+lifecycle = "2.8.7"
+retrofit = "2.11.0"
 okhttp = "4.12.0"
 biometric = "1.1.0"
 securityCrypto = "1.1.0-alpha06"
@@ -30,9 +30,12 @@ lifecycle-livedata = { group = "androidx.lifecycle", name = "lifecycle-livedata"
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+
 
