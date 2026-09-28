@@ -1430,6 +1430,46 @@ public class VirtualAulaRepository {
         }
     }
 
+    public void updateNotification(Notification notification, Callback<Void> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    db.notificationDao().updateNotification(notification);
+                    mainHandler.post(() -> {
+                        if (callback != null) callback.onResponse(null, Response.success(null));
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    mainHandler.post(() -> {
+                        if (callback != null) callback.onFailure(null, e);
+                    });
+                }
+            });
+        } else {
+            if (callback != null) callback.onResponse(null, Response.success(null));
+        }
+    }
+
+    public void deleteNotification(int id, Callback<Void> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    db.notificationDao().deleteNotificationById(id);
+                    mainHandler.post(() -> {
+                        if (callback != null) callback.onResponse(null, Response.success(null));
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    mainHandler.post(() -> {
+                        if (callback != null) callback.onFailure(null, e);
+                    });
+                }
+            });
+        } else {
+            if (callback != null) callback.onResponse(null, Response.success(null));
+        }
+    }
+
     // --- Synchronize all data from SQL Server for Offline use ---
     public void downloadAllDataForOffline(SyncCallback callback) {
         if (db == null) {

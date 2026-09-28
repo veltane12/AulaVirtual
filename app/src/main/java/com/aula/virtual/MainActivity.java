@@ -50,22 +50,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ThemeHelper.applyTheme(this);
-        setTheme(ThemeHelper.getAccentTheme(this));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         applyNavbarPosition();
 
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment);
-        
-        if (navHostFragment == null) {
-            // Handle the case where NavHostFragment is not found
-            return;
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        if (navHostFragment != null) {
+            navController = navHostFragment.getNavController();
         }
 
-        navController = navHostFragment.getNavController();
-        
         Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
@@ -163,21 +157,10 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (navController == null || navController.getCurrentDestination() == null) {
-                    showExitConfirmationDialog();
-                    return;
-                }
-                
-                int currentId = navController.getCurrentDestination().getId();
-                // If we are on a "Home" screen, show exit dialog
-                if (currentId == R.id.loginFragment || 
-                    currentId == R.id.adminHomeFragment || 
-                    currentId == R.id.studentHomeFragment ||
-                    currentId == R.id.professorHomeFragment) {
+                if (isCurrentDestinationHome()) {
                     showExitConfirmationDialog();
                 } else {
-                    // Otherwise, just go back in navigation
-                    if (!navController.navigateUp()) {
+                    if (!navController.popBackStack()) {
                         showExitConfirmationDialog();
                     }
                 }
@@ -227,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
             MaterialButton btnCreate = new MaterialButton(this);
             btnCreate.setText("➕ Crear y Enviar Notificación");
             btnCreate.setAllCaps(false);
-            btnCreate.setOnClickListener(v -> showCreateNotificationDialog());
+            btnCreate.setOnClickListener(v -> showCreateNotificationDialog(null));
             container.addView(btnCreate);
         }
 
@@ -281,6 +264,31 @@ public class MainActivity extends AppCompatActivity {
                 cardLayout.addView(tvMsg);
                 cardLayout.addView(tvSender);
 
+                // If Admin: Add Edit & Delete action buttons
+                if (currentUser != null && "ADMIN".equals(currentUser.role)) {
+                    LinearLayout actionLayout = new LinearLayout(this);
+                    actionLayout.setOrientation(LinearLayout.HORIZONTAL);
+                    actionLayout.setGravity(Gravity.END);
+                    actionLayout.setPadding(0, 8, 0, 0);
+
+                    MaterialButton btnEdit = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
+                    btnEdit.setText("✏️ Editar");
+                    btnEdit.setTextSize(12);
+                    btnEdit.setAllCaps(false);
+                    btnEdit.setOnClickListener(v -> showCreateNotificationDialog(n));
+
+                    MaterialButton btnDelete = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
+                    btnDelete.setText("🗑️ Eliminar");
+                    btnDelete.setTextColor(0xFFD32F2F);
+                    btnDelete.setTextSize(12);
+                    btnDelete.setAllCaps(false);
+                    btnDelete.setOnClickListener(v -> showDeleteNotificationConfirmation(n));
+
+                    actionLayout.addView(btnEdit);
+                    actionLayout.addView(btnDelete);
+                    cardLayout.addView(actionLayout);
+                }
+
                 card.addView(cardLayout);
 
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -295,6 +303,21 @@ public class MainActivity extends AppCompatActivity {
         builder.setView(container);
         builder.setPositiveButton("Cerrar", null);
         builder.show();
+    }
+
+    private void showDeleteNotificationConfirmation(Notification n) {
+        if (n == null) return;
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Eliminar Notificación")
+                .setMessage("¿Estás seguro de que deseas eliminar esta notificación?")
+                .setPositiveButton("Eliminar", (dialog, which) -> {
+                    viewModel.deleteNotification(n.id, () -> {
+                        Toast.makeText(this, "Notificación eliminada", Toast.LENGTH_SHORT).show();
+                        showNotificationsDialog();
+                    });
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     private List<Notification> filterNotificationsForUser(List<Notification> all, User user) {
@@ -357,24 +380,34 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showCreateNotificationDialog() {
+    private void showCreateNotificationDialog(Notification existingNotif) {
         User currentUser = viewModel.getCurrentUser().getValue();
         if (currentUser == null) return;
 
-        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(this, "Crear Notificación");
+        boolean isEditing = existingNotif != null;
+        String dialogTitle = isEditing ? "Editar Notificación" : "Crear Notificación";
+
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(this, dialogTitle);
         LinearLayout layout = DialogUtils.createDialogContainer(this);
 
         final EditText etTitle = DialogUtils.createStyledEditText(this, "Título de la Notificación", 0);
+        if (isEditing && existingNotif.title != null) {
+            etTitle.setText(existingNotif.title);
+        }
         layout.addView(etTitle);
 
         final EditText etMessage = DialogUtils.createStyledEditText(this, "Mensaje / Contenido de la Notificación", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        if (isEditing && existingNotif.message != null) {
+            etMessage.setText(existingNotif.message);
+        }
         layout.addView(etMessage);
 
-        final TextView tvTarget = DialogUtils.createDialogOptionButton(this, "Destinatarios: 📢 General (Todos los usuarios)", false);
-        layout.addView(tvTarget);
+        final String[] targetType = {isEditing && existingNotif.targetType != null ? existingNotif.targetType : "ALL"};
+        final String[] targetValue = {isEditing ? existingNotif.targetValue : null};
 
-        final String[] targetType = {"ALL"};
-        final String[] targetValue = {null};
+        String initialTargetLabel = "Destinatarios: " + getNotificationTargetLabel(existingNotif);
+        final TextView tvTarget = DialogUtils.createDialogOptionButton(this, initialTargetLabel, false);
+        layout.addView(tvTarget);
 
         tvTarget.setOnClickListener(v -> {
             String[] options = {
@@ -456,7 +489,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         builder.setView(layout);
-        builder.setPositiveButton("Enviar", null);
+        builder.setPositiveButton(isEditing ? "Guardar" : "Enviar", null);
         builder.setNegativeButton("Cancelar", null);
 
         AlertDialog dialog = builder.create();
@@ -477,14 +510,26 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (isValid) {
-                String timestamp = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
-                Notification notif = new Notification(title, message, targetType[0], targetValue[0], currentUser.name, timestamp);
+                if (isEditing) {
+                    existingNotif.title = title;
+                    existingNotif.message = message;
+                    existingNotif.targetType = targetType[0];
+                    existingNotif.targetValue = targetValue[0];
+                    viewModel.updateNotification(existingNotif, () -> {
+                        Toast.makeText(this, "¡Notificación actualizada con éxito!", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                        showNotificationsDialog();
+                    });
+                } else {
+                    String timestamp = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
+                    Notification notif = new Notification(title, message, targetType[0], targetValue[0], currentUser.name, timestamp);
 
-                viewModel.insertNotification(notif, () -> {
-                    Toast.makeText(this, "¡Notificación enviada con éxito!", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                    showNotificationsDialog();
-                });
+                    viewModel.insertNotification(notif, () -> {
+                        Toast.makeText(this, "¡Notificación enviada con éxito!", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                        showNotificationsDialog();
+                    });
+                }
             }
         });
     }

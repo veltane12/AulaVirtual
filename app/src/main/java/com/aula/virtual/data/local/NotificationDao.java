@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 import com.aula.virtual.data.entity.Notification;
 import java.util.List;
 
@@ -17,4 +18,10 @@ public interface NotificationDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Notification> notifications);
+
+    @Update
+    void updateNotification(Notification notification);
+
+    @Query("DELETE FROM notifications WHERE id = :id")
+    void deleteNotificationById(int id);
 }

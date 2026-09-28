@@ -693,6 +693,38 @@ public class MainViewModel extends AndroidViewModel {
         });
     }
 
+    public void updateNotification(Notification notification, Runnable onSuccess) {
+        repository.updateNotification(notification, new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                fetchNotifications();
+                if (onSuccess != null) onSuccess.run();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                fetchNotifications();
+                if (onSuccess != null) onSuccess.run();
+            }
+        });
+    }
+
+    public void deleteNotification(int id, Runnable onSuccess) {
+        repository.deleteNotification(id, new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                fetchNotifications();
+                if (onSuccess != null) onSuccess.run();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                fetchNotifications();
+                if (onSuccess != null) onSuccess.run();
+            }
+        });
+    }
+
     public interface LoginCallback {
         void onSuccess(User user);
         void onError(String message);
