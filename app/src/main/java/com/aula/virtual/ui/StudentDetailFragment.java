@@ -164,6 +164,8 @@ public class StudentDetailFragment extends Fragment {
 
                 int paddingPx = (int) (16 * getResources().getDisplayMetrics().density);
                 ImageUtils.setProfileImage(binding.ivProfileImageDetail, student.profile_image, paddingPx);
+
+                DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
             }
         });
 

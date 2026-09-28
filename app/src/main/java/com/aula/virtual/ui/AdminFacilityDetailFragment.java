@@ -3,6 +3,7 @@ package com.aula.virtual.ui;
 import androidx.appcompat.app.AlertDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +56,7 @@ public class AdminFacilityDetailFragment extends Fragment {
         
         binding.etField3.setHint("Descripción");
         binding.etField3.setVisibility(View.VISIBLE);
-        binding.etField3.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+        binding.etField3.setInputType(InputType.TYPE_CLASS_TEXT);
         binding.btnTogglePassword.setVisibility(View.GONE);
 
         binding.btnSave.setOnClickListener(v -> saveChanges());
@@ -64,6 +65,8 @@ public class AdminFacilityDetailFragment extends Fragment {
         binding.btnManageGrades.setText("Gestionar Horarios");
         binding.btnManageGrades.setVisibility(View.VISIBLE);
         binding.btnManageGrades.setOnClickListener(v -> navigateToSchedules());
+
+        DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
     }
 
     private void observeViewModel() {

@@ -53,6 +53,7 @@ public class FacultyDetailFragment extends Fragment {
 
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
+        DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
     }
 
     private void observeViewModel() {

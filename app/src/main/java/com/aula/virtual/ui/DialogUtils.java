@@ -2,13 +2,17 @@ package com.aula.virtual.ui;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import com.aula.virtual.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DialogUtils {
 
@@ -100,6 +104,41 @@ public class DialogUtils {
             } else {
                 tv.setTextColor(ContextCompat.getColor(context, R.color.black));
             }
+        }
+    }
+
+    public static void arrangeGridButtons(GridLayout gridLayout) {
+        if (gridLayout == null) return;
+        List<View> visibleButtons = new ArrayList<>();
+        for (int i = 0; i < gridLayout.getChildCount(); i++) {
+            View child = gridLayout.getChildAt(i);
+            if (child != null && child.getVisibility() == View.VISIBLE) {
+                visibleButtons.add(child);
+            }
+        }
+
+        int count = visibleButtons.size();
+        for (int i = 0; i < count; i++) {
+            View v = visibleButtons.get(i);
+            GridLayout.LayoutParams params = (GridLayout.LayoutParams) v.getLayoutParams();
+            if (params == null) {
+                params = new GridLayout.LayoutParams();
+            }
+
+            boolean isLastOdd = (i == count - 1) && (count % 2 != 0);
+
+            if (isLastOdd) {
+                params.columnSpec = GridLayout.spec(0, 2, 1.0f);
+                params.rowSpec = GridLayout.spec(i / 2);
+                params.width = 0;
+            } else {
+                int col = i % 2;
+                int row = i / 2;
+                params.columnSpec = GridLayout.spec(col, 1, 1.0f);
+                params.rowSpec = GridLayout.spec(row);
+                params.width = 0;
+            }
+            v.setLayoutParams(params);
         }
     }
 

@@ -226,6 +226,9 @@ public class SubjectDetailFragment extends Fragment {
             binding.btnManageBlog.setVisibility(View.VISIBLE);
         }
 
+        DialogUtils.arrangeGridButtons(binding.layoutTopButtons);
+        DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
+
         viewModel.getSelectedSubject().observe(getViewLifecycleOwner(), sub -> {
             if (sub != null) {
                 subject = sub;

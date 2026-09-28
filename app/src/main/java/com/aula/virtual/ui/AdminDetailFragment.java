@@ -230,6 +230,8 @@ public class AdminDetailFragment extends Fragment {
                     binding.btnDelete.setVisibility(View.GONE);
                     binding.etField2.setEnabled(false); // Carnet cannot be changed
                 }
+
+                DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
             }
         });
 
