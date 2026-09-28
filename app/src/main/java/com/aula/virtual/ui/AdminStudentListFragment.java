@@ -178,10 +178,7 @@ public class AdminStudentListFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        final TextView tvFaculty = new TextView(getContext());
-        tvFaculty.setText("Seleccionar Facultad (Click aquí)");
-        tvFaculty.setPadding(0, 20, 0, 20);
-        tvFaculty.setTextColor(0xFF007BFF);
+        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Facultad...");
         layout.addView(tvFaculty);
 
         final String[] facultyNames;

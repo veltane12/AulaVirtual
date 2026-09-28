@@ -440,14 +440,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
     }
 
     private TextView createValueButton(String text) {
-        TextView tv = new TextView(getContext());
-        tv.setText(text);
-        tv.setPadding(20, 30, 20, 30);
-        tv.setBackgroundResource(R.drawable.bg_list_item);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 10, 0, 10);
-        tv.setLayoutParams(params);
-        return tv;
+        return DialogUtils.createDialogOptionButton(requireContext(), text);
     }
 
     private void showDeleteScheduleConfirmation(ScheduleInfo info) {

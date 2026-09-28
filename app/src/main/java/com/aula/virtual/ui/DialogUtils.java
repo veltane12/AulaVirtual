@@ -66,12 +66,13 @@ public class DialogUtils {
         int paddingV = (int) (12 * context.getResources().getDisplayMetrics().density);
         tv.setPadding(paddingH, paddingV, paddingH, paddingV);
         tv.setTextSize(15f);
-        tv.setBackgroundResource(R.drawable.bg_list_item);
 
         boolean isDark = isNightMode(context);
         if (isDark) {
+            tv.setBackgroundResource(R.drawable.bg_bootstrap_input_dark);
             tv.setTextColor(ContextCompat.getColor(context, R.color.white));
         } else {
+            tv.setBackgroundResource(R.drawable.bg_bootstrap_input);
             tv.setTextColor(ContextCompat.getColor(context, R.color.black));
         }
 
