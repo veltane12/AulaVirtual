@@ -59,9 +59,8 @@ public class DialogUtils {
         return et;
     }
 
-    public static TextView createDialogOptionButton(Context context, String text) {
+    public static TextView createDialogOptionButton(Context context, String text, boolean isPlaceholder) {
         TextView tv = new TextView(context);
-        tv.setText(text);
         int paddingH = (int) (14 * context.getResources().getDisplayMetrics().density);
         int paddingV = (int) (12 * context.getResources().getDisplayMetrics().density);
         tv.setPadding(paddingH, paddingV, paddingH, paddingV);
@@ -70,11 +69,11 @@ public class DialogUtils {
         boolean isDark = isNightMode(context);
         if (isDark) {
             tv.setBackgroundResource(R.drawable.bg_bootstrap_input_dark);
-            tv.setTextColor(ContextCompat.getColor(context, R.color.white));
         } else {
             tv.setBackgroundResource(R.drawable.bg_bootstrap_input);
-            tv.setTextColor(ContextCompat.getColor(context, R.color.black));
         }
+
+        setOptionState(tv, text, isPlaceholder, context);
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -83,6 +82,26 @@ public class DialogUtils {
         lp.setMargins(0, marginV, 0, marginV);
         tv.setLayoutParams(lp);
         return tv;
+    }
+
+    public static TextView createDialogOptionButton(Context context, String text) {
+        return createDialogOptionButton(context, text, false);
+    }
+
+    public static void setOptionState(TextView tv, String text, boolean isPlaceholder, Context context) {
+        tv.setText(text);
+        boolean isDark = isNightMode(context);
+        if (isPlaceholder) {
+            tv.setAlpha(0.65f);
+            tv.setTextColor(ContextCompat.getColor(context, R.color.bs_secondary));
+        } else {
+            tv.setAlpha(1.0f);
+            if (isDark) {
+                tv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            } else {
+                tv.setTextColor(ContextCompat.getColor(context, R.color.black));
+            }
+        }
     }
 
     private static boolean isNightMode(Context context) {

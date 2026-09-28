@@ -128,26 +128,26 @@ public class AdminFacilitySchedulesFragment extends Fragment {
             });
         }
 
-        final TextView tvSubject = createValueButton("Seleccionar Materia...");
+        final TextView tvSubject = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Materia...", existing == null);
         if (existing != null) {
             viewModel.getSubjectById(existing.subjectId, s -> {
                 String sec = s.section != null ? s.section : "01";
-                tvSubject.setText("Materia: " + s.name + "\n(Sección " + sec + ")");
+                DialogUtils.setOptionState(tvSubject, "Materia: " + s.name + " (Sec " + sec + ")", false, requireContext());
             });
         }
         tvSubject.setOnClickListener(v -> showSearchDialog("Materia", (item) -> {
             selectedSubId[0] = item.id;
-            tvSubject.setText("Materia: " + item.text + "\n(" + item.subtext + ")");
+            DialogUtils.setOptionState(tvSubject, "Materia: " + item.text + " (" + item.subtext + ")", false, requireContext());
         }));
         layout.addView(tvSubject);
 
-        final TextView tvProfessor = createValueButton("Seleccionar Profesor...");
+        final TextView tvProfessor = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Profesor...", existing == null);
         if (existing != null) {
-            viewModel.getUserById(existing.professorId, u -> tvProfessor.setText("Profesor: " + u.name + " [" + u.carnet + "]"));
+            viewModel.getUserById(existing.professorId, u -> DialogUtils.setOptionState(tvProfessor, "Profesor: " + u.name + " [" + u.carnet + "]", false, requireContext()));
         }
         tvProfessor.setOnClickListener(v -> showSearchDialog("Profesor", (item) -> {
             selectedProfId[0] = item.id;
-            tvProfessor.setText("Profesor: " + item.text + " [" + item.subtext.replace("Carnet: ", "") + "]");
+            DialogUtils.setOptionState(tvProfessor, "Profesor: " + item.text + " [" + item.subtext.replace("Carnet: ", "") + "]", false, requireContext());
             
             viewModel.getProfessorSchedules(item.id).observe(getViewLifecycleOwner(), schedules -> {
                 professorSchedules = schedules;
@@ -155,26 +155,26 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         }));
         layout.addView(tvProfessor);
 
-        final TextView tvDays = createValueButton(selectedDays[0].isEmpty() ? "Seleccionar Días..." : "Días: " + selectedDays[0]);
+        final TextView tvDays = DialogUtils.createDialogOptionButton(requireContext(), selectedDays[0].isEmpty() ? "Seleccionar Días..." : "Días: " + selectedDays[0], selectedDays[0].isEmpty());
         tvDays.setOnClickListener(v -> showDaysPickerDialog(selectedDays[0], result -> {
             selectedDays[0] = result;
-            tvDays.setText("Días: " + result);
+            DialogUtils.setOptionState(tvDays, "Días: " + result, false, requireContext());
         }));
         layout.addView(tvDays);
 
-        final TextView tvStart = createValueButton("Hora Inicio: " + (existing != null ? existing.startTime : "00:00"));
+        final TextView tvStart = DialogUtils.createDialogOptionButton(requireContext(), existing != null ? "Hora Inicio: " + existing.startTime : "Hora Inicio (Click aquí)", existing == null);
         tvStart.setOnClickListener(v -> showTimePicker(tvStart));
         layout.addView(tvStart);
 
-        final TextView tvEnd = createValueButton("Hora Fin: " + (existing != null ? existing.endTime : "00:00"));
+        final TextView tvEnd = DialogUtils.createDialogOptionButton(requireContext(), existing != null ? "Hora Fin: " + existing.endTime : "Hora Fin (Click aquí)", existing == null);
         tvEnd.setOnClickListener(v -> showTimePicker(tvEnd));
         layout.addView(tvEnd);
 
         final String[] selectedColor = {existing != null && existing.color != null ? existing.color : "BLUE"};
-        final TextView tvColor = createValueButton("Color en esta Aula: " + selectedColor[0]);
+        final TextView tvColor = DialogUtils.createDialogOptionButton(requireContext(), "Color en esta Aula: " + selectedColor[0], false);
         tvColor.setOnClickListener(v -> showColorPickerDialog(selectedColor[0], colorName -> {
             selectedColor[0] = colorName;
-            tvColor.setText("Color en esta Aula: " + colorName);
+            DialogUtils.setOptionState(tvColor, "Color en esta Aula: " + colorName, false, requireContext());
         }));
         layout.addView(tvColor);
 
@@ -475,8 +475,11 @@ public class AdminFacilitySchedulesFragment extends Fragment {
             if (hour12 == 0) hour12 = 12;
             
             String time = String.format(Locale.getDefault(), "%02d:%02d %s", hour12, minute, ampm);
-            if (target.getText().toString().contains("Inicio")) target.setText("Hora Inicio: " + time);
-            else target.setText("Hora Fin: " + time);
+            if (target.getText().toString().contains("Inicio")) {
+                DialogUtils.setOptionState(target, "Hora Inicio: " + time, false, requireContext());
+            } else {
+                DialogUtils.setOptionState(target, "Hora Fin: " + time, false, requireContext());
+            }
         }, initialHour, initialMinute, false).show();
     }
 

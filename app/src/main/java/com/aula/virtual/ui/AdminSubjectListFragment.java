@@ -158,7 +158,7 @@ public class AdminSubjectListFragment extends Fragment {
         etSection.setText("1");
         layout.addView(etSection);
 
-        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Facultad...");
+        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Facultad...", true);
         layout.addView(tvFaculty);
 
         final String[] facultyNames = new String[faculties.size()];
@@ -170,7 +170,7 @@ public class AdminSubjectListFragment extends Fragment {
                 .setTitle("Facultades")
                 .setItems(facultyNames, (dialog, which) -> {
                     selectedFaculty[0] = facultyNames[which];
-                    tvFaculty.setText("Facultad: " + selectedFaculty[0]);
+                    DialogUtils.setOptionState(tvFaculty, "Facultad: " + selectedFaculty[0], false, requireContext());
                 }).show();
         });
 

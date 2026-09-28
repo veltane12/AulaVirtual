@@ -178,7 +178,7 @@ public class AdminStudentListFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Facultad...");
+        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Facultad...", true);
         layout.addView(tvFaculty);
 
         final String[] facultyNames;
@@ -196,7 +196,7 @@ public class AdminStudentListFragment extends Fragment {
                 .setTitle("Facultades")
                 .setItems(facultyNames, (dialog, which) -> {
                     selectedFaculty[0] = facultyNames[which];
-                    tvFaculty.setText("Facultad: " + selectedFaculty[0]);
+                    DialogUtils.setOptionState(tvFaculty, "Facultad: " + selectedFaculty[0], false, requireContext());
                 }).show();
         });
 

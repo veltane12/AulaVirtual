@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -160,20 +160,18 @@ public class SubjectBlogFragment extends Fragment {
 
         LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
 
-        final Spinner spinnerCategory = new Spinner(getContext());
+        final String[] selectedCategory = {existing != null ? existing.category : "Aviso"};
+        final TextView tvCategory = DialogUtils.createDialogOptionButton(requireContext(), existing != null ? "Categoría: " + existing.category : "Categoría: Aviso", existing == null);
         String[] categories = {"Aviso", "Parcial", "Tarea"};
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, categories);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(spinnerAdapter);
-        if (existing != null) {
-            for (int i = 0; i < categories.length; i++) {
-                if (categories[i].equals(existing.category)) {
-                    spinnerCategory.setSelection(i);
-                    break;
-                }
-            }
-        }
-        layout.addView(spinnerCategory);
+        tvCategory.setOnClickListener(v -> {
+            new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Categoría de Asignación")
+                .setItems(categories, (dialog1, which) -> {
+                    selectedCategory[0] = categories[which];
+                    DialogUtils.setOptionState(tvCategory, "Categoría: " + selectedCategory[0], false, requireContext());
+                }).show();
+        });
+        layout.addView(tvCategory);
 
         final EditText etTitle = DialogUtils.createStyledEditText(requireContext(), "Título", 0);
         if (existing != null) etTitle.setText(existing.title);
@@ -191,7 +189,7 @@ public class SubjectBlogFragment extends Fragment {
         dialog.show();
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String cat = spinnerCategory.getSelectedItem().toString();
+            String cat = selectedCategory[0];
             String title = etTitle.getText().toString();
             String content = etContent.getText().toString();
 
