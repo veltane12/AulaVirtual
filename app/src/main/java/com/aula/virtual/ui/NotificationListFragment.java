@@ -28,6 +28,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import com.aula.virtual.R;
+import com.aula.virtual.data.ScheduleInfo;
+import com.aula.virtual.data.StudentGradeInfo;
 import com.aula.virtual.data.entity.Facility;
 import com.aula.virtual.data.entity.Faculty;
 import com.aula.virtual.data.entity.Notification;
@@ -41,14 +43,20 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class NotificationListFragment extends Fragment {
     private FragmentNotificationListBinding binding;
     private MainViewModel viewModel;
     private User currentUser;
     private List<Notification> allUserNotifications = new ArrayList<>();
+    private List<Notification> rawServerNotifications = new ArrayList<>();
+    private final List<String> userSubjectNames = new ArrayList<>();
+    private final List<String> userFacilityNames = new ArrayList<>();
+    private final Map<Integer, String> facilityMap = new HashMap<>();
     private final String[] selectedChannelFilter = {"ALL"};
 
     @Nullable
@@ -88,10 +96,77 @@ public class NotificationListFragment extends Fragment {
 
         setupSearch();
 
+        viewModel.getAllFacilities().observe(getViewLifecycleOwner(), facilities -> {
+            if (facilities != null) {
+                for (Facility f : facilities) {
+                    facilityMap.put(f.id, f.name);
+                }
+                reFilterAndRender();
+            }
+        });
+
+        if ("STUDENT".equals(currentUser.role)) {
+            viewModel.getStudentSchedules(currentUser.id).observe(getViewLifecycleOwner(), schedules -> {
+                if (schedules != null) {
+                    for (ScheduleInfo info : schedules) {
+                        if (info.subjectName != null && !userSubjectNames.contains(info.subjectName)) {
+                            userSubjectNames.add(info.subjectName);
+                        }
+                        if (info.schedule != null) {
+                            String facName = facilityMap.get(info.schedule.facilityId);
+                            if (facName != null && !userFacilityNames.contains(facName)) {
+                                userFacilityNames.add(facName);
+                            }
+                        }
+                    }
+                    reFilterAndRender();
+                }
+            });
+
+            viewModel.getGradeInfoForStudent(currentUser.id).observe(getViewLifecycleOwner(), gradeInfos -> {
+                if (gradeInfos != null) {
+                    for (StudentGradeInfo info : gradeInfos) {
+                        if (info.subject != null && info.subject.name != null && !userSubjectNames.contains(info.subject.name)) {
+                            userSubjectNames.add(info.subject.name);
+                        }
+                    }
+                    reFilterAndRender();
+                }
+            });
+        } else if ("PROFESSOR".equals(currentUser.role)) {
+            viewModel.getProfessorSchedules(currentUser.id).observe(getViewLifecycleOwner(), schedules -> {
+                if (schedules != null) {
+                    for (ScheduleInfo info : schedules) {
+                        if (info.subjectName != null && !userSubjectNames.contains(info.subjectName)) {
+                            userSubjectNames.add(info.subjectName);
+                        }
+                        if (info.schedule != null) {
+                            String facName = facilityMap.get(info.schedule.facilityId);
+                            if (facName != null && !userFacilityNames.contains(facName)) {
+                                userFacilityNames.add(facName);
+                            }
+                        }
+                    }
+                    reFilterAndRender();
+                }
+            });
+
+            viewModel.getSubjectsByProfessor(currentUser.id).observe(getViewLifecycleOwner(), subjects -> {
+                if (subjects != null) {
+                    for (Subject sub : subjects) {
+                        if (sub.name != null && !userSubjectNames.contains(sub.name)) {
+                            userSubjectNames.add(sub.name);
+                        }
+                    }
+                    reFilterAndRender();
+                }
+            });
+        }
+
         viewModel.getAllNotifications().observe(getViewLifecycleOwner(), notifications -> {
             if (notifications != null) {
-                allUserNotifications = filterNotificationsForUser(notifications, currentUser);
-                renderNotificationsAndChips();
+                rawServerNotifications = notifications;
+                reFilterAndRender();
             }
         });
 
@@ -627,6 +702,31 @@ public class NotificationListFragment extends Fragment {
         }
     }
 
+    private void reFilterAndRender() {
+        allUserNotifications = filterNotificationsForUser(rawServerNotifications, currentUser);
+        renderNotificationsAndChips();
+    }
+
+    private boolean isUserInSubject(String subjectTarget) {
+        if (subjectTarget == null || subjectTarget.trim().isEmpty()) return true;
+        for (String name : userSubjectNames) {
+            if (name != null && name.equalsIgnoreCase(subjectTarget.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isUserInFacility(String facilityTarget) {
+        if (facilityTarget == null || facilityTarget.trim().isEmpty()) return true;
+        for (String name : userFacilityNames) {
+            if (name != null && name.equalsIgnoreCase(facilityTarget.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private List<Notification> filterNotificationsForUser(List<Notification> all, User user) {
         List<Notification> result = new ArrayList<>();
         if (all == null) return result;
@@ -644,16 +744,24 @@ public class NotificationListFragment extends Fragment {
                 result.add(n);
             } else if (user != null) {
                 if ("ADMIN".equals(user.role)) {
-                    // Administrators can see ALL notifications across all user types
+                    // Administrators can see ALL notifications across all user types, faculties, subjects, facilities
                     result.add(n);
                 } else if ("ROLE_STUDENTS".equals(type) && "STUDENT".equals(user.role)) {
                     result.add(n);
                 } else if ("ROLE_PROFESSORS".equals(type) && "PROFESSOR".equals(user.role)) {
                     result.add(n);
-                } else if ("FACULTY".equals(type) && user.faculty != null && user.faculty.equalsIgnoreCase(val)) {
-                    result.add(n);
-                } else if ("SUBJECT".equals(type) || "FACILITY".equals(type)) {
-                    result.add(n);
+                } else if ("FACULTY".equals(type)) {
+                    if (user.faculty != null && user.faculty.equalsIgnoreCase(val)) {
+                        result.add(n);
+                    }
+                } else if ("SUBJECT".equals(type)) {
+                    if (isUserInSubject(val)) {
+                        result.add(n);
+                    }
+                } else if ("FACILITY".equals(type)) {
+                    if (isUserInFacility(val)) {
+                        result.add(n);
+                    }
                 }
             }
         }
