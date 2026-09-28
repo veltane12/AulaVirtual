@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -154,7 +155,7 @@ public class AdminFacilityTimetableFragment extends Fragment {
                 details.append("📅 Días: ").append(info.schedule.days != null ? info.schedule.days : "N/A").append("\n");
                 details.append("⏰ Hora: ").append(info.schedule.startTime).append(" - ").append(info.schedule.endTime);
 
-                new AlertDialog.Builder(getContext())
+                new MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Detalle de la Clase")
                     .setMessage(details.toString())
                     .setPositiveButton("Cerrar", null)

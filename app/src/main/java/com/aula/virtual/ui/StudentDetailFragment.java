@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -174,7 +175,7 @@ public class StudentDetailFragment extends Fragment {
             String[] names = filteredNames.toArray(new String[0]);
             
             binding.etField4.setOnClickListener(v -> {
-                new AlertDialog.Builder(getContext())
+                new MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Seleccionar Facultad")
                     .setItems(names, (dialog, which) -> {
                         binding.etField4.setText(names[which]);
@@ -234,7 +235,7 @@ public class StudentDetailFragment extends Fragment {
     }
 
     private void showDeleteConfirmation() {
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Confirmar Eliminación")
             .setMessage("¿Estás seguro de que deseas eliminar a este estudiante?")
             .setPositiveButton("Eliminar", (dialog, which) -> {

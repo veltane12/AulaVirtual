@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -155,12 +156,9 @@ public class SubjectBlogFragment extends Fragment {
     }
 
     private void showEntryDialog(@Nullable BlogEntry existing) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(existing == null ? "Nueva Asignación" : "Editar Asignación");
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), existing == null ? "Nueva Asignación" : "Editar Asignación");
 
-        LinearLayout layout = new LinearLayout(getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
 
         final Spinner spinnerCategory = new Spinner(getContext());
         String[] categories = {"Aviso", "Parcial", "Tarea"};
@@ -177,13 +175,11 @@ public class SubjectBlogFragment extends Fragment {
         }
         layout.addView(spinnerCategory);
 
-        final EditText etTitle = new EditText(getContext());
-        etTitle.setHint("Título");
+        final EditText etTitle = DialogUtils.createStyledEditText(requireContext(), "Título", 0);
         if (existing != null) etTitle.setText(existing.title);
         layout.addView(etTitle);
 
-        final EditText etContent = new EditText(getContext());
-        etContent.setHint("Contenido/Instrucciones");
+        final EditText etContent = DialogUtils.createStyledEditText(requireContext(), "Contenido/Instrucciones", 0);
         if (existing != null) etContent.setText(existing.content);
         layout.addView(etContent);
 
@@ -233,7 +229,7 @@ public class SubjectBlogFragment extends Fragment {
     }
 
     private void showDeleteDialog(BlogEntry entry) {
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Eliminar Entrada")
             .setMessage("¿Estás seguro de eliminar esta asignación?")
             .setPositiveButton("Eliminar", (dialog, which) -> {

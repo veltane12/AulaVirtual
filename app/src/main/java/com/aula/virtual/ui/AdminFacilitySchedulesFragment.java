@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.app.TimePickerDialog;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -112,12 +113,9 @@ public class AdminFacilitySchedulesFragment extends Fragment {
     }
 
     private void showAddScheduleDialog(@Nullable FacilitySchedule existing) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(existing == null ? "Nueva Programación" : "Editar Programación");
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), existing == null ? "Nueva Programación" : "Editar Programación");
         
-        LinearLayout layout = new LinearLayout(getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
 
         final int[] selectedSubId = {existing != null ? existing.subjectId : -1};
         final int[] selectedProfId = {existing != null ? existing.professorId : -1};
@@ -239,7 +237,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
     }
 
     private void showColorPickerDialog(String currentColor, MainViewModel.DataCallback<String> onSelected) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         builder.setTitle("Seleccionar Color del Horario");
 
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_detail, null);
@@ -379,8 +377,8 @@ public class AdminFacilitySchedulesFragment extends Fragment {
     }
 
     private void showSearchDialog(String type, SearchableAdapter.OnItemClickListener onSelected) {
-        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_searchable_list, null);
-        AlertDialog dialog = new AlertDialog.Builder(getContext()).setView(dialogView).create();
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_searchable_list, null);
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext()).setView(dialogView).create();
         EditText etSearch = dialogView.findViewById(R.id.etSearchDialog);
         RecyclerView rvList = dialogView.findViewById(R.id.rvDialogList);
         rvList.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -426,7 +424,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
             for (int i = 0; i < 7; i++) checked[i] = currentList.contains(days[i]);
         }
 
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Seleccionar Días")
             .setMultiChoiceItems(days, checked, (dialog, which, isChecked) -> checked[which] = isChecked)
             .setPositiveButton("OK", (dialog, which) -> {
@@ -453,7 +451,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
     }
 
     private void showDeleteScheduleConfirmation(ScheduleInfo info) {
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Eliminar Horario")
             .setMessage("¿Estás seguro de eliminar esta programación?")
             .setPositiveButton("Eliminar", (dialog, which) -> {

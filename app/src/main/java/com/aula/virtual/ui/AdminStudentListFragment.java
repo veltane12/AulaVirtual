@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -150,25 +151,17 @@ public class AdminStudentListFragment extends Fragment {
     }
 
     private void showAddUserAlertDialog(List<Faculty> faculties) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Añadir Estudiante");
-        LinearLayout layout = new LinearLayout(getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Añadir Estudiante");
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
 
-        final EditText etName = new EditText(getContext());
-        etName.setHint("Nombre Completo");
+        final EditText etName = DialogUtils.createStyledEditText(requireContext(), "Nombre Completo", 0);
         layout.addView(etName);
 
-        final EditText etCarnet = new EditText(getContext());
-        etCarnet.setHint("Carnet (7 dígitos)");
-        etCarnet.setInputType(InputType.TYPE_CLASS_NUMBER);
+        final EditText etCarnet = DialogUtils.createStyledEditText(requireContext(), "Carnet (7 dígitos)", InputType.TYPE_CLASS_NUMBER);
         etCarnet.setFilters(new InputFilter[]{new InputFilter.LengthFilter(7)});
         layout.addView(etCarnet);
 
-        final EditText etPass = new EditText(getContext());
-        etPass.setHint("Contraseña");
-        etPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        final EditText etPass = DialogUtils.createStyledEditText(requireContext(), "Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etPass);
 
         final TextView tvStrength = new TextView(getContext());
@@ -202,7 +195,7 @@ public class AdminStudentListFragment extends Fragment {
         final String[] selectedFaculty = {null};
 
         tvFaculty.setOnClickListener(v -> {
-            new AlertDialog.Builder(getContext())
+            new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Facultades")
                 .setItems(facultyNames, (dialog, which) -> {
                     selectedFaculty[0] = facultyNames[which];

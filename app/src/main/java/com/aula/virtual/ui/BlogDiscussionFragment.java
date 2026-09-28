@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -115,7 +116,7 @@ public class BlogDiscussionFragment extends Fragment {
     }
 
     private void showDeleteConfirmation(BlogComment comment) {
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Eliminar mensaje")
                 .setMessage("¿Estás seguro de que deseas eliminar este mensaje definitivamente?")
                 .setPositiveButton("Eliminar", (dialog, which) -> {
@@ -126,7 +127,7 @@ public class BlogDiscussionFragment extends Fragment {
     }
 
     private void showClearChatConfirmation() {
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Vaciar conversación")
                 .setMessage("¿Deseas eliminar TODOS los mensajes de esta discusión? Esta acción no se puede deshacer.")
                 .setPositiveButton("Vaciar todo", (dialog, which) -> {

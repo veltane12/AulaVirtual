@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -121,16 +122,11 @@ public class AdminFacultyListFragment extends Fragment {
     }
 
     private void showAddFacultyDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Añadir Facultad");
-        LinearLayout layout = new LinearLayout(getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
-        final EditText etName = new EditText(getContext());
-        etName.setHint("Nombre de la Facultad");
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Añadir Facultad");
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
+        final EditText etName = DialogUtils.createStyledEditText(requireContext(), "Nombre de la Facultad", 0);
         layout.addView(etName);
-        final EditText etDesc = new EditText(getContext());
-        etDesc.setHint("Descripción");
+        final EditText etDesc = DialogUtils.createStyledEditText(requireContext(), "Descripción", 0);
         layout.addView(etDesc);
         builder.setView(layout);
         builder.setPositiveButton("Añadir", null);

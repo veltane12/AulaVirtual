@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -100,7 +101,7 @@ public class AdminFacilityDetailFragment extends Fragment {
     }
 
     private void showDeleteConfirmation() {
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Confirmar Eliminación")
             .setMessage("¿Estás seguro de que deseas eliminar esta instalación? Se borrarán todos los horarios asociados.")
             .setPositiveButton("Eliminar todo", (dialog, which) -> {

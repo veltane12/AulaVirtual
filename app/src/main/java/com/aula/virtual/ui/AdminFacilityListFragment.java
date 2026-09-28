@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -106,22 +107,16 @@ public class AdminFacilityListFragment extends Fragment {
     }
 
     private void showAddFacilityDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Nueva Instalación");
-        LinearLayout layout = new LinearLayout(getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Nueva Instalación");
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
 
-        final EditText etName = new EditText(getContext());
-        etName.setHint("Nombre (Ej: Aula 01)");
+        final EditText etName = DialogUtils.createStyledEditText(requireContext(), "Nombre (Ej: Aula 01)", 0);
         layout.addView(etName);
 
-        final EditText etType = new EditText(getContext());
-        etType.setHint("Tipo (Ej: Edificio, Laboratorio)");
+        final EditText etType = DialogUtils.createStyledEditText(requireContext(), "Tipo (Ej: Edificio, Laboratorio)", 0);
         layout.addView(etType);
 
-        final EditText etDesc = new EditText(getContext());
-        etDesc.setHint("Descripción");
+        final EditText etDesc = DialogUtils.createStyledEditText(requireContext(), "Descripción", 0);
         layout.addView(etDesc);
 
         builder.setView(layout);

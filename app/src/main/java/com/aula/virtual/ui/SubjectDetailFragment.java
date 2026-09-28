@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.InputType;
@@ -289,7 +290,7 @@ public class SubjectDetailFragment extends Fragment {
             
             binding.etField3.setOnClickListener(v -> {
                 if (currentUser != null && !"ADMIN".equals(currentUser.role)) return;
-                new AlertDialog.Builder(getContext())
+                new MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Seleccionar Facultad")
                     .setItems(names, (dialog, which) -> {
                         binding.etField3.setText(names[which]);
@@ -373,7 +374,7 @@ public class SubjectDetailFragment extends Fragment {
     }
 
     private void showDeleteConfirmation() {
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Confirmar Eliminación")
             .setMessage("¿Estás seguro de que deseas eliminar esta materia?")
             .setPositiveButton("Eliminar", (dialog, which) -> {

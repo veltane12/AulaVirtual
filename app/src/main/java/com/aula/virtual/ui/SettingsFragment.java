@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.app.ProgressDialog;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -135,21 +136,14 @@ public class SettingsFragment extends Fragment {
         User currentUser = viewModel.getCurrentUser().getValue();
         if (currentUser == null) return;
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Cambiar Contraseña");
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Cambiar Contraseña");
 
-        LinearLayout layout = new LinearLayout(getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
 
-        final EditText etNewPass = new EditText(getContext());
-        etNewPass.setHint("Nueva Contraseña");
-        etNewPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        final EditText etNewPass = DialogUtils.createStyledEditText(requireContext(), "Nueva Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etNewPass);
 
-        final EditText etConfirmPass = new EditText(getContext());
-        etConfirmPass.setHint("Confirmar Contraseña");
-        etConfirmPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        final EditText etConfirmPass = DialogUtils.createStyledEditText(requireContext(), "Confirmar Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etConfirmPass);
 
         builder.setView(layout);

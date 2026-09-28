@@ -1,7 +1,8 @@
 package com.aula.virtual.ui;
 
 import android.Manifest;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -131,7 +132,7 @@ public class StudentProfileFragment extends Fragment {
 
     private void showImageSourceDialog() {
         if (currentUser != null && currentUser.can_change_photo == 0) {
-            new AlertDialog.Builder(getContext())
+            new MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Acceso Restringido")
                     .setMessage("Tu función de cambio de foto ha sido deshabilitada por subir contenido inapropiado.")
                     .setPositiveButton("Entendido", null)
@@ -139,7 +140,7 @@ public class StudentProfileFragment extends Fragment {
             return;
         }
         String[] options = {"Cámara", "Galería", "Eliminar foto"};
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Cambiar foto de perfil")
                 .setItems(options, (dialog, which) -> {
                     if (which == 0) checkCameraPermission();

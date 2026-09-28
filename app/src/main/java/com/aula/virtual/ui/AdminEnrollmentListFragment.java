@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -87,7 +88,7 @@ public class AdminEnrollmentListFragment extends Fragment {
             @Override
             public void onDeleteEnrollment(StudentGradeInfo info) {
                 if (info == null || info.enrollment == null) return;
-                new AlertDialog.Builder(getContext())
+                new MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Confirmar Desinscripción")
                     .setMessage("¿Estás seguro de que deseas eliminar esta materia inscrita?")
                     .setPositiveButton("Eliminar", (dialog, which) -> {
@@ -113,7 +114,7 @@ public class AdminEnrollmentListFragment extends Fragment {
                 names[i] = s.name + " (Sección: " + (s.section != null ? s.section : "01") + ")";
             }
 
-            new AlertDialog.Builder(getContext())
+            new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Seleccionar Materia")
                 .setItems(names, (dialog, which) -> {
                     viewModel.performOnlineAction(() -> {

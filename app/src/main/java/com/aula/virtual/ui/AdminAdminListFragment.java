@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -145,25 +146,17 @@ public class AdminAdminListFragment extends Fragment {
     }
 
     private void showAddAdminAlertDialog(List<Faculty> faculties) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Añadir Administrador");
-        LinearLayout layout = new LinearLayout(getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Añadir Administrador");
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
         
-        final EditText etName = new EditText(getContext());
-        etName.setHint("Nombre Completo");
+        final EditText etName = DialogUtils.createStyledEditText(requireContext(), "Nombre Completo", 0);
         layout.addView(etName);
         
-        final EditText etCarnet = new EditText(getContext());
-        etCarnet.setHint("Ingrese los 5 dígitos del carnet");
-        etCarnet.setInputType(InputType.TYPE_CLASS_NUMBER);
+        final EditText etCarnet = DialogUtils.createStyledEditText(requireContext(), "Ingrese los 5 dígitos del carnet", InputType.TYPE_CLASS_NUMBER);
         etCarnet.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
         layout.addView(etCarnet);
         
-        final EditText etPass = new EditText(getContext());
-        etPass.setHint("Contraseña");
-        etPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        final EditText etPass = DialogUtils.createStyledEditText(requireContext(), "Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etPass);
 
         final TextView tvStrength = new TextView(getContext());
@@ -180,12 +173,10 @@ public class AdminAdminListFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        final EditText etAddress = new EditText(getContext());
-        etAddress.setHint("Dirección (Opcional)");
+        final EditText etAddress = DialogUtils.createStyledEditText(requireContext(), "Dirección (Opcional)", 0);
         layout.addView(etAddress);
 
-        final EditText etEmail = new EditText(getContext());
-        etEmail.setHint("Email Personal (Opcional)");
+        final EditText etEmail = DialogUtils.createStyledEditText(requireContext(), "Email Personal (Opcional)", 0);
         layout.addView(etEmail);
         
         builder.setView(layout);

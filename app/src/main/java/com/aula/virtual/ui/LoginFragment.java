@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import com.aula.virtual.R;
 import com.aula.virtual.data.entity.User;
 import com.aula.virtual.databinding.FragmentLoginBinding;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -95,7 +96,7 @@ public class LoginFragment extends Fragment {
         }
 
         String[] items = accounts.toArray(new String[0]);
-        new android.app.AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Seleccionar cuenta")
                 .setItems(items, (dialog, which) -> {
                     String selectedCarnet = items[which];

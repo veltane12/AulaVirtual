@@ -18,6 +18,8 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.aula.virtual.ui.MainViewModel;
 import com.aula.virtual.ui.ThemeHelper;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import androidx.appcompat.widget.Toolbar;
 
 public class MainActivity extends AppCompatActivity {
@@ -162,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showExitConfirmationDialog() {
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this)
                 .setTitle("Salir")
                 .setMessage("¿Estás seguro de que deseas salir de la aplicación?")
                 .setPositiveButton("Sí", (dialog, which) -> finish())

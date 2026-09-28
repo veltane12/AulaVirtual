@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -144,24 +145,17 @@ public class AdminSubjectListFragment extends Fragment {
     }
 
     private void showAddSubjectAlertDialog(List<Faculty> faculties) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Añadir Materia");
-        LinearLayout layout = new LinearLayout(getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Añadir Materia");
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
 
-        final EditText etName = new EditText(getContext());
-        etName.setHint("Nombre de la Materia");
+        final EditText etName = DialogUtils.createStyledEditText(requireContext(), "Nombre de la Materia", 0);
         layout.addView(etName);
 
-        final EditText etDesc = new EditText(getContext());
-        etDesc.setHint("Descripción");
+        final EditText etDesc = DialogUtils.createStyledEditText(requireContext(), "Descripción", 0);
         layout.addView(etDesc);
 
-        final EditText etSection = new EditText(getContext());
-        etSection.setHint("Sección (Número del 1 al 9)");
-        etSection.setInputType(InputType.TYPE_CLASS_NUMBER);
-        etSection.setText("1"); // Valor por defecto obligatorio
+        final EditText etSection = DialogUtils.createStyledEditText(requireContext(), "Sección (Número del 1 al 9)", InputType.TYPE_CLASS_NUMBER);
+        etSection.setText("1");
         layout.addView(etSection);
 
         final TextView tvFaculty = new TextView(getContext());
@@ -175,7 +169,7 @@ public class AdminSubjectListFragment extends Fragment {
         final String[] selectedFaculty = {null};
 
         tvFaculty.setOnClickListener(v -> {
-            new AlertDialog.Builder(getContext())
+            new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Facultades")
                 .setItems(facultyNames, (dialog, which) -> {
                     selectedFaculty[0] = facultyNames[which];

@@ -1,6 +1,7 @@
 package com.aula.virtual.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -120,25 +121,17 @@ public class AdminProfessorListFragment extends Fragment {
     }
 
     private void showAddProfessorDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Añadir Profesor");
-        LinearLayout layout = new LinearLayout(getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Añadir Profesor");
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
 
-        final EditText etName = new EditText(getContext());
-        etName.setHint("Nombre Completo");
+        final EditText etName = DialogUtils.createStyledEditText(requireContext(), "Nombre Completo", 0);
         layout.addView(etName);
 
-        final EditText etCarnet = new EditText(getContext());
-        etCarnet.setHint("Ingrese los 6 dígitos numéricos del carnet");
-        etCarnet.setInputType(InputType.TYPE_CLASS_NUMBER);
+        final EditText etCarnet = DialogUtils.createStyledEditText(requireContext(), "Ingrese los 6 dígitos numéricos del carnet", InputType.TYPE_CLASS_NUMBER);
         etCarnet.setFilters(new InputFilter[]{new InputFilter.LengthFilter(6)});
         layout.addView(etCarnet);
 
-        final EditText etPass = new EditText(getContext());
-        etPass.setHint("Contraseña");
-        etPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        final EditText etPass = DialogUtils.createStyledEditText(requireContext(), "Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etPass);
 
         builder.setView(layout);
