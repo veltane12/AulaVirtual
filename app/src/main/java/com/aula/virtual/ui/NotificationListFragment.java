@@ -206,6 +206,7 @@ public class NotificationListFragment extends Fragment {
 
         // Divide into specific channels
         List<Notification> generalNotifs = new ArrayList<>();
+        List<Notification> supportNotifs = new ArrayList<>();
         List<Notification> studentNotifs = new ArrayList<>();
         List<Notification> professorNotifs = new ArrayList<>();
         List<Notification> adminNotifs = new ArrayList<>();
@@ -219,7 +220,9 @@ public class NotificationListFragment extends Fragment {
                 continue;
             }
             String type = n.targetType.toUpperCase();
-            if ("ROLE_STUDENTS".equals(type)) {
+            if ("SUPPORT".equals(type)) {
+                supportNotifs.add(n);
+            } else if ("ROLE_STUDENTS".equals(type)) {
                 studentNotifs.add(n);
             } else if ("ROLE_PROFESSORS".equals(type)) {
                 professorNotifs.add(n);
@@ -238,7 +241,7 @@ public class NotificationListFragment extends Fragment {
 
         // Render Channel Chips
         int activeThemeColor = ThemeHelper.getSubjectColor(requireContext(), ThemeHelper.getAccentColorName(requireContext()));
-        renderChannelChips(generalNotifs, studentNotifs, professorNotifs, adminNotifs, facultyNotifs, subjectNotifs, facilityNotifs, activeThemeColor);
+        renderChannelChips(generalNotifs, supportNotifs, studentNotifs, professorNotifs, adminNotifs, facultyNotifs, subjectNotifs, facilityNotifs, activeThemeColor);
 
         // Render Cards inside List Container
         binding.notificationsContainer.removeAllViews();
@@ -256,6 +259,13 @@ public class NotificationListFragment extends Fragment {
             if (!generalNotifs.isEmpty()) {
                 addChannelHeaderView(binding.notificationsContainer, "📢 Canal General", activeThemeColor);
                 renderNotificationCards(binding.notificationsContainer, generalNotifs, primaryTextColor, secondaryTextColor, isDark);
+                hasContent = true;
+            }
+        }
+        if ("ALL".equals(filter) || "SUPPORT".equals(filter)) {
+            if (!supportNotifs.isEmpty()) {
+                addChannelHeaderView(binding.notificationsContainer, "✉️ Canal Soporte", 0xFFD32F2F);
+                renderNotificationCards(binding.notificationsContainer, supportNotifs, primaryTextColor, secondaryTextColor, isDark);
                 hasContent = true;
             }
         }
@@ -311,12 +321,13 @@ public class NotificationListFragment extends Fragment {
         }
     }
 
-    private void renderChannelChips(List<Notification> gen, List<Notification> stu, List<Notification> prof, List<Notification> adm, List<Notification> fac, List<Notification> sub, List<Notification> fcl, int activeColor) {
+    private void renderChannelChips(List<Notification> gen, List<Notification> sup, List<Notification> stu, List<Notification> prof, List<Notification> adm, List<Notification> fac, List<Notification> sub, List<Notification> fcl, int activeColor) {
         binding.chipsLayout.removeAllViews();
         List<MaterialButton> chipButtons = new ArrayList<>();
 
         int activeChannelsCount = 0;
         if (!gen.isEmpty()) activeChannelsCount++;
+        if (!sup.isEmpty()) activeChannelsCount++;
         if (!stu.isEmpty()) activeChannelsCount++;
         if (!prof.isEmpty()) activeChannelsCount++;
         if (!adm.isEmpty()) activeChannelsCount++;
@@ -329,6 +340,9 @@ public class NotificationListFragment extends Fragment {
         }
         if (!gen.isEmpty()) {
             addChipButton(binding.chipsLayout, chipButtons, "📢 General", "GENERAL", activeColor);
+        }
+        if (!sup.isEmpty()) {
+            addChipButton(binding.chipsLayout, chipButtons, "✉️ Soporte", "SUPPORT", activeColor);
         }
         if (!stu.isEmpty()) {
             addChipButton(binding.chipsLayout, chipButtons, "👨‍🎓 Estudiantes", "ROLE_STUDENTS", activeColor);
@@ -446,9 +460,10 @@ public class NotificationListFragment extends Fragment {
             tvMsg.setTextColor(primaryTextColor);
             tvMsg.setPadding(0, 6, 0, 6);
 
-            TextView tvSender = new TextView(requireContext());
-            String senderStr = (n.timestamp != null ? n.timestamp : "");
-            tvSender.setText(senderStr);
+        TextView tvSender = new TextView(requireContext());
+        String senderStr = (n.senderName != null && !n.senderName.isEmpty() ? "Enviado por: " + n.senderName + " • " : "") + 
+                           (n.timestamp != null ? n.timestamp : "");
+        tvSender.setText(senderStr);
             tvSender.setTextSize(11);
             tvSender.setTextColor(secondaryTextColor);
 
@@ -744,8 +759,12 @@ public class NotificationListFragment extends Fragment {
                 result.add(n);
             } else if (user != null) {
                 if ("ADMIN".equals(user.role)) {
-                    // Administrators can see ALL notifications across all user types, faculties, subjects, facilities
+                    // Administrators can see ALL notifications across all user types, faculties, subjects, facilities, and SUPPORT
                     result.add(n);
+                } else if ("SUPPORT".equals(type)) {
+                    if ("ADMIN".equals(user.role)) {
+                        result.add(n);
+                    }
                 } else if ("ROLE_STUDENTS".equals(type) && "STUDENT".equals(user.role)) {
                     result.add(n);
                 } else if ("ROLE_PROFESSORS".equals(type) && "PROFESSOR".equals(user.role)) {
@@ -774,6 +793,7 @@ public class NotificationListFragment extends Fragment {
         String val = n.targetValue != null ? n.targetValue : "";
 
         switch (type) {
+            case "SUPPORT": return "[✉️ Soporte - Mensaje de Usuario]";
             case "ROLE_STUDENTS": return "[👨‍🎓 Todos los Estudiantes]";
             case "ROLE_PROFESSORS": return "[👨‍🏫 Todos los Profesores]";
             case "ROLE_ADMINS": return "[⚙️ Todos los Administradores]";

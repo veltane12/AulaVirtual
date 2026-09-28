@@ -794,7 +794,34 @@ def get_notifications(db: Session = Depends(get_db)):
 
 @app.post("/notifications", response_model=NotificationSchema)
 def create_notification(notification: NotificationBase, db: Session = Depends(get_db)):
-    db_notif = NotificationDB(**notification.dict())
+    from datetime import datetime
+
+    # 1. Enforce Server Time 2-Hour Limit for SUPPORT Messages
+    if notification.targetType == "SUPPORT":
+        last_support = db.query(NotificationDB).filter(
+            NotificationDB.targetType == "SUPPORT",
+            NotificationDB.senderName == notification.senderName
+        ).order_by(NotificationDB.id.desc()).first()
+
+        if last_support and last_support.timestamp:
+            try:
+                last_dt = datetime.strptime(last_support.timestamp, "%d/%m/%Y %H:%M")
+                now_dt = datetime.now()
+                elapsed_seconds = (now_dt - last_dt).total_seconds()
+                if elapsed_seconds < 7200:
+                    remaining_mins = int((7200 - elapsed_seconds) / 60)
+                    hours = remaining_mins // 60
+                    mins = remaining_mins % 60
+                    time_msg = f"{hours} hora(s) y {mins} minuto(s)" if hours > 0 else f"{mins} minuto(s)"
+                    raise HTTPException(status_code=400, detail=f"Debes esperar {time_msg} antes de enviar otro reporte a los Administradores.")
+            except ValueError:
+                pass
+
+    # 2. Always stamp exact server time
+    notif_data = notification.dict()
+    notif_data["timestamp"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    db_notif = NotificationDB(**notif_data)
     db.add(db_notif)
     db.commit()
     db.refresh(db_notif)

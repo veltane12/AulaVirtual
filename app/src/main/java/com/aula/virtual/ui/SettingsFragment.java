@@ -338,9 +338,8 @@ public class SettingsFragment extends Fragment {
             }
 
             if (isValid) {
-                String timestamp = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
                 String senderInfo = user.name + " (" + user.carnet + ")";
-                Notification notif = new Notification(title, message, "ROLE_ADMINS", null, senderInfo, timestamp);
+                Notification notif = new Notification(title, message, "SUPPORT", null, senderInfo, "");
 
                 viewModel.insertNotification(notif, () -> {
                     prefs.edit().putLong("KEY_LAST_REPORT_TIME_" + user.id, System.currentTimeMillis()).apply();
