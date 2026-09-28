@@ -10,6 +10,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -22,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.aula.virtual.R;
+import com.aula.virtual.data.entity.Faculty;
 import com.aula.virtual.data.entity.User;
 import com.aula.virtual.databinding.FragmentAdminDashboardBinding;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class AdminProfessorListFragment extends Fragment {
     private MainViewModel viewModel;
     private StudentAdapter adapter;
     private List<User> allProfessors = new ArrayList<>();
+    private List<Faculty> availableFaculties = new ArrayList<>();
 
     @Nullable
     @Override
@@ -56,6 +59,12 @@ public class AdminProfessorListFragment extends Fragment {
         viewModel.getAllProfessors().observe(getViewLifecycleOwner(), professors -> {
             allProfessors = professors;
             applyFilter();
+        });
+
+        viewModel.getAllFaculties().observe(getViewLifecycleOwner(), faculties -> {
+            if (faculties != null) {
+                availableFaculties = faculties;
+            }
         });
 
         viewModel.getModificationError().observe(getViewLifecycleOwner(), error -> {
@@ -88,9 +97,9 @@ public class AdminProfessorListFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        binding.spinnerFilter.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) { applyFilter(); }
-            @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        binding.spinnerFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { applyFilter(); }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
 
@@ -134,6 +143,57 @@ public class AdminProfessorListFragment extends Fragment {
         final EditText etPass = DialogUtils.createStyledEditText(requireContext(), "Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etPass);
 
+        final TextView tvStrength = new TextView(getContext());
+        tvStrength.setTextSize(12);
+        tvStrength.setVisibility(View.GONE);
+        layout.addView(tvStrength);
+
+        etPass.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 0) {
+                    tvStrength.setVisibility(View.GONE);
+                } else {
+                    tvStrength.setVisibility(View.VISIBLE);
+                    ValidationUtils.PasswordStrength strength = ValidationUtils.getPasswordStrength(s.toString());
+                    tvStrength.setText(strength.label);
+                    tvStrength.setTextColor(strength.color);
+                }
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Facultad: Docencia (Click para cambiar)", false);
+        layout.addView(tvFaculty);
+
+        final String[] facultyNames;
+        List<String> filteredNames = new ArrayList<>();
+        if (availableFaculties != null) {
+            for (Faculty f : availableFaculties) {
+                filteredNames.add(f.name);
+            }
+        }
+        facultyNames = filteredNames.toArray(new String[0]);
+        final String[] selectedFaculty = {"Docencia"};
+
+        tvFaculty.setOnClickListener(v -> {
+            if (facultyNames.length > 0) {
+                new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Facultades")
+                    .setItems(facultyNames, (dialog, which) -> {
+                        selectedFaculty[0] = facultyNames[which];
+                        tvFaculty.setError(null);
+                        DialogUtils.setOptionState(tvFaculty, "Facultad: " + selectedFaculty[0], false, requireContext());
+                    }).show();
+            }
+        });
+
+        final EditText etAddress = DialogUtils.createStyledEditText(requireContext(), "Dirección (Opcional)", 0);
+        layout.addView(etAddress);
+
+        final EditText etEmail = DialogUtils.createStyledEditText(requireContext(), "Email Personal (Opcional)", 0);
+        layout.addView(etEmail);
+
         builder.setView(layout);
         builder.setPositiveButton("Añadir", null);
         builder.setNegativeButton("Cancelar", null);
@@ -155,15 +215,22 @@ public class AdminProfessorListFragment extends Fragment {
                 etCarnet.setError("Debe ingresar exactamente 6 dígitos");
                 isValid = false;
             }
-            if (pass.isEmpty()) {
-                etPass.setError("La contraseña es obligatoria");
+            if (ValidationUtils.getPasswordStrength(pass) == ValidationUtils.PasswordStrength.WEAK) {
+                etPass.setError("Contraseña muy débil");
                 isValid = false;
             }
 
             if (isValid) {
                 String fullCarnet = "PROF" + carnet;
+                String address = etAddress.getText().toString().trim();
+                String email = etEmail.getText().toString().trim();
+                String facultyName = selectedFaculty[0] != null ? selectedFaculty[0] : "Docencia";
+
                 viewModel.performOnlineAction(() -> {
-                    viewModel.insertUser(new User(fullCarnet, name, pass, "PROFESSOR", "Docencia"));
+                    User newProf = new User(fullCarnet, name, pass, "PROFESSOR", facultyName);
+                    newProf.address = address.isEmpty() ? null : address;
+                    newProf.personal_email = email.isEmpty() ? null : email;
+                    viewModel.insertUser(newProf);
                     dialog.dismiss();
                 });
             }

@@ -187,6 +187,12 @@ public class AdminStudentListFragment extends Fragment {
         final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Facultad...", true);
         layout.addView(tvFaculty);
 
+        final EditText etAddress = DialogUtils.createStyledEditText(requireContext(), "Dirección (Opcional)", 0);
+        layout.addView(etAddress);
+
+        final EditText etEmail = DialogUtils.createStyledEditText(requireContext(), "Email Personal (Opcional)", 0);
+        layout.addView(etEmail);
+
         final String[] facultyNames;
         List<String> filteredNames = new ArrayList<>();
         for (Faculty f : faculties) {
@@ -240,8 +246,13 @@ public class AdminStudentListFragment extends Fragment {
 
             if (isValid) {
                 String fullCarnet = "EST" + carnet;
+                String address = etAddress.getText().toString().trim();
+                String email = etEmail.getText().toString().trim();
                 viewModel.performOnlineAction(() -> {
-                    viewModel.insertUser(new User(fullCarnet, name, pass, "STUDENT", selectedFaculty[0]));
+                    User newStudent = new User(fullCarnet, name, pass, "STUDENT", selectedFaculty[0]);
+                    newStudent.address = address.isEmpty() ? null : address;
+                    newStudent.personal_email = email.isEmpty() ? null : email;
+                    viewModel.insertUser(newStudent);
                     dialog.dismiss();
                 });
             }
