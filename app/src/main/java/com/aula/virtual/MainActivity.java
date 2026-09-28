@@ -1,6 +1,8 @@
 package com.aula.virtual;
 
 import androidx.appcompat.app.AlertDialog;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -289,8 +292,9 @@ public class MainActivity extends AppCompatActivity {
                 int secondaryTextColor = typedValue.data;
                 int activeThemeColor = ThemeHelper.getSubjectColor(this, ThemeHelper.getAccentColorName(this));
 
-                // Divide notifications by channels
+                // Divide notifications into channels
                 List<Notification> generalNotifs = new ArrayList<>();
+                List<Notification> roleNotifs = new ArrayList<>();
                 List<Notification> facultyNotifs = new ArrayList<>();
                 List<Notification> subjectNotifs = new ArrayList<>();
                 List<Notification> facilityNotifs = new ArrayList<>();
@@ -307,31 +311,95 @@ public class MainActivity extends AppCompatActivity {
                         subjectNotifs.add(n);
                     } else if ("FACILITY".equals(type)) {
                         facilityNotifs.add(n);
+                    } else if (type.startsWith("ROLE_")) {
+                        roleNotifs.add(n);
                     } else {
                         generalNotifs.add(n);
                     }
                 }
 
-                // Render ONLY channels that have notifications
+                int activeChannelsCount = 0;
+                if (!generalNotifs.isEmpty()) activeChannelsCount++;
+                if (!roleNotifs.isEmpty()) activeChannelsCount++;
+                if (!facultyNotifs.isEmpty()) activeChannelsCount++;
+                if (!subjectNotifs.isEmpty()) activeChannelsCount++;
+                if (!facilityNotifs.isEmpty()) activeChannelsCount++;
+
+                // Horizontal Filter Chips Row above notifications
+                HorizontalScrollView chipsScrollView = new HorizontalScrollView(this);
+                chipsScrollView.setScrollBarSize(0);
+                chipsScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+                
+                LinearLayout chipsLayout = new LinearLayout(this);
+                chipsLayout.setOrientation(LinearLayout.HORIZONTAL);
+                chipsLayout.setPadding(0, 4, 0, 12);
+
+                List<MaterialButton> chipButtons = new ArrayList<>();
+                LinearLayout notifsListContainer = new LinearLayout(this);
+                notifsListContainer.setOrientation(LinearLayout.VERTICAL);
+
+                final String[] selectedFilter = {"ALL"};
+
+                Runnable updateFilteredNotifs = () -> {
+                    notifsListContainer.removeAllViews();
+                    String filter = selectedFilter[0];
+
+                    if ("ALL".equals(filter) || "GENERAL".equals(filter)) {
+                        if (!generalNotifs.isEmpty()) {
+                            addChannelHeaderView(notifsListContainer, "📢 Canal General", activeThemeColor);
+                            renderNotificationList(notifsListContainer, generalNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                        }
+                    }
+                    if ("ALL".equals(filter) || "ROLE".equals(filter)) {
+                        if (!roleNotifs.isEmpty()) {
+                            addChannelHeaderView(notifsListContainer, "👤 Canal por Tipo de Usuario", 0xFF1565C0);
+                            renderNotificationList(notifsListContainer, roleNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                        }
+                    }
+                    if ("ALL".equals(filter) || "FACULTY".equals(filter)) {
+                        if (!facultyNotifs.isEmpty()) {
+                            addChannelHeaderView(notifsListContainer, "🏫 Canal por Facultad", 0xFF2E7D32);
+                            renderNotificationList(notifsListContainer, facultyNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                        }
+                    }
+                    if ("ALL".equals(filter) || "SUBJECT".equals(filter)) {
+                        if (!subjectNotifs.isEmpty()) {
+                            addChannelHeaderView(notifsListContainer, "📚 Canal por Materias", 0xFF6A1B9A);
+                            renderNotificationList(notifsListContainer, subjectNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                        }
+                    }
+                    if ("ALL".equals(filter) || "FACILITY".equals(filter)) {
+                        if (!facilityNotifs.isEmpty()) {
+                            addChannelHeaderView(notifsListContainer, "🏛️ Canal por Instalaciones", 0xFFE65100);
+                            renderNotificationList(notifsListContainer, facilityNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                        }
+                    }
+                };
+
+                if (activeChannelsCount > 1) {
+                    addChipButton(chipsLayout, chipButtons, "🌐 Todos", "ALL", selectedFilter, activeThemeColor, updateFilteredNotifs);
+                }
                 if (!generalNotifs.isEmpty()) {
-                    addChannelHeaderView(container, "📢 Canal General", activeThemeColor);
-                    renderNotificationList(container, generalNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                    addChipButton(chipsLayout, chipButtons, "📢 General", "GENERAL", selectedFilter, activeThemeColor, updateFilteredNotifs);
                 }
-
+                if (!roleNotifs.isEmpty()) {
+                    addChipButton(chipsLayout, chipButtons, "👤 Tipo de Usuario", "ROLE", selectedFilter, activeThemeColor, updateFilteredNotifs);
+                }
                 if (!facultyNotifs.isEmpty()) {
-                    addChannelHeaderView(container, "🏫 Canal por Facultad", 0xFF2E7D32);
-                    renderNotificationList(container, facultyNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                    addChipButton(chipsLayout, chipButtons, "🏫 Facultad", "FACULTY", selectedFilter, activeThemeColor, updateFilteredNotifs);
                 }
-
                 if (!subjectNotifs.isEmpty()) {
-                    addChannelHeaderView(container, "📚 Canal por Materias", 0xFF6A1B9A);
-                    renderNotificationList(container, subjectNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                    addChipButton(chipsLayout, chipButtons, "📚 Materias", "SUBJECT", selectedFilter, activeThemeColor, updateFilteredNotifs);
+                }
+                if (!facilityNotifs.isEmpty()) {
+                    addChipButton(chipsLayout, chipButtons, "🏛️ Instalaciones", "FACILITY", selectedFilter, activeThemeColor, updateFilteredNotifs);
                 }
 
-                if (!facilityNotifs.isEmpty()) {
-                    addChannelHeaderView(container, "🏛️ Canal por Instalaciones", 0xFFE65100);
-                    renderNotificationList(container, facilityNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
-                }
+                chipsScrollView.addView(chipsLayout);
+                container.addView(chipsScrollView);
+                container.addView(notifsListContainer);
+
+                updateFilteredNotifs.run();
             }
 
             ScrollView scrollView = new ScrollView(this);
@@ -344,6 +412,51 @@ public class MainActivity extends AppCompatActivity {
             activeNotificationsDialog.setOnDismissListener(dialog -> activeNotificationsDialog = null);
             activeNotificationsDialog.show();
         });
+    }
+
+    private void addChipButton(LinearLayout layout, List<MaterialButton> allChips, String label, String channelKey, String[] selectedFilter, int activeColor, Runnable onSelect) {
+        MaterialButton chip = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+        chip.setText(label);
+        chip.setTextSize(11);
+        chip.setAllCaps(false);
+        chip.setCornerRadius(30);
+        chip.setInsetTop(0);
+        chip.setInsetBottom(0);
+
+        boolean isSelected = channelKey.equals(selectedFilter[0]);
+        updateChipStyle(chip, isSelected, activeColor);
+
+        chip.setOnClickListener(v -> {
+            selectedFilter[0] = channelKey;
+            for (MaterialButton btn : allChips) {
+                boolean active = channelKey.equals(btn.getTag());
+                updateChipStyle(btn, active, activeColor);
+            }
+            onSelect.run();
+        });
+
+        chip.setTag(channelKey);
+        allChips.add(chip);
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 0, 12, 0);
+        chip.setLayoutParams(lp);
+
+        layout.addView(chip);
+    }
+
+    private void updateChipStyle(MaterialButton chip, boolean isSelected, int activeColor) {
+        if (isSelected) {
+            chip.setBackgroundColor(activeColor);
+            chip.setTextColor(0xFFFFFFFF);
+            chip.setStrokeWidth(0);
+        } else {
+            chip.setBackgroundColor(Color.TRANSPARENT);
+            chip.setTextColor(ThemeHelper.isDarkMode(this) ? 0xFFDDDDDD : 0xFF333333);
+            chip.setStrokeColor(ColorStateList.valueOf(activeColor));
+            chip.setStrokeWidth((int) (1.5f * getResources().getDisplayMetrics().density));
+        }
     }
 
     private void addChannelHeaderView(LinearLayout container, String channelName, int accentColor) {
