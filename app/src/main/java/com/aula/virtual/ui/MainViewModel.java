@@ -19,6 +19,8 @@ import com.aula.virtual.data.entity.Faculty;
 import com.aula.virtual.data.entity.Notification;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
+
+import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -654,25 +656,20 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void fetchNotifications() {
+        allNotifications.setValue(null);
         repository.getNotifications(new Callback<List<Notification>>() {
             @Override
             public void onResponse(@NonNull Call<List<Notification>> call, @NonNull Response<List<Notification>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     allNotifications.setValue(response.body());
+                } else {
+                    allNotifications.setValue(new ArrayList<>());
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<List<Notification>> call, @NonNull Throwable t) {
-                repository.getNotifications(new Callback<List<Notification>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<List<Notification>> call2, @NonNull Response<List<Notification>> response2) {
-                        if (response2.isSuccessful() && response2.body() != null) {
-                            allNotifications.setValue(response2.body());
-                        }
-                    }
-                    @Override public void onFailure(@NonNull Call<List<Notification>> call2, @NonNull Throwable t2) {}
-                });
+                allNotifications.setValue(new ArrayList<>());
             }
         });
     }

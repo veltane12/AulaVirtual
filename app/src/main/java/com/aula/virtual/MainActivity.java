@@ -186,123 +186,124 @@ public class MainActivity extends AppCompatActivity {
         User currentUser = viewModel.getCurrentUser().getValue();
         viewModel.fetchNotifications();
 
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
-        builder.setTitle("🔔 Notificaciones y Avisos");
+        observeOnce(viewModel.getAllNotifications(), allNotifs -> {
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+            builder.setTitle("🔔 Notificaciones y Avisos");
 
-        LinearLayout container = DialogUtils.createDialogContainer(this);
+            LinearLayout container = DialogUtils.createDialogContainer(this);
 
-        // Server Status Header
-        TextView tvServerStatus = new TextView(this);
-        tvServerStatus.setTextSize(13);
-        tvServerStatus.setPadding(0, 0, 0, 12);
-        boolean isConnected = Boolean.TRUE.equals(viewModel.isServerConnected().getValue());
-        if (isConnected) {
-            tvServerStatus.setText("🟢 Servidor en línea (Sincronizado con MySQL)");
-            tvServerStatus.setTextColor(0xFF2E7D32);
-        } else {
-            tvServerStatus.setText("⚠️ Servidor fuera de línea (Modo Offline)");
-            tvServerStatus.setTextColor(0xFFD32F2F);
-        }
-        container.addView(tvServerStatus);
-
-        // If Admin: Add button to send new notification
-        if (currentUser != null && "ADMIN".equals(currentUser.role)) {
-            MaterialButton btnCreate = new MaterialButton(this);
-            btnCreate.setText("➕ Crear y Enviar Notificación");
-            btnCreate.setAllCaps(false);
-            btnCreate.setOnClickListener(v -> showCreateNotificationDialog(null));
-            container.addView(btnCreate);
-        }
-
-        // List of Notifications
-        List<Notification> allNotifs = viewModel.getAllNotifications().getValue();
-        List<Notification> userNotifs = filterNotificationsForUser(allNotifs, currentUser);
-
-        if (userNotifs == null || userNotifs.isEmpty()) {
-            TextView tvEmpty = new TextView(this);
-            tvEmpty.setText("\nNo hay notificaciones recientes.\n");
-            tvEmpty.setGravity(Gravity.CENTER);
-            tvEmpty.setTextColor(0xFF757575);
-            container.addView(tvEmpty);
-        } else {
-            for (Notification n : userNotifs) {
-                MaterialCardView card = new MaterialCardView(this);
-                card.setCardElevation(2f);
-                card.setRadius(12f);
-                card.setStrokeWidth(1);
-                card.setStrokeColor(0xFFCCCCCC);
-                
-                LinearLayout cardLayout = new LinearLayout(this);
-                cardLayout.setOrientation(LinearLayout.VERTICAL);
-                cardLayout.setPadding(16, 16, 16, 16);
-
-                TextView tvTitle = new TextView(this);
-                tvTitle.setText(n.title != null ? n.title : "Notificación");
-                tvTitle.setTextSize(15);
-                tvTitle.setTypeface(null, Typeface.BOLD);
-                tvTitle.setTextColor(0xFF111111);
-
-                TextView tvTargetTag = new TextView(this);
-                tvTargetTag.setTextSize(11);
-                tvTargetTag.setTextColor(ThemeHelper.getSubjectColor(this, ThemeHelper.getAccentColorName(this)));
-                tvTargetTag.setText(getNotificationTargetLabel(n));
-
-                TextView tvMsg = new TextView(this);
-                tvMsg.setText(n.message != null ? n.message : "");
-                tvMsg.setTextSize(13);
-                tvMsg.setPadding(0, 6, 0, 6);
-
-                TextView tvSender = new TextView(this);
-                String senderStr = (n.senderName != null ? "Enviado por: " + n.senderName : "") + 
-                                   (n.timestamp != null ? " • " + n.timestamp : "");
-                tvSender.setText(senderStr);
-                tvSender.setTextSize(11);
-                tvSender.setTextColor(0xFF666666);
-
-                cardLayout.addView(tvTitle);
-                cardLayout.addView(tvTargetTag);
-                cardLayout.addView(tvMsg);
-                cardLayout.addView(tvSender);
-
-                // If Admin: Add Edit & Delete action buttons
-                if (currentUser != null && "ADMIN".equals(currentUser.role)) {
-                    LinearLayout actionLayout = new LinearLayout(this);
-                    actionLayout.setOrientation(LinearLayout.HORIZONTAL);
-                    actionLayout.setGravity(Gravity.END);
-                    actionLayout.setPadding(0, 8, 0, 0);
-
-                    MaterialButton btnEdit = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
-                    btnEdit.setText("✏️ Editar");
-                    btnEdit.setTextSize(12);
-                    btnEdit.setAllCaps(false);
-                    btnEdit.setOnClickListener(v -> showCreateNotificationDialog(n));
-
-                    MaterialButton btnDelete = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
-                    btnDelete.setText("🗑️ Eliminar");
-                    btnDelete.setTextColor(0xFFD32F2F);
-                    btnDelete.setTextSize(12);
-                    btnDelete.setAllCaps(false);
-                    btnDelete.setOnClickListener(v -> showDeleteNotificationConfirmation(n));
-
-                    actionLayout.addView(btnEdit);
-                    actionLayout.addView(btnDelete);
-                    cardLayout.addView(actionLayout);
-                }
-
-                card.addView(cardLayout);
-
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                lp.setMargins(0, 10, 0, 10);
-                card.setLayoutParams(lp);
-
-                container.addView(card);
+            // Server Status Header
+            TextView tvServerStatus = new TextView(this);
+            tvServerStatus.setTextSize(13);
+            tvServerStatus.setPadding(0, 0, 0, 12);
+            boolean isConnected = Boolean.TRUE.equals(viewModel.isServerConnected().getValue());
+            if (isConnected) {
+                tvServerStatus.setText("🟢 Servidor en línea (Sincronizado con MySQL)");
+                tvServerStatus.setTextColor(0xFF2E7D32);
+            } else {
+                tvServerStatus.setText("⚠️ Servidor fuera de línea (Modo Offline)");
+                tvServerStatus.setTextColor(0xFFD32F2F);
             }
-        }
+            container.addView(tvServerStatus);
 
-        builder.setView(container);
-        builder.setPositiveButton("Cerrar", null);
-        builder.show();
+            // If Admin: Add button to send new notification
+            if (currentUser != null && "ADMIN".equals(currentUser.role)) {
+                MaterialButton btnCreate = new MaterialButton(this);
+                btnCreate.setText("➕ Crear y Enviar Notificación");
+                btnCreate.setAllCaps(false);
+                btnCreate.setOnClickListener(v -> showCreateNotificationDialog(null));
+                container.addView(btnCreate);
+            }
+
+            // List of Notifications
+            List<Notification> userNotifs = filterNotificationsForUser(allNotifs, currentUser);
+
+            if (userNotifs == null || userNotifs.isEmpty()) {
+                TextView tvEmpty = new TextView(this);
+                tvEmpty.setText("\nNo hay notificaciones recientes.\n");
+                tvEmpty.setGravity(Gravity.CENTER);
+                tvEmpty.setTextColor(0xFF757575);
+                container.addView(tvEmpty);
+            } else {
+                for (Notification n : userNotifs) {
+                    MaterialCardView card = new MaterialCardView(this);
+                    card.setCardElevation(2f);
+                    card.setRadius(12f);
+                    card.setStrokeWidth(1);
+                    card.setStrokeColor(0xFFCCCCCC);
+                    
+                    LinearLayout cardLayout = new LinearLayout(this);
+                    cardLayout.setOrientation(LinearLayout.VERTICAL);
+                    cardLayout.setPadding(16, 16, 16, 16);
+
+                    TextView tvTitle = new TextView(this);
+                    tvTitle.setText(n.title != null ? n.title : "Notificación");
+                    tvTitle.setTextSize(15);
+                    tvTitle.setTypeface(null, Typeface.BOLD);
+                    tvTitle.setTextColor(0xFF111111);
+
+                    TextView tvTargetTag = new TextView(this);
+                    tvTargetTag.setTextSize(11);
+                    tvTargetTag.setTextColor(ThemeHelper.getSubjectColor(this, ThemeHelper.getAccentColorName(this)));
+                    tvTargetTag.setText(getNotificationTargetLabel(n));
+
+                    TextView tvMsg = new TextView(this);
+                    tvMsg.setText(n.message != null ? n.message : "");
+                    tvMsg.setTextSize(13);
+                    tvMsg.setPadding(0, 6, 0, 6);
+
+                    TextView tvSender = new TextView(this);
+                    String senderStr = (n.senderName != null ? "Enviado por: " + n.senderName : "") + 
+                                       (n.timestamp != null ? " • " + n.timestamp : "");
+                    tvSender.setText(senderStr);
+                    tvSender.setTextSize(11);
+                    tvSender.setTextColor(0xFF666666);
+
+                    cardLayout.addView(tvTitle);
+                    cardLayout.addView(tvTargetTag);
+                    cardLayout.addView(tvMsg);
+                    cardLayout.addView(tvSender);
+
+                    // If Admin: Add Edit & Delete action buttons
+                    if (currentUser != null && "ADMIN".equals(currentUser.role)) {
+                        LinearLayout actionLayout = new LinearLayout(this);
+                        actionLayout.setOrientation(LinearLayout.HORIZONTAL);
+                        actionLayout.setGravity(Gravity.END);
+                        actionLayout.setPadding(0, 8, 0, 0);
+
+                        MaterialButton btnEdit = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
+                        btnEdit.setText("✏️ Editar");
+                        btnEdit.setTextSize(12);
+                        btnEdit.setAllCaps(false);
+                        btnEdit.setOnClickListener(v -> showCreateNotificationDialog(n));
+
+                        MaterialButton btnDelete = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
+                        btnDelete.setText("🗑️ Eliminar");
+                        btnDelete.setTextColor(0xFFD32F2F);
+                        btnDelete.setTextSize(12);
+                        btnDelete.setAllCaps(false);
+                        btnDelete.setOnClickListener(v -> showDeleteNotificationConfirmation(n));
+
+                        actionLayout.addView(btnEdit);
+                        actionLayout.addView(btnDelete);
+                        cardLayout.addView(actionLayout);
+                    }
+
+                    card.addView(cardLayout);
+
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    lp.setMargins(0, 10, 0, 10);
+                    card.setLayoutParams(lp);
+
+                    container.addView(card);
+                }
+            }
+
+            builder.setView(container);
+            builder.setPositiveButton("Cerrar", null);
+            builder.show();
+        });
     }
 
     private void showDeleteNotificationConfirmation(Notification n) {
