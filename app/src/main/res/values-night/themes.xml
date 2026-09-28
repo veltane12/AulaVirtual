@@ -9,6 +9,9 @@
         <item name="colorSurface">@color/surface_dark</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/bs_secondary</item>
+        <item name="materialCardViewStyle">@style/Widget.Bootstrap.Card</item>
+        <item name="cardViewStyle">@style/Widget.Bootstrap.Card</item>
+        <item name="alertDialogTheme">@style/Theme.MyApplication.Dialog</item>
     </style>
 
     <!-- Blue Variants -->
