@@ -62,20 +62,38 @@ public class FacultyDetailFragment extends Fragment {
                 faculty = fac;
                 binding.etField1.setText(faculty.name);
                 binding.etField2.setText(faculty.description);
+
+                if (isSystemFaculty(faculty.name)) {
+                    binding.etField1.setEnabled(false);
+                    binding.etField1.setFocusable(false);
+                    binding.btnDelete.setVisibility(View.GONE);
+                } else {
+                    binding.etField1.setEnabled(true);
+                    binding.etField1.setFocusable(true);
+                    binding.etField1.setFocusableInTouchMode(true);
+                    binding.btnDelete.setVisibility(View.VISIBLE);
+                }
+                DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
             }
         });
     }
 
+    private boolean isSystemFaculty(String name) {
+        return name != null && ("Docencia".equalsIgnoreCase(name.trim()) || "Administrativa".equalsIgnoreCase(name.trim()));
+    }
+
     private void saveChanges() {
         if (faculty != null) {
-            String name = binding.etField1.getText().toString();
-            if (name.isEmpty()) {
-                binding.etField1.setError("El nombre es obligatorio");
-                return;
+            if (!isSystemFaculty(faculty.name)) {
+                String name = binding.etField1.getText().toString().trim();
+                if (name.isEmpty()) {
+                    binding.etField1.setError("El nombre es obligatorio");
+                    return;
+                }
+                faculty.name = name;
             }
             
-            faculty.name = name;
-            faculty.description = binding.etField2.getText().toString();
+            faculty.description = binding.etField2.getText().toString().trim();
             viewModel.performOnlineAction(() -> {
                 viewModel.updateFaculty(faculty);
                 Toast.makeText(getContext(), "Facultad actualizada", Toast.LENGTH_SHORT).show();
