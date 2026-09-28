@@ -1,8 +1,12 @@
 package com.aula.virtual.ui;
 
 import androidx.appcompat.app.AlertDialog;
+
+import com.aula.virtual.data.entity.Notification;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.Editable;
@@ -24,6 +28,10 @@ import com.aula.virtual.data.VirtualAulaRepository;
 import com.aula.virtual.data.entity.User;
 import com.aula.virtual.databinding.FragmentSettingsBinding;
 import com.google.android.material.button.MaterialButton;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
@@ -51,6 +59,14 @@ public class SettingsFragment extends Fragment {
         setupNavbarPositionSelector();
         binding.btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
         binding.btnDownloadOfflineData.setOnClickListener(v -> downloadOfflineData());
+
+        User currentUser = viewModel.getCurrentUser().getValue();
+        if (currentUser != null && !"ADMIN".equals(currentUser.role)) {
+            binding.layoutContactAdminContainer.setVisibility(View.VISIBLE);
+            binding.btnContactAdmin.setOnClickListener(v -> showContactAdminDialog(currentUser));
+        } else {
+            binding.layoutContactAdminContainer.setVisibility(View.GONE);
+        }
 
         viewModel.getModificationError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
@@ -261,6 +277,76 @@ public class SettingsFragment extends Fragment {
                         Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
                     });
                 }
+            }
+        });
+    }
+
+    private static final long TWO_HOURS_MILLIS = 2 * 60 * 60 * 1000L; // 7,200,000 ms
+
+    private void showContactAdminDialog(User user) {
+        if (user == null || getContext() == null) return;
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("aula_virtual_prefs", Context.MODE_PRIVATE);
+        long lastReportTime = prefs.getLong("KEY_LAST_REPORT_TIME_" + user.id, 0L);
+        long currentTime = System.currentTimeMillis();
+        long elapsed = currentTime - lastReportTime;
+
+        if (elapsed < TWO_HOURS_MILLIS) {
+            long remainingMillis = TWO_HOURS_MILLIS - elapsed;
+            long remainingMinutes = remainingMillis / (60 * 1000L);
+            long hours = remainingMinutes / 60;
+            long minutes = remainingMinutes % 60;
+
+            String timeMsg = (hours > 0 ? hours + " hora(s) y " : "") + minutes + " minuto(s)";
+
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("⏳ Límite de Tiempo de Reporte")
+                    .setMessage("Debes esperar " + timeMsg + " antes de enviar otro reporte a los Administradores.")
+                    .setPositiveButton("Entendido", null)
+                    .show();
+            return;
+        }
+
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Contactar con Administrador");
+        LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
+
+        final EditText etTitle = DialogUtils.createStyledEditText(requireContext(), "Asunto / Título del Problema", 0);
+        layout.addView(etTitle);
+
+        final EditText etMessage = DialogUtils.createStyledEditText(requireContext(), "Detalles del problema o consulta", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        layout.addView(etMessage);
+
+        builder.setView(layout);
+        builder.setPositiveButton("Enviar Reporte", null);
+        builder.setNegativeButton("Cancelar", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String title = etTitle.getText().toString().trim();
+            String message = etMessage.getText().toString().trim();
+
+            boolean isValid = true;
+            if (title.isEmpty()) {
+                etTitle.setError("El asunto es obligatorio");
+                isValid = false;
+            }
+            if (message.isEmpty()) {
+                etMessage.setError("El mensaje es obligatorio");
+                isValid = false;
+            }
+
+            if (isValid) {
+                String timestamp = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
+                String senderInfo = user.name + " (" + user.carnet + ")";
+                Notification notif = new Notification(title, message, "ROLE_ADMINS", null, senderInfo, timestamp);
+
+                viewModel.insertNotification(notif, () -> {
+                    prefs.edit().putLong("KEY_LAST_REPORT_TIME_" + user.id, System.currentTimeMillis()).apply();
+                    Toast.makeText(getContext(), "¡Reporte enviado exitosamente a los Administradores!", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                });
             }
         });
     }
