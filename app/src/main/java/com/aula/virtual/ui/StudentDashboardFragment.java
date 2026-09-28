@@ -15,13 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.aula.virtual.R;
 import com.aula.virtual.data.StudentGradeInfo;
 import com.aula.virtual.data.entity.Subject;
-import com.aula.virtual.databinding.FragmentStudentDashboardBinding;
+import com.aula.virtual.databinding.FragmentAdminDashboardBinding;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class StudentDashboardFragment extends Fragment {
-    private FragmentStudentDashboardBinding binding;
+    private FragmentAdminDashboardBinding binding;
     private MainViewModel viewModel;
     private SubjectAdapter adapter;
     private List<Subject> allStudentSubjects = new ArrayList<>();
@@ -29,7 +29,7 @@ public class StudentDashboardFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentStudentDashboardBinding.inflate(inflater, container, false);
+        binding = FragmentAdminDashboardBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -38,9 +38,14 @@ public class StudentDashboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
+        binding.tvTitle.setText("Mis Materias Asignadas");
+        binding.btnAdd.setVisibility(View.GONE);
+        binding.spinnerFilter.setVisibility(View.GONE);
+        binding.etSearch.setHint("Buscar materia...");
+
         adapter = new SubjectAdapter();
-        binding.rvGrades.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.rvGrades.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setAdapter(adapter);
 
         setupSearch();
 
@@ -66,20 +71,23 @@ public class StudentDashboardFragment extends Fragment {
                     applyFilter();
                 });
 
+                binding.cardHeaderAction.setVisibility(View.VISIBLE);
+                binding.btnHeaderAction.setImageResource(R.drawable.ic_timetable);
+
                 View.OnClickListener openTimetable = v -> {
                     Bundle args = new Bundle();
                     args.putInt("studentId", user.id);
                     Navigation.findNavController(requireView()).navigate(R.id.action_studentDashboardFragment_to_adminFacilityTimetableFragment, args);
                 };
 
-                binding.btnViewTimetableStudent.setOnClickListener(openTimetable);
-                binding.cardTimetableStudent.setOnClickListener(openTimetable);
+                binding.btnHeaderAction.setOnClickListener(openTimetable);
+                binding.cardHeaderAction.setOnClickListener(openTimetable);
             }
         });
     }
 
     private void setupSearch() {
-        binding.etSearchStudent.addTextChangedListener(new TextWatcher() {
+        binding.etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 applyFilter();
@@ -89,7 +97,7 @@ public class StudentDashboardFragment extends Fragment {
     }
 
     private void applyFilter() {
-        String query = binding.etSearchStudent.getText().toString().toLowerCase().trim();
+        String query = binding.etSearch.getText().toString().toLowerCase().trim();
         if (query.isEmpty()) {
             adapter.setSubjects(allStudentSubjects);
             return;

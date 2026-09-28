@@ -46,15 +46,29 @@
             android:layout_centerVertical="true"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/btnHeaderAction"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_book"
-                app:tint="?attr/colorPrimary"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardHeaderAction"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="1.5dp"
+                app:cardBackgroundColor="?attr/colorPrimary"
                 android:visibility="gone"
-                android:contentDescription="Acción"/>
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView
+                    android:id="@+id/btnHeaderAction"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_timetable"
+                    app:tint="@color/white"
+                    android:padding="10dp"
+                    android:contentDescription="Acción" />
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
     </RelativeLayout>
 

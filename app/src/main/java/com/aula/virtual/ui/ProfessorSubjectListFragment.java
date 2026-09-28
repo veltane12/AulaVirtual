@@ -46,13 +46,17 @@ public class ProfessorSubjectListFragment extends Fragment {
                 adapter.setSubjects(subjects);
             });
 
-            binding.btnHeaderAction.setVisibility(View.VISIBLE);
+            binding.cardHeaderAction.setVisibility(View.VISIBLE);
             binding.btnHeaderAction.setImageResource(R.drawable.ic_timetable);
-            binding.btnHeaderAction.setOnClickListener(v -> {
+            
+            View.OnClickListener openTimetable = v -> {
                 Bundle args = new Bundle();
                 args.putInt("professorId", prof.id);
                 Navigation.findNavController(view).navigate(R.id.action_professorSubjectListFragment_to_adminFacilityTimetableFragment, args);
-            });
+            };
+
+            binding.btnHeaderAction.setOnClickListener(openTimetable);
+            binding.cardHeaderAction.setOnClickListener(openTimetable);
         }
 
         adapter.setOnItemClickListener(subject -> {
