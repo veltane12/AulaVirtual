@@ -2,6 +2,7 @@ package com.aula.virtual;
 
 import androidx.appcompat.app.AlertDialog;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.TypedValue;
@@ -286,86 +287,50 @@ public class MainActivity extends AppCompatActivity {
                 int primaryTextColor = typedValue.data;
                 getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
                 int secondaryTextColor = typedValue.data;
+                int activeThemeColor = ThemeHelper.getSubjectColor(this, ThemeHelper.getAccentColorName(this));
+
+                // Divide notifications by channels
+                List<Notification> generalNotifs = new ArrayList<>();
+                List<Notification> facultyNotifs = new ArrayList<>();
+                List<Notification> subjectNotifs = new ArrayList<>();
+                List<Notification> facilityNotifs = new ArrayList<>();
 
                 for (Notification n : userNotifs) {
-                    MaterialCardView card = new MaterialCardView(this);
-                    card.setCardElevation(2f);
-                    card.setRadius(12f);
-                    card.setStrokeWidth(1);
-                    card.setStrokeColor(isDark ? 0xFF333333 : 0xFFCCCCCC);
-                    card.setCardBackgroundColor(isDark ? 0xFF1E1E1E : 0xFFFFFFFF);
-                    
-                    LinearLayout cardLayout = new LinearLayout(this);
-                    cardLayout.setOrientation(LinearLayout.VERTICAL);
-                    cardLayout.setPadding(16, 16, 16, 16);
-
-                    TextView tvTitle = new TextView(this);
-                    tvTitle.setText(n.title != null ? n.title : "Notificación");
-                    tvTitle.setTextSize(15);
-                    tvTitle.setTypeface(null, Typeface.BOLD);
-                    tvTitle.setTextColor(primaryTextColor);
-
-                    TextView tvTargetTag = new TextView(this);
-                    tvTargetTag.setTextSize(11);
-                    tvTargetTag.setTextColor(ThemeHelper.getSubjectColor(this, ThemeHelper.getAccentColorName(this)));
-                    tvTargetTag.setText(getNotificationTargetLabel(n));
-
-                    TextView tvMsg = new TextView(this);
-                    tvMsg.setText(n.message != null ? n.message : "");
-                    tvMsg.setTextSize(13);
-                    tvMsg.setTextColor(primaryTextColor);
-                    tvMsg.setPadding(0, 6, 0, 6);
-
-                    TextView tvSender = new TextView(this);
-                    String senderStr = (n.timestamp != null ? n.timestamp : "");
-                    tvSender.setText(senderStr);
-                    tvSender.setTextSize(11);
-                    tvSender.setTextColor(secondaryTextColor);
-
-                    cardLayout.addView(tvTitle);
-                    cardLayout.addView(tvTargetTag);
-                    cardLayout.addView(tvMsg);
-                    cardLayout.addView(tvSender);
-
-                    // If Admin: Add Edit & Delete action buttons
-                    if (currentUser != null && "ADMIN".equals(currentUser.role)) {
-                        LinearLayout actionLayout = new LinearLayout(this);
-                        actionLayout.setOrientation(LinearLayout.HORIZONTAL);
-                        actionLayout.setGravity(Gravity.END);
-                        actionLayout.setPadding(0, 8, 0, 0);
-
-                        MaterialButton btnEdit = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
-                        btnEdit.setText("✏️ Editar");
-                        btnEdit.setTextSize(12);
-                        btnEdit.setAllCaps(false);
-                        btnEdit.setOnClickListener(v -> {
-                            dismissActiveNotificationsDialog();
-                            showCreateNotificationDialog(n);
-                        });
-
-                        MaterialButton btnDelete = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
-                        btnDelete.setText("🗑️ Eliminar");
-                        btnDelete.setTextColor(0xFFD32F2F);
-                        btnDelete.setTextSize(12);
-                        btnDelete.setAllCaps(false);
-                        btnDelete.setOnClickListener(v -> {
-                            dismissActiveNotificationsDialog();
-                            showDeleteNotificationConfirmation(n);
-                        });
-
-                        actionLayout.addView(btnEdit);
-                        actionLayout.addView(btnDelete);
-                        cardLayout.addView(actionLayout);
+                    if (n == null || n.targetType == null) {
+                        generalNotifs.add(n);
+                        continue;
                     }
+                    String type = n.targetType.toUpperCase();
+                    if ("FACULTY".equals(type)) {
+                        facultyNotifs.add(n);
+                    } else if ("SUBJECT".equals(type)) {
+                        subjectNotifs.add(n);
+                    } else if ("FACILITY".equals(type)) {
+                        facilityNotifs.add(n);
+                    } else {
+                        generalNotifs.add(n);
+                    }
+                }
 
-                    card.addView(cardLayout);
+                // Render ONLY channels that have notifications
+                if (!generalNotifs.isEmpty()) {
+                    addChannelHeaderView(container, "📢 Canal General", activeThemeColor);
+                    renderNotificationList(container, generalNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                }
 
-                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    lp.setMargins(0, 10, 0, 10);
-                    card.setLayoutParams(lp);
+                if (!facultyNotifs.isEmpty()) {
+                    addChannelHeaderView(container, "🏫 Canal por Facultad", 0xFF2E7D32);
+                    renderNotificationList(container, facultyNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                }
 
-                    container.addView(card);
+                if (!subjectNotifs.isEmpty()) {
+                    addChannelHeaderView(container, "📚 Canal por Materias", 0xFF6A1B9A);
+                    renderNotificationList(container, subjectNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
+                }
+
+                if (!facilityNotifs.isEmpty()) {
+                    addChannelHeaderView(container, "🏛️ Canal por Instalaciones", 0xFFE65100);
+                    renderNotificationList(container, facilityNotifs, currentUser, primaryTextColor, secondaryTextColor, isDark);
                 }
             }
 
@@ -379,6 +344,110 @@ public class MainActivity extends AppCompatActivity {
             activeNotificationsDialog.setOnDismissListener(dialog -> activeNotificationsDialog = null);
             activeNotificationsDialog.show();
         });
+    }
+
+    private void addChannelHeaderView(LinearLayout container, String channelName, int accentColor) {
+        TextView header = new TextView(this);
+        header.setText(channelName);
+        header.setTextSize(13);
+        header.setTypeface(null, Typeface.BOLD);
+        header.setTextColor(0xFFFFFFFF);
+        header.setPadding(24, 10, 24, 10);
+        
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(accentColor);
+        gd.setCornerRadius(16f);
+        header.setBackground(gd);
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 16, 0, 8);
+        header.setLayoutParams(lp);
+
+        container.addView(header);
+    }
+
+    private void renderNotificationList(LinearLayout container, List<Notification> notifs, User currentUser, int primaryTextColor, int secondaryTextColor, boolean isDark) {
+        for (Notification n : notifs) {
+            MaterialCardView card = new MaterialCardView(this);
+            card.setCardElevation(2f);
+            card.setRadius(12f);
+            card.setStrokeWidth(1);
+            card.setStrokeColor(isDark ? 0xFF333333 : 0xFFCCCCCC);
+            card.setCardBackgroundColor(isDark ? 0xFF1E1E1E : 0xFFFFFFFF);
+            
+            LinearLayout cardLayout = new LinearLayout(this);
+            cardLayout.setOrientation(LinearLayout.VERTICAL);
+            cardLayout.setPadding(16, 16, 16, 16);
+
+            TextView tvTitle = new TextView(this);
+            tvTitle.setText(n.title != null ? n.title : "Notificación");
+            tvTitle.setTextSize(15);
+            tvTitle.setTypeface(null, Typeface.BOLD);
+            tvTitle.setTextColor(primaryTextColor);
+
+            TextView tvTargetTag = new TextView(this);
+            tvTargetTag.setTextSize(11);
+            tvTargetTag.setTextColor(ThemeHelper.getSubjectColor(this, ThemeHelper.getAccentColorName(this)));
+            tvTargetTag.setText(getNotificationTargetLabel(n));
+
+            TextView tvMsg = new TextView(this);
+            tvMsg.setText(n.message != null ? n.message : "");
+            tvMsg.setTextSize(13);
+            tvMsg.setTextColor(primaryTextColor);
+            tvMsg.setPadding(0, 6, 0, 6);
+
+            TextView tvSender = new TextView(this);
+            String senderStr = (n.timestamp != null ? n.timestamp : "");
+            tvSender.setText(senderStr);
+            tvSender.setTextSize(11);
+            tvSender.setTextColor(secondaryTextColor);
+
+            cardLayout.addView(tvTitle);
+            cardLayout.addView(tvTargetTag);
+            cardLayout.addView(tvMsg);
+            cardLayout.addView(tvSender);
+
+            // If Admin: Add Edit & Delete action buttons
+            if (currentUser != null && "ADMIN".equals(currentUser.role)) {
+                LinearLayout actionLayout = new LinearLayout(this);
+                actionLayout.setOrientation(LinearLayout.HORIZONTAL);
+                actionLayout.setGravity(Gravity.END);
+                actionLayout.setPadding(0, 8, 0, 0);
+
+                MaterialButton btnEdit = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
+                btnEdit.setText("✏️ Editar");
+                btnEdit.setTextSize(12);
+                btnEdit.setAllCaps(false);
+                btnEdit.setOnClickListener(v -> {
+                    dismissActiveNotificationsDialog();
+                    showCreateNotificationDialog(n);
+                });
+
+                MaterialButton btnDelete = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
+                btnDelete.setText("🗑️ Eliminar");
+                btnDelete.setTextColor(0xFFD32F2F);
+                btnDelete.setTextSize(12);
+                btnDelete.setAllCaps(false);
+                btnDelete.setOnClickListener(v -> {
+                    dismissActiveNotificationsDialog();
+                    showDeleteNotificationConfirmation(n);
+                });
+
+                actionLayout.addView(btnEdit);
+                actionLayout.addView(btnDelete);
+                cardLayout.addView(actionLayout);
+            }
+
+            card.addView(cardLayout);
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(0, 8, 0, 8);
+            card.setLayoutParams(lp);
+
+            container.addView(card);
+        }
     }
 
     private void showDeleteNotificationConfirmation(Notification n) {
