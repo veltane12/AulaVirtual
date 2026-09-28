@@ -161,14 +161,20 @@ public class AdminAdminListFragment extends Fragment {
 
         final TextView tvStrength = new TextView(getContext());
         tvStrength.setTextSize(12);
+        tvStrength.setVisibility(View.GONE);
         layout.addView(tvStrength);
 
         etPass.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                ValidationUtils.PasswordStrength strength = ValidationUtils.getPasswordStrength(s.toString());
-                tvStrength.setText(strength.label);
-                tvStrength.setTextColor(strength.color);
+                if (s.length() == 0) {
+                    tvStrength.setVisibility(View.GONE);
+                } else {
+                    tvStrength.setVisibility(View.VISIBLE);
+                    ValidationUtils.PasswordStrength strength = ValidationUtils.getPasswordStrength(s.toString());
+                    tvStrength.setText(strength.label);
+                    tvStrength.setTextColor(strength.color);
+                }
             }
             @Override public void afterTextChanged(Editable s) {}
         });

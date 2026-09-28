@@ -90,12 +90,11 @@ public class DialogUtils {
 
     public static void setOptionState(TextView tv, String text, boolean isPlaceholder, Context context) {
         tv.setText(text);
+        tv.setAlpha(1.0f);
         boolean isDark = isNightMode(context);
         if (isPlaceholder) {
-            tv.setAlpha(0.65f);
             tv.setTextColor(ContextCompat.getColor(context, R.color.bs_secondary));
         } else {
-            tv.setAlpha(1.0f);
             if (isDark) {
                 tv.setTextColor(ContextCompat.getColor(context, R.color.white));
             } else {
