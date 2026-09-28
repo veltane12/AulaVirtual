@@ -9,6 +9,7 @@ import com.aula.virtual.data.entity.Facility;
 import com.aula.virtual.data.entity.FacilitySchedule;
 import com.aula.virtual.data.entity.Enrollment;
 import com.aula.virtual.data.entity.Faculty;
+import com.aula.virtual.data.entity.Notification;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
 import com.aula.virtual.data.entity.UserSubjectColor;
@@ -1379,6 +1380,42 @@ public class VirtualAulaRepository {
             executor.execute(() -> db.blogDao().deleteCommentsByEntry(entryId));
         }
         performCall(apiService.clearBlogDiscussion(entryId), callback);
+    }
+
+    // --- Notifications ---
+    public void getNotifications(Callback<List<Notification>> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    List<Notification> cached = db.notificationDao().getAllNotifications();
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(cached != null ? cached : new ArrayList<>())));
+                } catch (Exception e) {
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(new ArrayList<>())));
+                }
+            });
+        } else {
+            callback.onResponse(null, Response.success(new ArrayList<>()));
+        }
+    }
+
+    public void insertNotification(Notification notification, Callback<Void> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    db.notificationDao().insertNotification(notification);
+                    mainHandler.post(() -> {
+                        if (callback != null) callback.onResponse(null, Response.success(null));
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    mainHandler.post(() -> {
+                        if (callback != null) callback.onFailure(null, e);
+                    });
+                }
+            });
+        } else {
+            if (callback != null) callback.onResponse(null, Response.success(null));
+        }
     }
 
     // --- Synchronize all data from SQL Server for Offline use ---

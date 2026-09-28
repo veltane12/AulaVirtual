@@ -16,6 +16,7 @@ import com.aula.virtual.data.entity.Enrollment;
 import com.aula.virtual.data.entity.Facility;
 import com.aula.virtual.data.entity.FacilitySchedule;
 import com.aula.virtual.data.entity.Faculty;
+import com.aula.virtual.data.entity.Notification;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
 import java.util.List;
@@ -632,6 +633,52 @@ public class MainViewModel extends AndroidViewModel {
 
     public void downloadAllDataForOffline(VirtualAulaRepository.SyncCallback callback) {
         repository.downloadAllDataForOffline(callback);
+    }
+
+    private final MutableLiveData<List<Notification>> allNotifications = new MutableLiveData<>();
+
+    public LiveData<List<Notification>> getAllNotifications() {
+        return allNotifications;
+    }
+
+    public void fetchNotifications() {
+        repository.getNotifications(new Callback<List<Notification>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Notification>> call, @NonNull Response<List<Notification>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    allNotifications.setValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Notification>> call, @NonNull Throwable t) {
+                repository.getNotifications(new Callback<List<Notification>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Notification>> call2, @NonNull Response<List<Notification>> response2) {
+                        if (response2.isSuccessful() && response2.body() != null) {
+                            allNotifications.setValue(response2.body());
+                        }
+                    }
+                    @Override public void onFailure(@NonNull Call<List<Notification>> call2, @NonNull Throwable t2) {}
+                });
+            }
+        });
+    }
+
+    public void insertNotification(Notification notification, Runnable onSuccess) {
+        repository.insertNotification(notification, new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                fetchNotifications();
+                if (onSuccess != null) onSuccess.run();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                fetchNotifications();
+                if (onSuccess != null) onSuccess.run();
+            }
+        });
     }
 
     public interface LoginCallback {

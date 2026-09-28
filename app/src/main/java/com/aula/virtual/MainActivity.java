@@ -1,15 +1,21 @@
 package com.aula.virtual;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
@@ -17,17 +23,23 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.aula.virtual.data.entity.Faculty;
+import com.aula.virtual.data.entity.Facility;
+import com.aula.virtual.data.entity.Notification;
+import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
-import com.aula.virtual.ui.MainViewModel;
-import android.widget.LinearLayout;
+import com.aula.virtual.ui.DialogUtils;
 import com.aula.virtual.ui.MainViewModel;
 import com.aula.virtual.ui.ThemeHelper;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import androidx.appcompat.widget.Toolbar;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private NavController navController;
@@ -187,36 +199,280 @@ public class MainActivity extends AppCompatActivity {
 
     private void showNotificationsDialog() {
         User currentUser = viewModel.getCurrentUser().getValue();
-        List<String> notifications = new ArrayList<>();
+        viewModel.fetchNotifications();
 
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        builder.setTitle("🔔 Notificaciones y Avisos");
+
+        LinearLayout container = DialogUtils.createDialogContainer(this);
+
+        // Server Status Header
+        TextView tvServerStatus = new TextView(this);
+        tvServerStatus.setTextSize(13);
+        tvServerStatus.setPadding(0, 0, 0, 12);
         boolean isConnected = Boolean.TRUE.equals(viewModel.isServerConnected().getValue());
-        if (!isConnected) {
-            notifications.add("⚠️ Servidor fuera de línea: Estás trabajando en modo local.");
+        if (isConnected) {
+            tvServerStatus.setText("🟢 Servidor en línea (Sincronizado con MySQL)");
+            tvServerStatus.setTextColor(0xFF2E7D32);
         } else {
-            notifications.add("🟢 Servidor en línea: Datos sincronizados correctamente con MySQL.");
+            tvServerStatus.setText("⚠️ Servidor fuera de línea (Modo Offline)");
+            tvServerStatus.setTextColor(0xFFD32F2F);
+        }
+        container.addView(tvServerStatus);
+
+        // If Admin: Add button to send new notification
+        if (currentUser != null && "ADMIN".equals(currentUser.role)) {
+            MaterialButton btnCreate = new MaterialButton(this);
+            btnCreate.setText("➕ Crear y Enviar Notificación");
+            btnCreate.setAllCaps(false);
+            btnCreate.setOnClickListener(v -> showCreateNotificationDialog());
+            container.addView(btnCreate);
         }
 
-        if (currentUser != null) {
-            notifications.add("👤 Usuario activo: " + currentUser.name + " (" + currentUser.carnet + ")");
-            if ("STUDENT".equals(currentUser.role)) {
-                notifications.add("📚 Asignaciones: Revisa el Foro de tus materias para ver tareas y avisos.");
-                notifications.add("📊 Calificaciones: Tienes materias registradas en este período.");
-            } else if ("PROFESSOR".equals(currentUser.role)) {
-                notifications.add("👨‍🏫 Portal Docente: Puedes gestionar calificaciones y publicar en el foro de tus materias.");
-            } else if ("ADMIN".equals(currentUser.role)) {
-                notifications.add("⚙️ Portal Administrativo: Control activo de facultades, asignaturas, docentes y alumnos.");
+        // List of Notifications
+        List<Notification> allNotifs = viewModel.getAllNotifications().getValue();
+        List<Notification> userNotifs = filterNotificationsForUser(allNotifs, currentUser);
+
+        if (userNotifs == null || userNotifs.isEmpty()) {
+            TextView tvEmpty = new TextView(this);
+            tvEmpty.setText("\nNo hay notificaciones recientes.\n");
+            tvEmpty.setGravity(Gravity.CENTER);
+            tvEmpty.setTextColor(0xFF757575);
+            container.addView(tvEmpty);
+        } else {
+            for (Notification n : userNotifs) {
+                MaterialCardView card = new MaterialCardView(this);
+                card.setCardElevation(2f);
+                card.setRadius(12f);
+                card.setStrokeWidth(1);
+                card.setStrokeColor(0xFFCCCCCC);
+                
+                LinearLayout cardLayout = new LinearLayout(this);
+                cardLayout.setOrientation(LinearLayout.VERTICAL);
+                cardLayout.setPadding(16, 16, 16, 16);
+
+                TextView tvTitle = new TextView(this);
+                tvTitle.setText(n.title != null ? n.title : "Notificación");
+                tvTitle.setTextSize(15);
+                tvTitle.setTypeface(null, Typeface.BOLD);
+                tvTitle.setTextColor(0xFF111111);
+
+                TextView tvTargetTag = new TextView(this);
+                tvTargetTag.setTextSize(11);
+                tvTargetTag.setTextColor(ThemeHelper.getSubjectColor(this, ThemeHelper.getAccentColorName(this)));
+                tvTargetTag.setText(getNotificationTargetLabel(n));
+
+                TextView tvMsg = new TextView(this);
+                tvMsg.setText(n.message != null ? n.message : "");
+                tvMsg.setTextSize(13);
+                tvMsg.setPadding(0, 6, 0, 6);
+
+                TextView tvSender = new TextView(this);
+                String senderStr = (n.senderName != null ? "Enviado por: " + n.senderName : "") + 
+                                   (n.timestamp != null ? " • " + n.timestamp : "");
+                tvSender.setText(senderStr);
+                tvSender.setTextSize(11);
+                tvSender.setTextColor(0xFF666666);
+
+                cardLayout.addView(tvTitle);
+                cardLayout.addView(tvTargetTag);
+                cardLayout.addView(tvMsg);
+                cardLayout.addView(tvSender);
+
+                card.addView(cardLayout);
+
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                lp.setMargins(0, 10, 0, 10);
+                card.setLayoutParams(lp);
+
+                container.addView(card);
             }
-        } else {
-            notifications.add("🔑 Inicia sesión para ver avisos y notificaciones de tu cuenta.");
         }
 
-        String[] notifArray = notifications.toArray(new String[0]);
+        builder.setView(container);
+        builder.setPositiveButton("Cerrar", null);
+        builder.show();
+    }
 
-        new MaterialAlertDialogBuilder(this)
-                .setTitle("🔔 Notificaciones y Avisos")
-                .setItems(notifArray, null)
-                .setPositiveButton("Entendido", null)
-                .show();
+    private List<Notification> filterNotificationsForUser(List<Notification> all, User user) {
+        List<Notification> result = new ArrayList<>();
+        if (all == null) return result;
+
+        for (Notification n : all) {
+            if (n == null || n.targetType == null) {
+                result.add(n);
+                continue;
+            }
+
+            String type = n.targetType.toUpperCase();
+            String val = n.targetValue != null ? n.targetValue.trim() : "";
+
+            if ("ALL".equals(type)) {
+                result.add(n);
+            } else if (user != null) {
+                if ("ROLE_STUDENTS".equals(type) && "STUDENT".equals(user.role)) {
+                    result.add(n);
+                } else if ("ROLE_PROFESSORS".equals(type) && "PROFESSOR".equals(user.role)) {
+                    result.add(n);
+                } else if ("ROLE_ADMINS".equals(type) && "ADMIN".equals(user.role)) {
+                    result.add(n);
+                } else if ("FACULTY".equals(type) && user.faculty != null && user.faculty.equalsIgnoreCase(val)) {
+                    result.add(n);
+                } else if ("SUBJECT".equals(type) || "FACILITY".equals(type)) {
+                    result.add(n);
+                }
+            }
+        }
+        return result;
+    }
+
+    private String getNotificationTargetLabel(Notification n) {
+        if (n == null || n.targetType == null) return "[📢 General]";
+        String type = n.targetType.toUpperCase();
+        String val = n.targetValue != null ? n.targetValue : "";
+
+        switch (type) {
+            case "ROLE_STUDENTS": return "[👨‍🎓 Todos los Estudiantes]";
+            case "ROLE_PROFESSORS": return "[👨‍🏫 Todos los Profesores]";
+            case "ROLE_ADMINS": return "[⚙️ Todos los Administradores]";
+            case "FACULTY": return "[🏫 Facultad: " + val + "]";
+            case "SUBJECT": return "[📚 Materia: " + val + "]";
+            case "FACILITY": return "[🏛️ Instalación: " + val + "]";
+            default: return "[📢 General (Todos los usuarios)]";
+        }
+    }
+
+    private void showCreateNotificationDialog() {
+        User currentUser = viewModel.getCurrentUser().getValue();
+        if (currentUser == null) return;
+
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(this, "Crear Notificación");
+        LinearLayout layout = DialogUtils.createDialogContainer(this);
+
+        final EditText etTitle = DialogUtils.createStyledEditText(this, "Título de la Notificación", 0);
+        layout.addView(etTitle);
+
+        final EditText etMessage = DialogUtils.createStyledEditText(this, "Mensaje / Contenido de la Notificación", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        layout.addView(etMessage);
+
+        final TextView tvTarget = DialogUtils.createDialogOptionButton(this, "Destinatarios: 📢 General (Todos los usuarios)", false);
+        layout.addView(tvTarget);
+
+        final String[] targetType = {"ALL"};
+        final String[] targetValue = {null};
+
+        tvTarget.setOnClickListener(v -> {
+            String[] options = {
+                "📢 General (Todos los usuarios)",
+                "👨‍🎓 Todos los Estudiantes",
+                "👨‍🏫 Todos los Profesores",
+                "⚙️ Todos los Administradores",
+                "🏫 Integrantes de una Facultad...",
+                "📚 Integrantes de una Materia...",
+                "🏛️ Integrantes de una Instalación..."
+            };
+
+            new MaterialAlertDialogBuilder(this)
+                .setTitle("Seleccionar Destinatarios")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        targetType[0] = "ALL";
+                        targetValue[0] = null;
+                        DialogUtils.setOptionState(tvTarget, "Destinatarios: 📢 General (Todos)", false, this);
+                    } else if (which == 1) {
+                        targetType[0] = "ROLE_STUDENTS";
+                        targetValue[0] = null;
+                        DialogUtils.setOptionState(tvTarget, "Destinatarios: 👨‍🎓 Todos los Estudiantes", false, this);
+                    } else if (which == 2) {
+                        targetType[0] = "ROLE_PROFESSORS";
+                        targetValue[0] = null;
+                        DialogUtils.setOptionState(tvTarget, "Destinatarios: 👨‍🏫 Todos los Profesores", false, this);
+                    } else if (which == 3) {
+                        targetType[0] = "ROLE_ADMINS";
+                        targetValue[0] = null;
+                        DialogUtils.setOptionState(tvTarget, "Destinatarios: ⚙️ Todos los Administradores", false, this);
+                    } else if (which == 4) {
+                        viewModel.getAllFaculties().observe(this, faculties -> {
+                            if (faculties != null && !faculties.isEmpty()) {
+                                String[] facNames = faculties.stream().map(f -> f.name).toArray(String[]::new);
+                                new MaterialAlertDialogBuilder(this)
+                                    .setTitle("Seleccionar Facultad")
+                                    .setItems(facNames, (d2, w2) -> {
+                                        targetType[0] = "FACULTY";
+                                        targetValue[0] = facNames[w2];
+                                        DialogUtils.setOptionState(tvTarget, "Facultad: " + facNames[w2], false, this);
+                                    }).show();
+                            } else {
+                                Toast.makeText(this, "No hay facultades registradas", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else if (which == 5) {
+                        viewModel.getAllSubjects().observe(this, subjects -> {
+                            if (subjects != null && !subjects.isEmpty()) {
+                                String[] subNames = subjects.stream().map(s -> s.name).toArray(String[]::new);
+                                new MaterialAlertDialogBuilder(this)
+                                    .setTitle("Seleccionar Materia")
+                                    .setItems(subNames, (d2, w2) -> {
+                                        targetType[0] = "SUBJECT";
+                                        targetValue[0] = subNames[w2];
+                                        DialogUtils.setOptionState(tvTarget, "Materia: " + subNames[w2], false, this);
+                                    }).show();
+                            } else {
+                                Toast.makeText(this, "No hay materias registradas", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else if (which == 6) {
+                        viewModel.getAllFacilities().observe(this, facilities -> {
+                            if (facilities != null && !facilities.isEmpty()) {
+                                String[] facNames = facilities.stream().map(f -> f.name).toArray(String[]::new);
+                                new MaterialAlertDialogBuilder(this)
+                                    .setTitle("Seleccionar Instalación")
+                                    .setItems(facNames, (d2, w2) -> {
+                                        targetType[0] = "FACILITY";
+                                        targetValue[0] = facNames[w2];
+                                        DialogUtils.setOptionState(tvTarget, "Instalación: " + facNames[w2], false, this);
+                                    }).show();
+                            } else {
+                                Toast.makeText(this, "No hay instalaciones registradas", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }).show();
+        });
+
+        builder.setView(layout);
+        builder.setPositiveButton("Enviar", null);
+        builder.setNegativeButton("Cancelar", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String title = etTitle.getText().toString().trim();
+            String message = etMessage.getText().toString().trim();
+
+            boolean isValid = true;
+            if (title.isEmpty()) {
+                etTitle.setError("El título es obligatorio");
+                isValid = false;
+            }
+            if (message.isEmpty()) {
+                etMessage.setError("El mensaje es obligatorio");
+                isValid = false;
+            }
+
+            if (isValid) {
+                String timestamp = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
+                Notification notif = new Notification(title, message, targetType[0], targetValue[0], currentUser.name, timestamp);
+
+                viewModel.insertNotification(notif, () -> {
+                    Toast.makeText(this, "¡Notificación enviada con éxito!", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    showNotificationsDialog();
+                });
+            }
+        });
     }
 
     private void navigateToHome() {

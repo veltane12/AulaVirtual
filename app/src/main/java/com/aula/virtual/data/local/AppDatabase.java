@@ -10,6 +10,7 @@ import com.aula.virtual.data.entity.Enrollment;
 import com.aula.virtual.data.entity.Facility;
 import com.aula.virtual.data.entity.FacilitySchedule;
 import com.aula.virtual.data.entity.Faculty;
+import com.aula.virtual.data.entity.Notification;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
 
@@ -25,9 +26,10 @@ import com.aula.virtual.data.entity.UserSubjectColor;
         Enrollment.class,
         BlogEntry.class,
         BlogComment.class,
-        UserSubjectColor.class
+        UserSubjectColor.class,
+        Notification.class
     },
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -41,6 +43,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract EnrollmentDao enrollmentDao();
     public abstract BlogDao blogDao();
     public abstract UserSubjectColorDao userSubjectColorDao();
+    public abstract NotificationDao notificationDao();
 
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
