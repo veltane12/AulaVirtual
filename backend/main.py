@@ -876,5 +876,26 @@ def get_subject_participants(sub_id: int, db: Session = Depends(get_db)):
     return participants
 
 if __name__ == "__main__":
+    import threading
+    import time
     import uvicorn
+
+    def start_tunnel():
+        time.sleep(2)
+        tunnel_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run_tunnel_and_update_app.py")
+        if os.path.exists(tunnel_script):
+            try:
+                import run_tunnel_and_update_app
+                run_tunnel_and_update_app.main()
+            except Exception as e:
+                print(f"[!] Error al iniciar Cloudflare Tunnel: {e}")
+
+    tunnel_thread = threading.Thread(target=start_tunnel, daemon=True)
+    tunnel_thread.start()
+
+    print("===================================================")
+    print("    AULA VIRTUAL - FASTAPI + CLOUDFLARE TUNNEL")
+    print("===================================================")
+    print("Iniciando servidor Uvicorn en http://localhost:8000 ...\n")
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
