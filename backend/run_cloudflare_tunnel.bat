@@ -9,9 +9,6 @@ echo Requisitos:
 echo 1. Asegurate de tener FastAPI ejecutandose en http://localhost:8000
 echo.
 
-:: Forzar solucion para resolver DNS IPv4 sin IPv6 timeout
-set TUNNEL_DNS_SERVER=1.1.1.1
-
 set CLOUDFLARED_CMD=cloudflared
 where cloudflared >nul 2>nul
 if %errorlevel% neq 0 (
@@ -37,6 +34,10 @@ if %errorlevel% neq 0 (
 
 echo [OK] Iniciando Cloudflare Tunnel sobre HTTP2 e IPv4...
 echo.
-%CLOUDFLARED_CMD% tunnel --protocol http2 --edge-ip-version 4 --url http://127.0.0.1:8000
+echo [!] NOTA: La linea 'Registered tunnel connection... location=...' confirma que el tunel esta 100%% ACTIVO.
+echo [!] Copia la URL con dominio .trycloudflare.com que aparece arriba en la pantalla.
+echo.
+
+%CLOUDFLARED_CMD% tunnel --protocol http2 --edge-ip-version 4 --no-autoupdate --url http://127.0.0.1:8000
 
 pause
