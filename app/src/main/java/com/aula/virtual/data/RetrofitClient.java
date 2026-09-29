@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitClient {
     // Para conexion local emulador: "http://10.0.2.2:8000/" o IP Wi-Fi local "http://192.168.x.x:8000/"
     // Para Cloudflare Quick Tunnel (Conexion remota HTTPS global):
-    private static final String BASE_URL = "https://glasses-upper-basement-referenced.trycloudflare.com/";
+    private static final String BASE_URL = "https://increased-sean-entertainment-lovely.trycloudflare.com/";
 
     private static Retrofit retrofit = null;
 
