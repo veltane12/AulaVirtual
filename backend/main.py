@@ -1,3 +1,7 @@
+import os
+import sys
+import threading
+import time
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import create_engine, Column, Integer, String, Double, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
@@ -876,11 +880,11 @@ def get_subject_participants(sub_id: int, db: Session = Depends(get_db)):
     return participants
 
 if __name__ == "__main__":
-    import threading
-    import time
     import uvicorn
 
     def start_tunnel():
+        import os
+        import time
         time.sleep(2)
         tunnel_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run_tunnel_and_update_app.py")
         if os.path.exists(tunnel_script):

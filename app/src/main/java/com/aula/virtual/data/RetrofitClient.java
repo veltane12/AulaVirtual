@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     // URL activa de Cloudflare Quick Tunnel (Actualizada automaticamente por run_tunnel_and_update_app.py):
-    private static final String BASE_URL = "https://reaction-mats-what-drum.trycloudflare.com/";
+    private static final String BASE_URL = "https://dispatched-broker-eau-roller.trycloudflare.com/";
 
     private static Retrofit retrofit = null;
     private static String activeUrl = BASE_URL;
