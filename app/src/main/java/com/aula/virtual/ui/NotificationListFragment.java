@@ -542,7 +542,7 @@ public class NotificationListFragment extends Fragment {
                 if (s != null && ((s.carnet != null && s.carnet.equalsIgnoreCase(searchCarnet)) || (s.name != null && searchName.contains(s.name.toLowerCase())))) {
                     Bundle args = new Bundle();
                     args.putInt("studentId", s.id);
-                    Navigation.findNavController(requireView()).navigate(R.id.studentProfileFragment, args);
+                    Navigation.findNavController(requireView()).navigate(R.id.action_notificationListFragment_to_studentProfileFragment, args);
                     found[0] = true;
                     return;
                 }
@@ -555,8 +555,8 @@ public class NotificationListFragment extends Fragment {
             for (User p : profs) {
                 if (p != null && ((p.carnet != null && p.carnet.equalsIgnoreCase(searchCarnet)) || (p.name != null && searchName.contains(p.name.toLowerCase())))) {
                     Bundle args = new Bundle();
-                    args.putInt("adminId", p.id);
-                    Navigation.findNavController(requireView()).navigate(R.id.adminDetailFragment, args);
+                    args.putInt("studentId", p.id);
+                    Navigation.findNavController(requireView()).navigate(R.id.action_notificationListFragment_to_studentProfileFragment, args);
                     found[0] = true;
                     return;
                 }
