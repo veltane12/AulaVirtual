@@ -9,8 +9,6 @@ echo Requisitos:
 echo 1. Asegurate de tener FastAPI ejecutandose en http://localhost:8000
 echo.
 
-set TUNNEL_DNS_SERVER=1.1.1.1
-
 set CLOUDFLARED_CMD=cloudflared
 where cloudflared >nul 2>nul
 if %errorlevel% neq 0 (
@@ -34,12 +32,12 @@ if %errorlevel% neq 0 (
     )
 )
 
-echo [OK] Iniciando Cloudflare Tunnel con DNS 1.1.1.1/8.8.8.8, HTTP2 e IPv4...
+echo [OK] Iniciando Cloudflare Tunnel sobre HTTP2 e IPv4...
 echo.
 echo [!] NOTA: La linea 'Registered tunnel connection... location=...' confirma que el tunel esta 100%% ACTIVO.
 echo [!] Copia la URL con dominio .trycloudflare.com que aparece abajo en pantalla.
 echo.
 
-%CLOUDFLARED_CMD% tunnel --dns-resolver-addrs 1.1.1.1:53,8.8.8.8:53 --protocol http2 --edge-ip-version 4 --no-autoupdate --url http://127.0.0.1:8000
+%CLOUDFLARED_CMD% tunnel --protocol http2 --edge-ip-version 4 --no-autoupdate --url http://127.0.0.1:8000
 
 pause
