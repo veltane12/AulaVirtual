@@ -143,6 +143,25 @@ private static final String BASE_URL = "http://10.0.2.2:8000/";
    private static final String BASE_URL = "http://192.168.1.35:8000/"; // Reemplaza por la IP de tu PC
    ```
 
+#### Opción C: Despliegue Remoto Global HTTPS con Cloudflare Quick Tunnel (`cloudflared`)
+Si deseas probar la aplicación desde cualquier lugar del mundo fuera de tu red local sin configurar la IP de la PC ni abrir puertos en el router:
+
+1. **Asegúrate de tener FastAPI ejecutándose** en `http://localhost:8000`.
+2. **Ejecutar el script automatizado de Cloudflare Tunnel:**
+   En la terminal de Android Studio ejecuta:
+   ```cmd
+   .\backend\run_cloudflare_tunnel.bat
+   ```
+   *(Si `cloudflared` no está en tu equipo, el script descargará `cloudflared.exe` de forma transparente y levantará el túnel seguro hacia `http://localhost:8000`).*
+3. **Obtener la dirección HTTPS global:**
+   En la pantalla del túnel verás una URL asignada con el dominio `.trycloudflare.com`, por ejemplo:
+   `https://random-words-1234.trycloudflare.com`
+4. **Actualizar `RetrofitClient.java`:**
+   Copia la URL con `https://` y pégala en `RetrofitClient.java` (asegurándote de que termine en barra `/`):
+   ```java
+   private static final String BASE_URL = "https://random-words-1234.trycloudflare.com/";
+   ```
+
 ---
 
 ### Paso 6: Compilar y Ejecutar la Aplicación

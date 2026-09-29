@@ -24,11 +24,12 @@ Para instalar y ejecutar el proyecto desde cero en una computadora con una versi
   - Room Database (Persistencia de datos offline y caché)
   - Biometric Prompt & EncryptedSharedPreferences (Seguridad)
 
-### ⚙️ Backend API
+### ⚙️ Backend API & Túnels
 - **Lenguaje:** Python 3.10+
 - **Framework:** FastAPI + Uvicorn
 - **ORM:** SQLAlchemy
 - **Base de Datos:** MySQL / MariaDB (vía XAMPP)
+- **Túnel Seguro Remoto:** Cloudflare Quick Tunnel (`cloudflared` HTTPS) para pruebas globales sin apertura de puertos.
 
 ---
 
