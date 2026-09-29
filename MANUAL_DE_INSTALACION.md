@@ -94,13 +94,13 @@ DATABASE_URL = "mysql+mysqlconnector://root:@localhost/aula_virtual"
 *(Si tu usuario `root` de MySQL en XAMPP tiene contraseña, colócala entre `root:` y `@localhost`, por ejemplo: `root:mi_password@localhost`).*
 
 #### 6. Ejecutar el Servidor Backend:
-Ejecuta el siguiente comando en la Terminal de Android Studio / PowerShell:
+Ejecuta el script ejecutable de Python directamente:
 ```powershell
-py -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+py backend/run_backend.py
 ```
-*O ejecuta el script ejecutable directamente:*
+*O ejecuta el archivo de comandos de Windows:*
 ```cmd
-.\run_backend.bat
+.\backend\run_backend.bat
 ```
 
 #### 7. Comprobación del servidor:
