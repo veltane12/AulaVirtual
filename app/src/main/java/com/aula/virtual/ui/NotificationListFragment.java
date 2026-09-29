@@ -478,11 +478,23 @@ public class NotificationListFragment extends Fragment {
                 actionLayout.setGravity(Gravity.END);
                 actionLayout.setPadding(0, 8, 0, 0);
 
-                MaterialButton btnEdit = new MaterialButton(requireContext(), null, com.google.android.material.R.attr.borderlessButtonStyle);
-                btnEdit.setText("✏️ Editar");
-                btnEdit.setTextSize(12);
-                btnEdit.setAllCaps(false);
-                btnEdit.setOnClickListener(v -> showCreateNotificationDialog(n));
+                boolean isSupport = n.targetType != null && "SUPPORT".equalsIgnoreCase(n.targetType.trim());
+
+                if (isSupport) {
+                    MaterialButton btnProfile = new MaterialButton(requireContext(), null, com.google.android.material.R.attr.borderlessButtonStyle);
+                    btnProfile.setText("👤 Ver Perfil");
+                    btnProfile.setTextSize(12);
+                    btnProfile.setAllCaps(false);
+                    btnProfile.setOnClickListener(v -> navigateToUserProfile(n.senderName));
+                    actionLayout.addView(btnProfile);
+                } else {
+                    MaterialButton btnEdit = new MaterialButton(requireContext(), null, com.google.android.material.R.attr.borderlessButtonStyle);
+                    btnEdit.setText("✏️ Editar");
+                    btnEdit.setTextSize(12);
+                    btnEdit.setAllCaps(false);
+                    btnEdit.setOnClickListener(v -> showCreateNotificationDialog(n));
+                    actionLayout.addView(btnEdit);
+                }
 
                 MaterialButton btnDelete = new MaterialButton(requireContext(), null, com.google.android.material.R.attr.borderlessButtonStyle);
                 btnDelete.setText("🗑️ Eliminar");
@@ -491,7 +503,6 @@ public class NotificationListFragment extends Fragment {
                 btnDelete.setAllCaps(false);
                 btnDelete.setOnClickListener(v -> showDeleteNotificationConfirmation(n));
 
-                actionLayout.addView(btnEdit);
                 actionLayout.addView(btnDelete);
                 cardLayout.addView(actionLayout);
             }
@@ -504,6 +515,70 @@ public class NotificationListFragment extends Fragment {
             card.setLayoutParams(lp);
 
             container.addView(card);
+        }
+    }
+
+    private void navigateToUserProfile(String senderName) {
+        if (senderName == null || senderName.trim().isEmpty() || getView() == null) return;
+
+        String extractedCarnet = "";
+        int start = senderName.lastIndexOf('(');
+        int end = senderName.lastIndexOf(')');
+        if (start != -1 && end != -1 && end > start) {
+            extractedCarnet = senderName.substring(start + 1, end).trim();
+        } else {
+            extractedCarnet = senderName.trim();
+        }
+
+        final String searchCarnet = extractedCarnet;
+        final String searchName = senderName.trim().toLowerCase();
+
+        boolean[] found = {false};
+
+        // Check students
+        List<User> students = viewModel.getAllStudents().getValue();
+        if (students != null) {
+            for (User s : students) {
+                if (s != null && ((s.carnet != null && s.carnet.equalsIgnoreCase(searchCarnet)) || (s.name != null && searchName.contains(s.name.toLowerCase())))) {
+                    Bundle args = new Bundle();
+                    args.putInt("studentId", s.id);
+                    Navigation.findNavController(requireView()).navigate(R.id.studentProfileFragment, args);
+                    found[0] = true;
+                    return;
+                }
+            }
+        }
+
+        // Check professors
+        List<User> profs = viewModel.getAllProfessors().getValue();
+        if (!found[0] && profs != null) {
+            for (User p : profs) {
+                if (p != null && ((p.carnet != null && p.carnet.equalsIgnoreCase(searchCarnet)) || (p.name != null && searchName.contains(p.name.toLowerCase())))) {
+                    Bundle args = new Bundle();
+                    args.putInt("adminId", p.id);
+                    Navigation.findNavController(requireView()).navigate(R.id.adminDetailFragment, args);
+                    found[0] = true;
+                    return;
+                }
+            }
+        }
+
+        // Check admins
+        List<User> admins = viewModel.getAllAdmins().getValue();
+        if (!found[0] && admins != null) {
+            for (User a : admins) {
+                if (a != null && ((a.carnet != null && a.carnet.equalsIgnoreCase(searchCarnet)) || (a.name != null && searchName.contains(a.name.toLowerCase())))) {
+                    Bundle args = new Bundle();
+                    args.putInt("adminId", a.id);
+                    Navigation.findNavController(requireView()).navigate(R.id.adminDetailFragment, args);
+                    found[0] = true;
+                    return;
+                }
+            }
+        }
+
+        if (!found[0]) {
+            Toast.makeText(getContext(), "Perfil del emisor no encontrado (" + searchCarnet + ")", Toast.LENGTH_SHORT).show();
         }
     }
 
