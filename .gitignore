@@ -21,6 +21,8 @@ __pycache__/
 venv/
 .venv/
 env/
+*.exe
+cloudflared.exe
 
 # IDE & Artifacts
 .artifacts/
