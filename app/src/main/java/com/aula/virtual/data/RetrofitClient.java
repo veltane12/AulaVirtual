@@ -1,18 +1,29 @@
 package com.aula.virtual.data;
 
 import java.util.concurrent.TimeUnit;
-
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    // Para conexion local emulador: "http://10.0.2.2:8000/" o IP Wi-Fi local "http://192.168.x.x:8000/"
-    // Para Cloudflare Quick Tunnel (Conexion remota HTTPS global):
-    private static final String BASE_URL = "https://increased-sean-entertainment-lovely.trycloudflare.com/";
+    // URL activa de Cloudflare Quick Tunnel (Actualizada automaticamente por run_tunnel_and_update_app.py):
+    private static final String BASE_URL = "https://reaction-mats-what-drum.trycloudflare.com/";
 
     private static Retrofit retrofit = null;
+    private static String activeUrl = BASE_URL;
+
+    public static void setCustomUrl(String customUrl) {
+        if (customUrl != null && !customUrl.trim().isEmpty()) {
+            if (!customUrl.endsWith("/")) customUrl += "/";
+            activeUrl = customUrl;
+            retrofit = null; // Rebuild client with new URL
+        }
+    }
+
+    public static String getActiveUrl() {
+        return activeUrl;
+    }
 
     public static ApiService getApiService() {
         if (retrofit == null) {
@@ -27,7 +38,7 @@ public class RetrofitClient {
                     .build();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
+                    .baseUrl(activeUrl)
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(client)
                     .build();
