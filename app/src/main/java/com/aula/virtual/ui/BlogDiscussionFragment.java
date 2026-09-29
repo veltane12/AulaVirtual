@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -68,6 +71,22 @@ public class BlogDiscussionFragment extends Fragment {
         adapter = new BlogCommentAdapter(currentUserId, isAdmin);
         binding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvComments.setAdapter(adapter);
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.layoutInput, (v, insets) -> {
+            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+            Insets systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            
+            int bottomPadding = Math.max(imeInsets.bottom, systemBarInsets.bottom);
+            int defaultPadding = (int) (8 * getResources().getDisplayMetrics().density);
+
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    defaultPadding + bottomPadding
+            );
+            return insets;
+        });
 
         if (isAdmin) {
             binding.btnClearChat.setVisibility(View.VISIBLE);
