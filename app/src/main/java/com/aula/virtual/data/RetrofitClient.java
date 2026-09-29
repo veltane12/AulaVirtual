@@ -1,15 +1,16 @@
 package com.aula.virtual.data;
 
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    // IMPORTANTE: Cambia esta IP por la IP local de tu PC donde corre FastAPI
-    // Puedes obtenerla con 'ipconfig' en la terminal de Windows.
-    // Ej: "http://192.168.1.15:8000/"
-    private static final String BASE_URL = "http://192.168.1.35:8000/"; // IP para el emulador de Android (localhost de la PC)
+    // Para conexion local emulador: "http://10.0.2.2:8000/" o IP Wi-Fi local "http://192.168.x.x:8000/"
+    // Para Cloudflare Quick Tunnel (Conexion remota HTTPS global):
+    private static final String BASE_URL = "https://glasses-upper-basement-referenced.trycloudflare.com/";
 
     private static Retrofit retrofit = null;
 
@@ -20,9 +21,9 @@ public class RetrofitClient {
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(logging)
-                    .connectTimeout(3, java.util.concurrent.TimeUnit.SECONDS)
-                    .readTimeout(3, java.util.concurrent.TimeUnit.SECONDS)
-                    .writeTimeout(3, java.util.concurrent.TimeUnit.SECONDS)
+                    .connectTimeout(15, TimeUnit.SECONDS)
+                    .readTimeout(15, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
                     .build();
 
             retrofit = new Retrofit.Builder()
