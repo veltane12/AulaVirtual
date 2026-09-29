@@ -264,6 +264,14 @@ def get_db():
 
 # --- Endpoints ---
 
+@app.get("/")
+def root():
+    return {
+        "app": "Aula Virtual API",
+        "status": "online",
+        "docs": "/docs"
+    }
+
 @app.get("/users/students", response_model=List[User])
 def get_students(db: Session = Depends(get_db)):
     return db.query(UserDB).filter(UserDB.role == "STUDENT").all()
