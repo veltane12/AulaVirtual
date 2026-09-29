@@ -15,6 +15,8 @@ import com.aula.virtual.data.entity.User;
 import com.aula.virtual.data.entity.UserSubjectColor;
 import com.aula.virtual.data.local.AppDatabase;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -1440,13 +1442,29 @@ public class VirtualAulaRepository {
         performCall(apiService.createNotification(notification), new Callback<Notification>() {
             @Override
             public void onResponse(Call<Notification> call, Response<Notification> response) {
-                if (response.isSuccessful() && response.body() != null && db != null) {
+                if (response.isSuccessful() && response.body() != null) {
                     Notification saved = response.body();
-                    executor.execute(() -> db.notificationDao().insertNotification(saved));
-                } else if (db != null) {
-                    executor.execute(() -> db.notificationDao().insertNotification(notification));
+                    if (db != null) {
+                        executor.execute(() -> db.notificationDao().insertNotification(saved));
+                    }
+                    if (callback != null) callback.onResponse(null, Response.success(null));
+                } else {
+                    String errMessage = "Error al procesar la notificación.";
+                    try {
+                        if (response.errorBody() != null) {
+                            String errJson = response.errorBody().string();
+                            JSONObject obj = new JSONObject(errJson);
+                            if (obj.has("detail")) {
+                                errMessage = obj.getString("detail");
+                            }
+                        }
+                    } catch (Exception ignored) {}
+
+                    if (connectionStatusListener != null) {
+                        // Notify error
+                    }
+                    if (callback != null) callback.onFailure(null, new Exception(errMessage));
                 }
-                if (callback != null) callback.onResponse(null, Response.success(null));
             }
 
             @Override

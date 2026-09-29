@@ -281,31 +281,8 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-    private static final long TWO_HOURS_MILLIS = 2 * 60 * 60 * 1000L; // 7,200,000 ms
-
     private void showContactAdminDialog(User user) {
         if (user == null || getContext() == null) return;
-
-        SharedPreferences prefs = requireContext().getSharedPreferences("aula_virtual_prefs", Context.MODE_PRIVATE);
-        long lastReportTime = prefs.getLong("KEY_LAST_REPORT_TIME_" + user.id, 0L);
-        long currentTime = System.currentTimeMillis();
-        long elapsed = currentTime - lastReportTime;
-
-        if (elapsed < TWO_HOURS_MILLIS) {
-            long remainingMillis = TWO_HOURS_MILLIS - elapsed;
-            long remainingMinutes = remainingMillis / (60 * 1000L);
-            long hours = remainingMinutes / 60;
-            long minutes = remainingMinutes % 60;
-
-            String timeMsg = (hours > 0 ? hours + " hora(s) y " : "") + minutes + " minuto(s)";
-
-            new MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("⏳ Límite de Tiempo de Reporte")
-                    .setMessage("Debes esperar " + timeMsg + " antes de enviar otro reporte a los Administradores.")
-                    .setPositiveButton("Entendido", null)
-                    .show();
-            return;
-        }
 
         MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Contactar con Administrador");
         LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
@@ -341,10 +318,11 @@ public class SettingsFragment extends Fragment {
                 String senderInfo = user.name + " (" + user.carnet + ")";
                 Notification notif = new Notification(title, message, "SUPPORT", null, senderInfo, "");
 
-                viewModel.insertNotification(notif, () -> {
-                    prefs.edit().putLong("KEY_LAST_REPORT_TIME_" + user.id, System.currentTimeMillis()).apply();
-                    Toast.makeText(getContext(), "¡Reporte enviado exitosamente a los Administradores!", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
+                viewModel.performOnlineAction(() -> {
+                    viewModel.insertNotification(notif, () -> {
+                        Toast.makeText(getContext(), "¡Reporte enviado exitosamente a los Administradores!", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    });
                 });
             }
         });

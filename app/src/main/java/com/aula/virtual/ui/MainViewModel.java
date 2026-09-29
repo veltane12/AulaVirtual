@@ -684,8 +684,12 @@ public class MainViewModel extends AndroidViewModel {
 
             @Override
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                fetchNotifications();
-                if (onSuccess != null) onSuccess.run();
+                if (t != null && t.getMessage() != null && !t.getMessage().isEmpty()) {
+                    modificationError.postValue(t.getMessage());
+                } else {
+                    fetchNotifications();
+                    if (onSuccess != null) onSuccess.run();
+                }
             }
         });
     }
