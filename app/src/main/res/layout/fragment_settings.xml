@@ -157,75 +157,35 @@
                     android:background="@color/bs_border"
                     android:layout_marginVertical="16dp"/>
 
-                <!-- Soporte y Ayuda: Contactar Administrador -->
-                <LinearLayout
-                    android:id="@+id/layoutContactAdminContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="16dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Soporte y Ayuda"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorPrimary"
-                        android:textAllCaps="true"
-                        android:layout_marginBottom="12dp"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnContactAdmin"
-                        style="@style/Widget.Material3.Button.OutlinedButton.Icon"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="✉️ Contactar con un Administrador"
-                        android:textAllCaps="false"
-                        app:strokeColor="?attr/colorPrimary"
-                        app:strokeWidth="1.5dp"
-                        android:textColor="?attr/colorPrimary"/>
-                </LinearLayout>
-
-                <!-- Categoria: Otros -->
+                <!-- Categoria: Opciones Avanzadas -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Otros"
+                    android:text="Configuración Avanzada"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorPrimary"
                     android:textAllCaps="true"
-                    android:layout_marginBottom="16dp"/>
+                    android:layout_marginBottom="8dp"/>
 
-                <GridLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:columnCount="2"
-                    android:layout_marginBottom="16dp">
+                    android:text="Modo de almacenamiento, conexión al servidor, soporte y seguridad de la cuenta."
+                    android:textSize="13sp"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:layout_marginBottom="16dp"/>
 
-                    <Button
-                        android:id="@+id/btnChangePassword"
-                        style="@style/Widget.Bootstrap.Button.Primary"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:layout_margin="4dp"
-                        android:text="Cambiar Contraseña"
-                        android:textAllCaps="false"/>
-
-                    <Button
-                        android:id="@+id/btnDownloadOfflineData"
-                        style="@style/Widget.Bootstrap.Button.Primary"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:layout_margin="4dp"
-                        android:text="Descargar Offline"
-                        android:textAllCaps="false"/>
-
-                </GridLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoToAdvancedSettings"
+                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⚙️ Ir a Ajustes Avanzados"
+                    android:textAllCaps="false"
+                    app:strokeColor="?attr/colorPrimary"
+                    app:strokeWidth="1.5dp"
+                    android:textColor="?attr/colorPrimary"/>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

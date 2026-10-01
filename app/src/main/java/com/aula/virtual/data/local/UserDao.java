@@ -24,6 +24,9 @@ public interface UserDao {
     @Query("SELECT * FROM users WHERE carnet = :carnet AND password = :password LIMIT 1")
     User login(String carnet, String password);
 
+    @Query("SELECT * FROM users")
+    List<User> getAllUsers();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(User user);
 

@@ -43,6 +43,7 @@ public class FacultyDetailFragment extends Fragment {
             }
         });
 
+        DialogUtils.showLoadingOverlay(binding.getRoot(), requireContext());
         viewModel.fetchFacultyById(facultyId);
     }
 
@@ -74,6 +75,7 @@ public class FacultyDetailFragment extends Fragment {
                     binding.btnDelete.setVisibility(View.VISIBLE);
                 }
                 DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
+                DialogUtils.hideLoadingOverlay(binding.getRoot());
             }
         });
     }

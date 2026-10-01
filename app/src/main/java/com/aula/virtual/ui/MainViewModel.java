@@ -1,6 +1,8 @@
 package com.aula.virtual.ui;
 
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -21,6 +23,9 @@ import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,6 +56,33 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<List<ScheduleInfo>> professorSchedulesList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isServerConnected = new MutableLiveData<>(true);
     private final MutableLiveData<String> modificationError = new MutableLiveData<>();
+
+    private final Handler keepAliveHandler = new Handler(Looper.getMainLooper());
+    private boolean isKeepAliveRunning = false;
+    private final Runnable keepAliveRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isKeepAliveRunning) {
+                if (!ThemeHelper.isLocalMode(getApplication())) {
+                    repository.checkServerHealth(null);
+                }
+                keepAliveHandler.postDelayed(this, 20000);
+            }
+        }
+    };
+
+    public void startKeepAlive() {
+        if (!isKeepAliveRunning) {
+            isKeepAliveRunning = true;
+            keepAliveHandler.removeCallbacks(keepAliveRunnable);
+            keepAliveHandler.post(keepAliveRunnable);
+        }
+    }
+
+    public void stopKeepAlive() {
+        isKeepAliveRunning = false;
+        keepAliveHandler.removeCallbacks(keepAliveRunnable);
+    }
 
     public MainViewModel(Application application) {
         super(application);
@@ -114,7 +146,7 @@ public class MainViewModel extends AndroidViewModel {
     public void clearModificationError() { modificationError.setValue(null); }
 
     public boolean performOnlineAction(Runnable action) {
-        if (Boolean.TRUE.equals(isServerConnected.getValue())) {
+        if (ThemeHelper.isLocalMode(getApplication()) || Boolean.TRUE.equals(isServerConnected.getValue())) {
             action.run();
             return true;
         } else {
@@ -647,6 +679,64 @@ public class MainViewModel extends AndroidViewModel {
 
     public void downloadAllDataForOffline(VirtualAulaRepository.SyncCallback callback) {
         repository.downloadAllDataForOffline(callback);
+    }
+
+    public void uploadAllOfflineDataToOnline(VirtualAulaRepository.SyncCallback callback) {
+        repository.uploadAllOfflineDataToOnline(callback);
+    }
+
+    public void clearAllOfflineData(VirtualAulaRepository.SyncCallback callback) {
+        repository.clearAllOfflineData(callback);
+    }
+
+    public void fetchSubjectFacilityMap(DataCallback<Map<Integer, String>> callback) {
+        Map<Integer, String> map = new HashMap<>();
+        repository.getAllFacilities(new Callback<List<Facility>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Facility>> call, @NonNull Response<List<Facility>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Facility> facs = response.body();
+                    if (facs.isEmpty()) {
+                        callback.onResult(map);
+                        return;
+                    }
+                    int[] pending = {facs.size()};
+                    for (Facility f : facs) {
+                        repository.getFacilitySchedules(f.id, new Callback<List<ScheduleInfo>>() {
+                            @Override
+                            public void onResponse(@NonNull Call<List<ScheduleInfo>> call, @NonNull Response<List<ScheduleInfo>> schResp) {
+                                if (schResp.isSuccessful() && schResp.body() != null) {
+                                    for (ScheduleInfo info : schResp.body()) {
+                                        if (info.schedule != null) {
+                                            map.put(info.schedule.subjectId, f.name);
+                                        }
+                                    }
+                                }
+                                pending[0]--;
+                                if (pending[0] <= 0) {
+                                    callback.onResult(map);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<List<ScheduleInfo>> call, @NonNull Throwable t) {
+                                pending[0]--;
+                                if (pending[0] <= 0) {
+                                    callback.onResult(map);
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    callback.onResult(map);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Facility>> call, @NonNull Throwable t) {
+                callback.onResult(map);
+            }
+        });
     }
 
     private final MutableLiveData<List<Notification>> allNotifications = new MutableLiveData<>();

@@ -13,6 +13,9 @@ public interface BlogDao {
     @Query("SELECT * FROM blog_entries WHERE subjectId = :subjectId ORDER BY position ASC")
     List<BlogEntry> getEntriesBySubject(int subjectId);
 
+    @Query("SELECT * FROM blog_entries")
+    List<BlogEntry> getAllEntries();
+
     @Query("SELECT * FROM blog_comments WHERE blogEntryId = :entryId ORDER BY id ASC")
     List<BlogComment> getCommentsByEntry(int entryId);
 

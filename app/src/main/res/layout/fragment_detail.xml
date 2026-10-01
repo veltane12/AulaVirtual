@@ -445,7 +445,7 @@
                 android:textAllCaps="false"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:backgroundTint="@color/bs_primary"
+                android:backgroundTint="?attr/colorPrimary"
                 android:visibility="gone"/>
 
             <Button

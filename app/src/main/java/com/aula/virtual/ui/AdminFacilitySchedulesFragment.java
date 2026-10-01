@@ -79,19 +79,23 @@ public class AdminFacilitySchedulesFragment extends Fragment {
             }
         });
 
-        binding.btnAdd.setText("Programar Clase");
+        binding.btnAdd.setText("➕ Programar Clase");
         binding.btnAdd.setOnClickListener(v -> showAddScheduleDialog(null));
         binding.spinnerFilter.setVisibility(View.GONE);
         binding.etSearch.setVisibility(View.GONE);
 
-        // Timetable action
+        // Make Timetable Card Header Action VISIBLE and Clickable!
+        binding.cardHeaderAction.setVisibility(View.VISIBLE);
         binding.btnHeaderAction.setVisibility(View.VISIBLE);
         binding.btnHeaderAction.setImageResource(R.drawable.ic_timetable);
-        binding.btnHeaderAction.setOnClickListener(v -> {
+        
+        View.OnClickListener openTimetable = v -> {
             Bundle args = new Bundle();
             args.putInt("facilityId", facilityId);
             Navigation.findNavController(view).navigate(R.id.action_adminFacilitySchedulesFragment_to_adminFacilityTimetableFragment, args);
-        });
+        };
+        binding.btnHeaderAction.setOnClickListener(openTimetable);
+        binding.cardHeaderAction.setOnClickListener(openTimetable);
     }
 
     private void observeViewModel() {
@@ -109,6 +113,11 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         viewModel.getFacilitySchedules(facilityId).observe(getViewLifecycleOwner(), schedules -> {
             currentSchedules = schedules;
             adapter.setSchedules(schedules);
+            if (schedules != null) {
+                binding.tvRecordCount.setText(schedules.size() + (schedules.size() == 1 ? " horario" : " horarios"));
+            } else {
+                binding.tvRecordCount.setText("0 horarios");
+            }
         });
     }
 

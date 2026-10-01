@@ -117,6 +117,22 @@ class NotificationDB(Base):
 # Crear tablas si no existen
 Base.metadata.create_all(bind=engine)
 
+def seed_initial_data():
+    try:
+        db = SessionLocal()
+        if not db.query(FacultyDB).filter(FacultyDB.id == 998).first():
+            db.add(FacultyDB(id=998, name="Docencia", description="Facultad obligatoria asignada automáticamente a todos los Profesores."))
+        if not db.query(FacultyDB).filter(FacultyDB.id == 999).first():
+            db.add(FacultyDB(id=999, name="Administrativa", description="Facultad obligatoria asignada automáticamente a todos los Administradores."))
+        if not db.query(UserDB).filter(UserDB.carnet == "ADMIN12345").first():
+            db.add(UserDB(carnet="ADMIN12345", name="Admin Maestro", password="ASD###", role="ADMIN", faculty="Administrativa"))
+        db.commit()
+        db.close()
+    except Exception as e:
+        print(f"Error seeding initial data in backend: {e}")
+
+seed_initial_data()
+
 # --- Esquemas Pydantic ---
 
 class UserBase(BaseModel):
@@ -879,6 +895,17 @@ def get_subject_participants(sub_id: int, db: Session = Depends(get_db)):
 
     return participants
 
+def get_local_ip():
+    try:
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
 if __name__ == "__main__":
     import uvicorn
 
@@ -897,9 +924,14 @@ if __name__ == "__main__":
     tunnel_thread = threading.Thread(target=start_tunnel, daemon=True)
     tunnel_thread.start()
 
+    local_ip = get_local_ip()
     print("===================================================")
-    print("    AULA VIRTUAL - FASTAPI + CLOUDFLARE TUNNEL")
+    print("    AULA VIRTUAL - SERVIDOR FASTAPI BACKEND")
     print("===================================================")
-    print("Iniciando servidor Uvicorn en http://localhost:8000 ...\n")
+    print(f"Servidor FastAPI ejecutándose en el puerto 8000:")
+    print(f"  • PC Localhost:            http://localhost:8000/")
+    print(f"  • Emulador Android Studio: http://10.0.2.2:8000/")
+    print(f"  • Red Local Wi-Fi:         http://{local_ip}:8000/")
+    print("===================================================\n")
 
     uvicorn.run(app, host="0.0.0.0", port=8000)

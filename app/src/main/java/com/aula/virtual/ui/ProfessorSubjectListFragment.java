@@ -40,10 +40,30 @@ public class ProfessorSubjectListFragment extends Fragment {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
 
-        User prof = viewModel.getCurrentUser().getValue();
-        if (prof != null) {
-            viewModel.getSubjectsByProfessor(prof.id).observe(getViewLifecycleOwner(), subjects -> {
+        int targetProfId = -1;
+        if (getArguments() != null && getArguments().containsKey("professorId")) {
+            targetProfId = getArguments().getInt("professorId");
+            binding.tvTitle.setText("Materias Asignadas al Profesor");
+        } else {
+            User prof = viewModel.getCurrentUser().getValue();
+            if (prof != null) targetProfId = prof.id;
+        }
+
+        if (targetProfId != -1) {
+            final int profId = targetProfId;
+            viewModel.getSubjectsByProfessor(profId).observe(getViewLifecycleOwner(), subjects -> {
                 adapter.setSubjects(subjects);
+                if (subjects != null) {
+                    binding.tvRecordCount.setText(subjects.size() + (subjects.size() == 1 ? " materia" : " materias"));
+                } else {
+                    binding.tvRecordCount.setText("0 materias");
+                }
+            });
+
+            viewModel.fetchSubjectFacilityMap(map -> {
+                if (adapter != null && map != null) {
+                    adapter.setFacilityMap(map);
+                }
             });
 
             binding.cardHeaderAction.setVisibility(View.VISIBLE);
@@ -51,7 +71,7 @@ public class ProfessorSubjectListFragment extends Fragment {
             
             View.OnClickListener openTimetable = v -> {
                 Bundle args = new Bundle();
-                args.putInt("professorId", prof.id);
+                args.putInt("professorId", profId);
                 Navigation.findNavController(view).navigate(R.id.action_professorSubjectListFragment_to_adminFacilityTimetableFragment, args);
             };
 

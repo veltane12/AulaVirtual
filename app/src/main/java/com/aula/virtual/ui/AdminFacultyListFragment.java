@@ -99,10 +99,11 @@ public class AdminFacultyListFragment extends Fragment {
 
     private void applyFilter() {
         String query = binding.etSearch.getText().toString().toLowerCase().trim();
-        String filterType = binding.spinnerFilter.getSelectedItem().toString();
+        String filterType = binding.spinnerFilter.getSelectedItem() != null ? binding.spinnerFilter.getSelectedItem().toString() : "Todo";
 
         if (query.isEmpty()) {
             adapter.setFaculties(allFaculties);
+            binding.tvRecordCount.setText(allFaculties.size() + (allFaculties.size() == 1 ? " registro" : " registros"));
             return;
         }
 
@@ -119,6 +120,7 @@ public class AdminFacultyListFragment extends Fragment {
         }).collect(Collectors.toList());
 
         adapter.setFaculties(filtered);
+        binding.tvRecordCount.setText(filtered.size() + (filtered.size() == 1 ? " registro" : " registros"));
     }
 
     private void showAddFacultyDialog() {

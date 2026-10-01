@@ -111,10 +111,11 @@ public class AdminStudentListFragment extends Fragment {
 
     private void applyFilter() {
         String query = binding.etSearch.getText().toString().toLowerCase().trim();
-        String filterType = binding.spinnerFilter.getSelectedItem().toString();
+        String filterType = binding.spinnerFilter.getSelectedItem() != null ? binding.spinnerFilter.getSelectedItem().toString() : "Todo";
 
         if (query.isEmpty()) {
             adapter.setStudents(allStudents);
+            binding.tvRecordCount.setText(allStudents.size() + (allStudents.size() == 1 ? " registro" : " registros"));
             return;
         }
 
@@ -138,6 +139,9 @@ public class AdminStudentListFragment extends Fragment {
             }
             return match;
         }).collect(Collectors.toList());
+
+        adapter.setStudents(filtered);
+        binding.tvRecordCount.setText(filtered.size() + (filtered.size() == 1 ? " registro" : " registros"));
 
         adapter.setStudents(filtered);
     }

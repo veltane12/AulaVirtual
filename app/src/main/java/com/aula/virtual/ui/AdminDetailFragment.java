@@ -53,6 +53,7 @@ public class AdminDetailFragment extends Fragment {
             }
         });
 
+        DialogUtils.showLoadingOverlay(binding.getRoot(), requireContext());
         viewModel.fetchUserById(adminId);
     }
 
@@ -208,9 +209,20 @@ public class AdminDetailFragment extends Fragment {
                     if ("PROFESSOR".equals(admin.role)) {
                         binding.cardImpersonateIndicator.setVisibility(View.VISIBLE);
                         binding.btnImpersonate.setVisibility(View.GONE);
+
+                        binding.btnManageGrades.setText("Gestionar Materias / Horario");
+                        binding.btnManageGrades.setVisibility(View.VISIBLE);
+                        binding.btnManageGrades.setEnabled(true);
+                        binding.btnManageGrades.setOnClickListener(v -> {
+                            if (admin == null) return;
+                            Bundle args = new Bundle();
+                            args.putInt("professorId", admin.id);
+                            Navigation.findNavController(requireView()).navigate(R.id.action_adminDetailFragment_to_professorSubjectListFragment, args);
+                        });
                     } else {
                         binding.cardImpersonateIndicator.setVisibility(View.GONE);
                         binding.btnImpersonate.setVisibility(View.GONE);
+                        binding.btnManageGrades.setVisibility(View.GONE);
                     }
                 } else {
                     binding.tvRolePrefix.setVisibility(View.GONE);
@@ -232,6 +244,7 @@ public class AdminDetailFragment extends Fragment {
                 }
 
                 DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
+                DialogUtils.hideLoadingOverlay(binding.getRoot());
             }
         });
 

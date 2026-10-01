@@ -40,6 +40,7 @@ import com.aula.virtual.data.entity.User;
 import com.aula.virtual.ui.DialogUtils;
 import com.aula.virtual.ui.MainViewModel;
 import com.aula.virtual.ui.ThemeHelper;
+import com.aula.virtual.ui.ToastUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             
             viewModel.refreshData();
             refreshCurrentDestination();
-            Toast.makeText(this, "Actualizando...", Toast.LENGTH_SHORT).show();
+            ToastUtils.showToast(this, "Actualizando...");
         });
         if (btnNotification != null) {
             btnNotification.setOnClickListener(v -> {
@@ -157,9 +158,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TextView tvStatus = findViewById(R.id.tvConnectionStatus);
+        if (ThemeHelper.isLocalMode(this)) {
+            tvStatus.setVisibility(View.GONE);
+        }
         
         viewModel.isServerConnected().observe(this, connected -> {
-            if (connected) {
+            if (ThemeHelper.isLocalMode(this) || Boolean.TRUE.equals(connected)) {
                 tvStatus.setVisibility(View.GONE);
             } else {
                 tvStatus.setVisibility(View.VISIBLE);
@@ -178,6 +182,22 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (viewModel != null) {
+            viewModel.startKeepAlive();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (viewModel != null) {
+            viewModel.stopKeepAlive();
+        }
     }
 
     @Override

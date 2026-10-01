@@ -55,9 +55,12 @@ public class ProfessorStudentListFragment extends Fragment {
         binding.recyclerView.setAdapter(adapter);
 
         viewModel.getStudentsBySubject(subjectId).observe(getViewLifecycleOwner(), studentInfos -> {
-            // Mapping StudentInSubjectInfo to StudentGradeInfo for the existing adapter
-            // Note: In a real app we might need a specific adapter, but let's reuse logic
             adapter.setGradeInfos(studentInfos); 
+            if (studentInfos != null) {
+                binding.tvRecordCount.setText(studentInfos.size() + (studentInfos.size() == 1 ? " alumno" : " alumnos"));
+            } else {
+                binding.tvRecordCount.setText("0 alumnos");
+            }
         });
 
         adapter.setOnGradeActionListener(new GradeAdapter.OnGradeActionListener() {

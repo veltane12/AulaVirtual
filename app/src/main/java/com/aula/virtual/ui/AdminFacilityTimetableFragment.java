@@ -142,22 +142,21 @@ public class AdminFacilityTimetableFragment extends Fragment {
                 dialogShown[0] = true;
                 requireActivity().runOnUiThread(() -> {
                     StringBuilder details = new StringBuilder();
-                    details.append("📚 Materia: ").append(info.subjectName != null ? info.subjectName : "N/A").append("\n");
+                    details.append("📚 Materia: ").append(info.subjectName != null && !info.subjectName.isEmpty() ? info.subjectName : "N/A").append("\n");
+                    
+                    String facName = (facility != null && facility.name != null && !facility.name.isEmpty()) ? facility.name : "N/A";
+                    details.append("🏢 Instalación: ").append(facName).append("\n");
+
                     if (subject != null) {
                         if (subject.description != null && !subject.description.isEmpty()) {
                             details.append("📝 Descripción: ").append(subject.description).append("\n");
                         }
-                    }
-                    if (facility != null && facility.name != null && !facility.name.isEmpty()) {
-                        details.append("🏢 Instalación: ").append(facility.name).append("\n");
-                    }
-                    if (subject != null) {
                         if (subject.faculty != null && !subject.faculty.isEmpty()) {
                             details.append("🏛️ Facultad: ").append(subject.faculty).append("\n");
                         }
                         details.append("📌 Sección: ").append(subject.section != null ? subject.section : "01").append("\n");
                     }
-                    details.append("👨‍🏫 Profesor: ").append(info.professorName != null ? info.professorName : "N/A").append("\n");
+                    details.append("👨‍🏫 Profesor: ").append(info.professorName != null && !info.professorName.isEmpty() ? info.professorName : "N/A").append("\n");
                     details.append("📅 Días: ").append(info.schedule.days != null ? info.schedule.days : "N/A").append("\n");
                     details.append("⏰ Hora: ").append(info.schedule.startTime).append(" - ").append(info.schedule.endTime);
 

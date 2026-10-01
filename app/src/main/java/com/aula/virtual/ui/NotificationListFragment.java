@@ -239,6 +239,11 @@ public class NotificationListFragment extends Fragment {
             }
         }
 
+        if (binding != null && binding.tvRecordCount != null) {
+            int total = queryFiltered.size();
+            binding.tvRecordCount.setText(total + (total == 1 ? " aviso" : " avisos"));
+        }
+
         // Render Channel Chips
         int activeThemeColor = ThemeHelper.getSubjectColor(requireContext(), ThemeHelper.getAccentColorName(requireContext()));
         renderChannelChips(generalNotifs, supportNotifs, studentNotifs, professorNotifs, adminNotifs, facultyNotifs, subjectNotifs, facilityNotifs, activeThemeColor);

@@ -12,9 +12,27 @@ public class ThemeHelper {
     private static final String KEY_IS_DARK_MODE = "is_dark_mode";
     private static final String KEY_ACCENT_COLOR = "accent_color";
     private static final String KEY_NAVBAR_POSITION = "navbar_position";
+    private static final String KEY_DATA_MODE = "data_mode";
 
     public static final String NAVBAR_POSITION_TOP = "TOP";
     public static final String NAVBAR_POSITION_BOTTOM = "BOTTOM";
+
+    public static final String MODE_LOCAL = "LOCAL";
+    public static final String MODE_SERVER = "SERVER";
+
+    public static String getDataMode(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(KEY_DATA_MODE, MODE_SERVER);
+    }
+
+    public static void setDataMode(Context context, String mode) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putString(KEY_DATA_MODE, mode).apply();
+    }
+
+    public static boolean isLocalMode(Context context) {
+        return MODE_LOCAL.equals(getDataMode(context));
+    }
 
     public static String getNavbarPosition(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -35,6 +53,8 @@ public class ThemeHelper {
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
+
+        context.setTheme(getAccentTheme(context));
     }
 
     public static int getAccentTheme(Context context) {

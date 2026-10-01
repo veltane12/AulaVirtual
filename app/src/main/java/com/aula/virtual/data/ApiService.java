@@ -23,6 +23,9 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
+    @GET("/")
+    Call<Map<String, Object>> healthCheck();
+
     // --- Users ---
     @GET("users/students")
     Call<List<User>> getStudents();

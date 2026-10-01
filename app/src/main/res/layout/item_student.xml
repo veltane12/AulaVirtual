@@ -34,7 +34,7 @@
             android:id="@+id/tvFaculty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/bs_primary"
+            android:textColor="?attr/colorPrimary"
             android:textSize="12sp"
             android:textStyle="italic" />
     </LinearLayout>

@@ -46,6 +46,7 @@ public class AdminFacilityDetailFragment extends Fragment {
             }
         });
 
+        DialogUtils.showLoadingOverlay(binding.getRoot(), requireContext());
         viewModel.refreshData(); // Ensure we have the latest facilities
     }
 
@@ -58,6 +59,10 @@ public class AdminFacilityDetailFragment extends Fragment {
         binding.etField3.setVisibility(View.VISIBLE);
         binding.etField3.setInputType(InputType.TYPE_CLASS_TEXT);
         binding.btnTogglePassword.setVisibility(View.GONE);
+
+        binding.btnSave.setEnabled(false);
+        binding.btnDelete.setEnabled(false);
+        binding.btnManageGrades.setEnabled(false);
 
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
@@ -77,6 +82,12 @@ public class AdminFacilityDetailFragment extends Fragment {
                     binding.etField1.setText(f.name);
                     binding.etField2.setText(f.type);
                     binding.etField3.setText(f.description);
+                    
+                    binding.btnSave.setEnabled(true);
+                    binding.btnDelete.setEnabled(true);
+                    binding.btnManageGrades.setEnabled(true);
+
+                    DialogUtils.hideLoadingOverlay(binding.getRoot());
                     break;
                 }
             }
@@ -121,6 +132,7 @@ public class AdminFacilityDetailFragment extends Fragment {
     }
 
     private void navigateToSchedules() {
+        if (facility == null) return;
         Bundle args = new Bundle();
         args.putInt("facilityId", facilityId);
         Navigation.findNavController(requireView()).navigate(R.id.action_adminFacilityDetailFragment_to_adminFacilitySchedulesFragment, args);

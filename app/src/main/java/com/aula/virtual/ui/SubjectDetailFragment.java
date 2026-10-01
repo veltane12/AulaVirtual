@@ -59,6 +59,7 @@ public class SubjectDetailFragment extends Fragment {
             }
         });
 
+        DialogUtils.showLoadingOverlay(binding.getRoot(), requireContext());
         viewModel.fetchSubjectById(subjectId);
     }
 
@@ -113,7 +114,7 @@ public class SubjectDetailFragment extends Fragment {
     }
 
     private void selectColor(String colorName) {
-        if (!Boolean.TRUE.equals(viewModel.isServerConnected().getValue())) {
+        if (!ThemeHelper.isLocalMode(requireContext()) && !Boolean.TRUE.equals(viewModel.isServerConnected().getValue())) {
             User currentUser = viewModel.getCurrentUser().getValue();
             if (currentUser != null && !"ADMIN".equals(currentUser.role)) {
                 Toast.makeText(getContext(), "No se puede cambiar el color fuera de línea", Toast.LENGTH_SHORT).show();
@@ -235,6 +236,8 @@ public class SubjectDetailFragment extends Fragment {
                 binding.etField2.setText(subject.description);
                 binding.etField3.setText(subject.faculty);
                 binding.etField4.setText(subject.section != null ? subject.section : "01");
+
+                DialogUtils.hideLoadingOverlay(binding.getRoot());
 
                 if (currentUser != null && !"ADMIN".equals(currentUser.role)) {
                     viewModel.getUserSubjectColor(currentUser.id, subject.id, color -> {

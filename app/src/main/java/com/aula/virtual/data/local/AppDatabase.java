@@ -1,9 +1,12 @@
 package com.aula.virtual.data.local;
 
 import android.content.Context;
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.sqlite.db.SupportSQLiteDatabase;
+
 import com.aula.virtual.data.entity.BlogComment;
 import com.aula.virtual.data.entity.BlogEntry;
 import com.aula.virtual.data.entity.Enrollment;
@@ -54,11 +57,38 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class,
                             "aula_virtual_db"
                     )
+                    .addCallback(new Callback() {
+                        @Override
+                        public void onCreate(@NonNull SupportSQLiteDatabase db) {
+                            super.onCreate(db);
+                            seedInitialData(db);
+                        }
+
+                        @Override
+                        public void onOpen(@NonNull SupportSQLiteDatabase db) {
+                            super.onOpen(db);
+                            seedInitialData(db);
+                        }
+                    })
                     .fallbackToDestructiveMigration()
                     .build();
                 }
             }
         }
         return INSTANCE;
+    }
+
+    private static void seedInitialData(SupportSQLiteDatabase db) {
+        db.execSQL("INSERT INTO faculties (id, name, description) " +
+                "SELECT 998, 'Docencia', 'Facultad obligatoria asignada automáticamente a todos los Profesores.' " +
+                "WHERE NOT EXISTS (SELECT 1 FROM faculties WHERE id = 998);");
+
+        db.execSQL("INSERT INTO faculties (id, name, description) " +
+                "SELECT 999, 'Administrativa', 'Facultad obligatoria asignada automáticamente a todos los Administradores.' " +
+                "WHERE NOT EXISTS (SELECT 1 FROM faculties WHERE id = 999);");
+
+        db.execSQL("INSERT INTO users (carnet, name, password, role, faculty, can_change_photo) " +
+                "SELECT 'ADMIN12345', 'Admin Maestro', 'ASD###', 'ADMIN', 'Administrativa', 1 " +
+                "WHERE NOT EXISTS (SELECT 1 FROM users WHERE carnet = 'ADMIN12345');");
     }
 }

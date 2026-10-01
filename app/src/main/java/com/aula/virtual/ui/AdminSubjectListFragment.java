@@ -110,10 +110,11 @@ public class AdminSubjectListFragment extends Fragment {
 
     private void applyFilter() {
         String query = binding.etSearch.getText().toString().toLowerCase().trim();
-        String filterType = binding.spinnerFilter.getSelectedItem().toString();
+        String filterType = binding.spinnerFilter.getSelectedItem() != null ? binding.spinnerFilter.getSelectedItem().toString() : "Todo";
 
         if (query.isEmpty()) {
             adapter.setSubjects(allSubjects);
+            binding.tvRecordCount.setText(allSubjects.size() + (allSubjects.size() == 1 ? " registro" : " registros"));
             return;
         }
 
@@ -134,6 +135,7 @@ public class AdminSubjectListFragment extends Fragment {
         }).collect(Collectors.toList());
 
         adapter.setSubjects(filtered);
+        binding.tvRecordCount.setText(filtered.size() + (filtered.size() == 1 ? " registro" : " registros"));
     }
 
     private void showAddSubjectDialog() {

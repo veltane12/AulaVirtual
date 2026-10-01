@@ -44,7 +44,7 @@ public class AdminEnrollmentListFragment extends Fragment {
         
         studentId = getArguments().getInt("studentId");
 
-        binding.tvTitle.setText("Inscripciones del Alumno");
+        binding.tvTitle.setText("Mis Materias");
         viewModel.getUserById(studentId, user -> {
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
@@ -56,9 +56,28 @@ public class AdminEnrollmentListFragment extends Fragment {
             }
         });
 
+        // Timetable Header Action for Student
+        binding.cardHeaderAction.setVisibility(View.VISIBLE);
+        binding.btnHeaderAction.setVisibility(View.VISIBLE);
+        binding.btnHeaderAction.setImageResource(R.drawable.ic_timetable);
+        
+        View.OnClickListener openStudentTimetable = v -> {
+            Bundle args = new Bundle();
+            args.putInt("studentId", studentId);
+            Navigation.findNavController(view).navigate(R.id.action_adminEnrollmentListFragment_to_adminFacilityTimetableFragment, args);
+        };
+        binding.btnHeaderAction.setOnClickListener(openStudentTimetable);
+        binding.cardHeaderAction.setOnClickListener(openStudentTimetable);
+
         adapter = new GradeAdapter(true);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
+
+        viewModel.fetchSubjectFacilityMap(map -> {
+            if (adapter != null && map != null) {
+                adapter.setFacilityMap(map);
+            }
+        });
 
         viewModel.getModificationError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
@@ -67,7 +86,14 @@ public class AdminEnrollmentListFragment extends Fragment {
             }
         });
 
-        viewModel.getGradeInfoForStudent(studentId).observe(getViewLifecycleOwner(), gradeInfos -> adapter.setGradeInfos(gradeInfos));
+        viewModel.getGradeInfoForStudent(studentId).observe(getViewLifecycleOwner(), gradeInfos -> {
+            adapter.setGradeInfos(gradeInfos);
+            if (gradeInfos != null) {
+                binding.tvRecordCount.setText(gradeInfos.size() + (gradeInfos.size() == 1 ? " materia" : " materias"));
+            } else {
+                binding.tvRecordCount.setText("0 materias");
+            }
+        });
 
         adapter.setOnGradeActionListener(new GradeAdapter.OnGradeActionListener() {
             @Override

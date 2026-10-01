@@ -208,8 +208,18 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.aula.virtual.ui.SettingsFragment"
-        android:label="Ajustes"
-        tools:layout="@layout/fragment_settings" />
+        android:label="Ajustes de Apariencia"
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settingsFragment_to_settingsAdvancedFragment"
+            app:destination="@id/settingsAdvancedFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsAdvancedFragment"
+        android:name="com.aula.virtual.ui.SettingsAdvancedFragment"
+        android:label="Ajustes Avanzados"
+        tools:layout="@layout/fragment_settings_advanced" />
 
     <fragment
         android:id="@+id/studentDetailFragment"
@@ -267,6 +277,12 @@
         <action
             android:id="@+id/action_adminDetailFragment_to_studentHomeFragment"
             app:destination="@id/studentHomeFragment" />
+        <action
+            android:id="@+id/action_adminDetailFragment_to_professorSubjectListFragment"
+            app:destination="@id/professorSubjectListFragment" />
+        <action
+            android:id="@+id/action_adminDetailFragment_to_adminFacilityTimetableFragment"
+            app:destination="@id/adminFacilityTimetableFragment" />
     </fragment>
 
     <fragment
@@ -283,6 +299,9 @@
         <action
             android:id="@+id/action_adminEnrollmentListFragment_to_subjectBlogFragment"
             app:destination="@id/subjectBlogFragment" />
+        <action
+            android:id="@+id/action_adminEnrollmentListFragment_to_adminFacilityTimetableFragment"
+            app:destination="@id/adminFacilityTimetableFragment" />
     </fragment>
 
     <fragment

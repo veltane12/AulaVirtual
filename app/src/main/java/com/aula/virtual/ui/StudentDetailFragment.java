@@ -56,6 +56,7 @@ public class StudentDetailFragment extends Fragment {
             }
         });
 
+        DialogUtils.showLoadingOverlay((ViewGroup) binding.getRoot(), requireContext());
         viewModel.fetchUserById(studentId);
     }
 
@@ -111,6 +112,10 @@ public class StudentDetailFragment extends Fragment {
         binding.btnManageGrades.setVisibility(View.VISIBLE);
         binding.btnImpersonate.setVisibility(View.GONE);
 
+        binding.btnSave.setEnabled(false);
+        binding.btnDelete.setEnabled(false);
+        binding.btnManageGrades.setEnabled(false);
+
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
         binding.btnManageGrades.setOnClickListener(v -> navigateToGrades());
@@ -165,7 +170,12 @@ public class StudentDetailFragment extends Fragment {
                 int paddingPx = (int) (16 * getResources().getDisplayMetrics().density);
                 ImageUtils.setProfileImage(binding.ivProfileImageDetail, student.profile_image, paddingPx);
 
+                binding.btnSave.setEnabled(true);
+                binding.btnDelete.setEnabled(true);
+                binding.btnManageGrades.setEnabled(true);
+
                 DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
+                DialogUtils.hideLoadingOverlay(binding.getRoot());
             }
         });
 
@@ -257,6 +267,7 @@ public class StudentDetailFragment extends Fragment {
     }
 
     private void navigateToGrades() {
+        if (student == null) return;
         Bundle args = new Bundle();
         args.putInt("studentId", student.id);
         Navigation.findNavController(requireView()).navigate(R.id.action_studentDetailFragment_to_adminEnrollmentListFragment, args);

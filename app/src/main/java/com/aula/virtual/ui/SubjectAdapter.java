@@ -10,10 +10,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.aula.virtual.R;
 import com.aula.virtual.data.entity.Subject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHolder> {
     private List<Subject> subjects = new ArrayList<>();
+    private Map<Integer, String> facilityMap = new HashMap<>();
     private OnItemClickListener listener;
 
     public interface OnItemClickListener {
@@ -27,6 +30,13 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
     public void setSubjects(List<Subject> subjects) {
         this.subjects = subjects;
         notifyDataSetChanged();
+    }
+
+    public void setFacilityMap(Map<Integer, String> map) {
+        if (map != null) {
+            this.facilityMap = map;
+            notifyDataSetChanged();
+        }
     }
 
     @NonNull
@@ -45,6 +55,16 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
         holder.tvFaculty.setText(subject.faculty != null ? subject.faculty : "Sin Facultad");
         holder.tvSection.setText(subject.section != null ? "Sección: " + subject.section : "Sección: 01");
         holder.tvDescription.setText(subject.description != null ? subject.description : "");
+
+        if (holder.tvFacility != null) {
+            String facName = facilityMap.get(subject.id);
+            if (facName != null && !facName.isEmpty()) {
+                holder.tvFacility.setText("🏢 Instalación: " + facName);
+                holder.tvFacility.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvFacility.setVisibility(View.GONE);
+            }
+        }
         
         holder.btnManage.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(subject);
@@ -57,7 +77,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvFaculty, tvDescription, tvSection;
+        TextView tvName, tvFaculty, tvDescription, tvSection, tvFacility;
         Button btnManage;
 
         ViewHolder(View itemView) {
@@ -66,6 +86,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
             tvFaculty = itemView.findViewById(R.id.tvFaculty);
             tvSection = itemView.findViewById(R.id.tvSection);
             tvDescription = itemView.findViewById(R.id.tvDescription);
+            tvFacility = itemView.findViewById(R.id.tvFacility);
             btnManage = itemView.findViewById(R.id.btnManage);
         }
     }
