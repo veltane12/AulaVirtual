@@ -153,9 +153,9 @@ public class AdminDetailFragment extends Fragment {
                 
                 // Dynamic Title based on role
                 if ("PROFESSOR".equals(admin.role)) {
-                    binding.tvDetailTitle.setText("Detalle Prof.");
+                    binding.tvDetailTitle.setText("Detalle Administrador");
                 } else if ("ADMIN".equals(admin.role)) {
-                    binding.tvDetailTitle.setText("Detalle Admin.");
+                    binding.tvDetailTitle.setText("Detalle Administrador");
                 }
 
                 binding.etField1.setText(admin.name);
@@ -209,16 +209,7 @@ public class AdminDetailFragment extends Fragment {
                     if ("PROFESSOR".equals(admin.role)) {
                         binding.cardImpersonateIndicator.setVisibility(View.VISIBLE);
                         binding.btnImpersonate.setVisibility(View.GONE);
-
-                        binding.btnManageGrades.setText("Gestionar Materias / Horario");
-                        binding.btnManageGrades.setVisibility(View.VISIBLE);
-                        binding.btnManageGrades.setEnabled(true);
-                        binding.btnManageGrades.setOnClickListener(v -> {
-                            if (admin == null) return;
-                            Bundle args = new Bundle();
-                            args.putInt("professorId", admin.id);
-                            Navigation.findNavController(requireView()).navigate(R.id.action_adminDetailFragment_to_professorSubjectListFragment, args);
-                        });
+                        binding.btnManageGrades.setVisibility(View.GONE);
                     } else {
                         binding.cardImpersonateIndicator.setVisibility(View.GONE);
                         binding.btnImpersonate.setVisibility(View.GONE);
@@ -337,13 +328,15 @@ public class AdminDetailFragment extends Fragment {
     private void showDeleteConfirmation() {
         new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Confirmar Eliminación")
-            .setMessage("¿Estás seguro de que deseas eliminar este perfil administrativo?")
+            .setMessage("¿Estás seguro de que deseas eliminar este perfil?")
             .setPositiveButton("Eliminar", (dialog, which) -> {
                 if (admin != null) {
                     viewModel.performOnlineAction(() -> {
                         viewModel.deleteUser(admin);
-                        Toast.makeText(getContext(), "Administrador eliminado", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(requireView()).popBackStack();
+                        Toast.makeText(getContext(), "Perfil eliminado", Toast.LENGTH_SHORT).show();
+                        if (!Navigation.findNavController(requireView()).popBackStack(R.id.adminProfessorListFragment, false)) {
+                            Navigation.findNavController(requireView()).popBackStack();
+                        }
                     });
                 }
             })

@@ -15,7 +15,7 @@ public interface SubjectDao {
     @Query("SELECT * FROM subjects WHERE id = :id LIMIT 1")
     Subject getSubjectById(int id);
 
-    @Query("SELECT DISTINCT subjects.* FROM subjects INNER JOIN facility_schedules ON subjects.id = facility_schedules.subjectId WHERE facility_schedules.professorId = :profId")
+    @Query("SELECT DISTINCT * FROM subjects WHERE professorId = :profId OR id IN (SELECT subjectId FROM facility_schedules WHERE professorId = :profId)")
     List<Subject> getSubjectsByProfessor(int profId);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -109,12 +109,11 @@ public class StudentDetailFragment extends Fragment {
         binding.layoutPersonalEmail.setVisibility(View.VISIBLE);
         binding.switchLockPhoto.setVisibility(View.VISIBLE);
         
-        binding.btnManageGrades.setVisibility(View.VISIBLE);
+        binding.btnManageGrades.setVisibility(View.GONE);
         binding.btnImpersonate.setVisibility(View.GONE);
 
         binding.btnSave.setEnabled(false);
         binding.btnDelete.setEnabled(false);
-        binding.btnManageGrades.setEnabled(false);
 
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
@@ -258,7 +257,9 @@ public class StudentDetailFragment extends Fragment {
                     viewModel.performOnlineAction(() -> {
                         viewModel.deleteUser(student);
                         Toast.makeText(getContext(), "Estudiante eliminado", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(requireView()).popBackStack();
+                        if (!Navigation.findNavController(requireView()).popBackStack(R.id.adminStudentListFragment, false)) {
+                            Navigation.findNavController(requireView()).popBackStack();
+                        }
                     });
                 }
             })

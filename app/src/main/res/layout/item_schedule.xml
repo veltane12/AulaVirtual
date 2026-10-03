@@ -23,15 +23,38 @@
             android:text="Materia"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_marginBottom="2dp" />
 
-        <TextView
-            android:id="@+id/tvScheduleProfessor"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Profesor"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="14sp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="2dp">
+
+            <TextView
+                android:id="@+id/tvScheduleProfessor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Profesor"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvScheduleSection"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Sección 01"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="1dp"
+                android:background="@drawable/bg_badge_primary"
+                android:textColor="@color/white"
+                android:visibility="visible" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvScheduleTime"

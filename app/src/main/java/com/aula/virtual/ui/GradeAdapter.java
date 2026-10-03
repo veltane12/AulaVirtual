@@ -20,6 +20,7 @@ import java.util.Map;
 public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> {
     private List<StudentGradeInfo> gradeInfos = new ArrayList<>();
     private final boolean isAdmin;
+    private boolean isStudentList = false;
     private OnGradeActionListener listener;
 
     public interface OnGradeActionListener {
@@ -32,7 +33,12 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
     private Map<Integer, String> facilityMap = new HashMap<>();
 
     public GradeAdapter(boolean isAdmin) {
+        this(isAdmin, false);
+    }
+
+    public GradeAdapter(boolean isAdmin, boolean isStudentList) {
         this.isAdmin = isAdmin;
+        this.isStudentList = isStudentList;
     }
 
     public void setOnGradeActionListener(OnGradeActionListener listener) {
@@ -63,37 +69,50 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
         StudentGradeInfo info = gradeInfos.get(position);
         if (info == null) return;
         
-        if (isAdmin && info.student != null) {
-            // Professor view: Show student name and profile button
-            holder.tvName.setText(info.student.name);
+        if (isStudentList) {
+            // Professor view in ProfessorStudentListFragment: Each row is a Student
+            holder.tvName.setText(info.student != null ? info.student.name : "Alumno");
+            if (holder.tvSection != null) {
+                holder.tvSection.setVisibility(View.GONE);
+            }
             holder.btnBlog.setVisibility(View.GONE);
-            holder.tvName.setOnClickListener(null);
-            holder.tvName.setClickable(false);
             holder.btnProfile.setVisibility(View.VISIBLE);
             holder.btnProfile.setOnClickListener(v -> {
                 if (listener != null) listener.onStudentClick(info);
             });
-        } else if (isAdmin) {
-            // Admin view (AdminEnrollmentListFragment): Show subject name and direct "Foro" button
-            holder.tvName.setText(info.subject != null ? info.subject.name : "Materia Desconocida");
-            holder.btnBlog.setText("Foro");
-            holder.btnBlog.setVisibility(View.VISIBLE);
-            holder.tvName.setClickable(false);
-            holder.tvName.setOnClickListener(null);
-            holder.btnProfile.setVisibility(View.GONE);
-            holder.btnBlog.setOnClickListener(v -> {
-                if (listener != null) listener.onViewBlog(info);
+            holder.btnEdit.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            holder.btnEdit.setOnClickListener(v -> {
+                if (listener != null) listener.onEditGrades(info);
             });
+            holder.btnDelete.setVisibility(View.GONE);
         } else {
-            // Student view: Show subject name, "Gestión" button that opens SubjectDetailFragment
+            // Subject view in AdminEnrollmentListFragment & Student views: Each row is a Subject
             holder.tvName.setText(info.subject != null ? info.subject.name : "Materia Desconocida");
-            holder.btnBlog.setText("Gestión");
+            if (holder.tvSection != null) {
+                if (info.subject != null) {
+                    String sec = (info.subject.section != null && !info.subject.section.isEmpty()) ? info.subject.section : "01";
+                    holder.tvSection.setText("Sección " + sec);
+                    holder.tvSection.setVisibility(View.VISIBLE);
+                } else {
+                    holder.tvSection.setVisibility(View.GONE);
+                }
+            }
+            holder.btnProfile.setVisibility(View.GONE); // No Profile button for subject cards
+            holder.btnBlog.setText("Gestionar");
             holder.btnBlog.setVisibility(View.VISIBLE);
-            holder.tvName.setClickable(false);
-            holder.tvName.setOnClickListener(null);
-            holder.btnProfile.setVisibility(View.GONE);
             holder.btnBlog.setOnClickListener(v -> {
-                if (listener != null) listener.onStudentClick(info);
+                if (listener != null) {
+                    if (isAdmin) listener.onViewBlog(info);
+                    else listener.onStudentClick(info);
+                }
+            });
+            holder.btnEdit.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            holder.btnEdit.setOnClickListener(v -> {
+                if (listener != null) listener.onEditGrades(info);
+            });
+            holder.btnDelete.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            holder.btnDelete.setOnClickListener(v -> {
+                if (listener != null) listener.onDeleteEnrollment(info);
             });
         }
 
@@ -158,23 +177,7 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
             holder.tvAverage.setTextColor(secondary);
         }
 
-        if (isAdmin) {
-            holder.btnEdit.setVisibility(View.VISIBLE);
-            holder.btnEdit.setOnClickListener(v -> {
-                if (listener != null) listener.onEditGrades(info);
-            });
-        } else {
-            holder.btnEdit.setVisibility(View.GONE);
-        }
 
-        if (isAdmin && info.student == null) {
-            holder.btnDelete.setVisibility(View.VISIBLE);
-            holder.btnDelete.setOnClickListener(v -> {
-                if (listener != null) listener.onDeleteEnrollment(info);
-            });
-        } else {
-            holder.btnDelete.setVisibility(View.GONE);
-        }
 
 
     }
@@ -206,12 +209,13 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvFacility, tvP1, tvP2, tvP3, tvP4, tvP5, tvAverage;
+        TextView tvName, tvSection, tvFacility, tvP1, tvP2, tvP3, tvP4, tvP5, tvAverage;
         Button btnBlog, btnEdit, btnDelete, btnProfile;
 
         ViewHolder(View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvSubjectName);
+            tvSection = itemView.findViewById(R.id.tvSection);
             tvFacility = itemView.findViewById(R.id.tvFacility);
             tvP1 = itemView.findViewById(R.id.tvP1);
             tvP2 = itemView.findViewById(R.id.tvP2);

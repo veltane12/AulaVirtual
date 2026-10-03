@@ -43,6 +43,11 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
         if (info == null) return;
         
         holder.tvSubject.setText(info.subjectName);
+        if (holder.tvSection != null) {
+            String sec = (info.subjectSection != null && !info.subjectSection.isEmpty()) ? info.subjectSection : "01";
+            holder.tvSection.setText("Sección " + sec);
+            holder.tvSection.setVisibility(View.VISIBLE);
+        }
         holder.tvProfessor.setText(info.professorName);
         holder.tvTime.setText(info.schedule.days + " | " + info.schedule.startTime + " - " + info.schedule.endTime);
         
@@ -56,12 +61,13 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvSubject, tvProfessor, tvTime;
+        TextView tvSubject, tvSection, tvProfessor, tvTime;
         ImageButton btnDelete, btnEdit;
 
         ViewHolder(View itemView) {
             super(itemView);
             tvSubject = itemView.findViewById(R.id.tvScheduleSubject);
+            tvSection = itemView.findViewById(R.id.tvScheduleSection);
             tvProfessor = itemView.findViewById(R.id.tvScheduleProfessor);
             tvTime = itemView.findViewById(R.id.tvScheduleTime);
             btnDelete = itemView.findViewById(R.id.btnDeleteSchedule);

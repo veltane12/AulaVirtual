@@ -45,7 +45,7 @@ public class AdminFacultyListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        binding.tvTitle.setText("Gestión de Facultades");
+        binding.tvTitle.setText("Listado de Facultades");
         adapter = new FacultyAdapter();
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);

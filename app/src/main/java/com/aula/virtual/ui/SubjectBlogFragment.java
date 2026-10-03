@@ -99,6 +99,14 @@ public class SubjectBlogFragment extends Fragment {
             Navigation.findNavController(view).navigate(R.id.action_subjectBlogFragment_to_subjectParticipantsFragment, args);
         });
 
+        View.OnClickListener openSubjectDetail = v -> {
+            Bundle args = new Bundle();
+            args.putInt("subjectId", subjectId);
+            Navigation.findNavController(view).navigate(R.id.action_subjectBlogFragment_to_subjectDetailFragment, args);
+        };
+        binding.cardSubjectDetailBlog.setOnClickListener(openSubjectDetail);
+        binding.btnSubjectDetailBlog.setOnClickListener(openSubjectDetail);
+
         // Start polling
         pollHandler.postDelayed(pollRunnable, POLL_INTERVAL);
     }

@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import com.aula.virtual.R;
 import com.aula.virtual.data.StudentGradeInfo;
@@ -224,7 +225,7 @@ public class SubjectDetailFragment extends Fragment {
             binding.btnSave.setText("Guardar Cambios");
             binding.btnSave.setVisibility(View.VISIBLE);
             binding.btnManageStudents.setVisibility(View.GONE);
-            binding.btnManageBlog.setVisibility(View.VISIBLE);
+            binding.btnManageBlog.setVisibility(View.GONE);
         }
 
         DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
@@ -378,6 +379,23 @@ public class SubjectDetailFragment extends Fragment {
         }
     }
 
+    private void popBackToManagementMenu() {
+        NavController navController = Navigation.findNavController(requireView());
+        if (navController.popBackStack(R.id.adminSubjectListFragment, false)) {
+            return;
+        }
+        if (navController.popBackStack(R.id.adminEnrollmentListFragment, false)) {
+            return;
+        }
+        if (navController.popBackStack(R.id.professorSubjectListFragment, false)) {
+            return;
+        }
+        if (navController.popBackStack(R.id.studentDashboardFragment, false)) {
+            return;
+        }
+        navController.popBackStack();
+    }
+
     private void showDeleteConfirmation() {
         new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Confirmar Eliminación")
@@ -386,8 +404,8 @@ public class SubjectDetailFragment extends Fragment {
                 if (subject != null) {
                     viewModel.performOnlineAction(() -> {
                         viewModel.deleteSubject(subject);
-                        Toast.makeText(getContext(), "Materiaidn gerental", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(requireView()).popBackStack();
+                        Toast.makeText(getContext(), "Materia eliminada", Toast.LENGTH_SHORT).show();
+                        popBackToManagementMenu();
                     });
                 }
             })

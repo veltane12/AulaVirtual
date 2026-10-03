@@ -3,16 +3,8 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- School Icon (Cap) -->
+    <!-- School Graduation Cap Icon Centered, pure white for system launcher compatibility -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M54,32L24,44L54,56L79,44V59H84V44L54,32ZM34,51.33V58.33C34,64.22 42.95,69 54,69C65.05,69 74,64.22 74,58.33V51.33L54,60.33L34,51.33Z" />
-    <!-- Grade Badge (Small Circle) -->
-    <path
-        android:fillColor="#198754"
-        android:pathData="M80,75m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0" />
-    <!-- A+ Symbol -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M78,71H82L85,81H81.5L80,77.5H76.5L75,81H71.5L78,71ZM79,74.5L77,76.5H81L79,74.5ZM86,74V76H84V78H86V80H88V78H90V76H88V74H86Z" />
 </vector>

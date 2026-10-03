@@ -50,7 +50,7 @@ public class ProfessorStudentListFragment extends Fragment {
         binding.spinnerFilter.setVisibility(View.GONE);
         binding.etSearch.setHint("Buscar alumno...");
 
-        adapter = new GradeAdapter(true); // Professor can edit grades
+        adapter = new GradeAdapter(true, true); // Professor viewing student list
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
 

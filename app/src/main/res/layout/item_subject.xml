@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_toStartOf="@id/btnManage"
+        android:layout_toStartOf="@id/layoutButtons"
         android:orientation="vertical">
 
         <TextView
@@ -26,7 +26,8 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp">
 
             <TextView
                 android:id="@+id/tvFaculty"
@@ -41,9 +42,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="1dp"
+                android:background="@drawable/bg_badge_primary"
+                android:textColor="@color/white" />
         </LinearLayout>
 
         <TextView
@@ -65,20 +69,52 @@
             android:layout_marginTop="2dp" />
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnManage"
-        style="@style/Widget.Material3.Button.TonalButton"
+    <LinearLayout
+        android:id="@+id/layoutButtons"
         android:layout_width="wrap_content"
-        android:layout_height="36dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:text="Gestionar"
-        android:textSize="11sp"
-        android:textAllCaps="false"
-        app:cornerRadius="18dp"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        app:backgroundTint="?attr/colorPrimary"
-        android:textColor="@color/white"/>
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnManage"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:minHeight="0dp"
+            android:text="Gestionar"
+            android:textSize="11sp"
+            android:textAllCaps="false"
+            app:cornerRadius="18dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:backgroundTint="?attr/colorPrimary"
+            android:textColor="@color/white"
+            android:layout_marginEnd="4dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeleteSubject"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:minHeight="0dp"
+            android:padding="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            app:cornerRadius="18dp"
+            app:icon="@drawable/ic_delete"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="18dp"
+            app:backgroundTint="@color/bs_danger"
+            app:iconTint="@color/white"
+            android:layout_marginStart="4dp"
+            android:contentDescription="Desinscribir"
+            android:visibility="gone"/>
+
+    </LinearLayout>
 
 </RelativeLayout>

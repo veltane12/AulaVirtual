@@ -100,9 +100,9 @@ public class BlogCommentAdapter extends RecyclerView.Adapter<BlogCommentAdapter.
             }
         }
 
-        // Long click for deletion if it's mine or I'm admin
+        // Long click for message options
         holder.itemView.setOnLongClickListener(v -> {
-            if (listener != null && (info.comment.userId == currentUserId || isAdmin)) {
+            if (listener != null) {
                 listener.onLongClick(info.comment);
                 return true;
             }

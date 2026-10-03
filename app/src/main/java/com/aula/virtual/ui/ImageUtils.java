@@ -93,28 +93,30 @@ public class ImageUtils {
         if (iv == null) return;
         Context context = iv.getContext();
         
+        iv.setImageTintList(null);
+
         if (profileImage != null && !profileImage.isEmpty()) {
             Bitmap bitmap = base64ToBitmap(profileImage);
             if (bitmap != null) {
                 iv.setPadding(0, 0, 0, 0);
                 iv.setImageBitmap(bitmap);
-                iv.setImageTintList(null);
                 if (iv.getParent() instanceof CardView) {
                     CardView card = (CardView) iv.getParent();
-                    card.setCardBackgroundColor(Color.TRANSPARENT);
-                    card.setCardElevation(dpToPx(context, 4));
+                    card.setCardBackgroundColor(Color.WHITE);
+                    card.setCardElevation(dpToPx(context, 2));
                 }
                 return;
             }
         }
 
-        iv.setPadding(0, 0, 0, 0);
+        int accentColor = ThemeHelper.getSubjectColor(context, ThemeHelper.getAccentColorName(context));
+        int pad = dpToPx(context, 8);
+        iv.setPadding(pad, pad, pad, pad);
         iv.setImageResource(R.drawable.ic_person_badge);
-        iv.setImageTintList(null);
         if (iv.getParent() instanceof CardView) {
             CardView card = (CardView) iv.getParent();
-            card.setCardBackgroundColor(Color.TRANSPARENT);
-            card.setCardElevation(dpToPx(context, 4));
+            card.setCardBackgroundColor(accentColor);
+            card.setCardElevation(dpToPx(context, 2));
         }
     }
 

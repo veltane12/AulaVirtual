@@ -145,6 +145,13 @@ public class MainViewModel extends AndroidViewModel {
 
     public void clearModificationError() { modificationError.setValue(null); }
 
+    public boolean isProfOrStudentInLocalMode() {
+        if (!ThemeHelper.isLocalMode(getApplication())) return false;
+        User user = currentUser.getValue();
+        if (user == null) return false;
+        return "PROFESSOR".equals(user.role) || "STUDENT".equals(user.role);
+    }
+
     public boolean performOnlineAction(Runnable action) {
         if (ThemeHelper.isLocalMode(getApplication()) || Boolean.TRUE.equals(isServerConnected.getValue())) {
             action.run();
@@ -678,14 +685,26 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void downloadAllDataForOffline(VirtualAulaRepository.SyncCallback callback) {
+        if (isProfOrStudentInLocalMode()) {
+            if (callback != null) callback.onError("Acción no permitida: Los Profesores y Estudiantes no pueden descargar datos del servidor en Modo Local.");
+            return;
+        }
         repository.downloadAllDataForOffline(callback);
     }
 
     public void uploadAllOfflineDataToOnline(VirtualAulaRepository.SyncCallback callback) {
+        if (isProfOrStudentInLocalMode()) {
+            if (callback != null) callback.onError("Acción no permitida: Los Profesores y Estudiantes no pueden subir datos al servidor en Modo Local.");
+            return;
+        }
         repository.uploadAllOfflineDataToOnline(callback);
     }
 
     public void clearAllOfflineData(VirtualAulaRepository.SyncCallback callback) {
+        if (isProfOrStudentInLocalMode()) {
+            if (callback != null) callback.onError("Acción no permitida: Los Profesores y Estudiantes no pueden eliminar datos de la aplicación en Modo Local.");
+            return;
+        }
         repository.clearAllOfflineData(callback);
     }
 

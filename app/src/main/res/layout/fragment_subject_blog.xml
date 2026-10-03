@@ -22,30 +22,62 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/btnViewParticipantsBlog"
+                android:layout_toStartOf="@id/layoutHeaderActionsBlog"
                 android:text="Foro de Discusión"
-                android:textSize="24sp"
+                android:textSize="22sp"
                 android:textStyle="bold"/>
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/btnViewParticipantsBlog"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@android:color/transparent"
+            <LinearLayout
+                android:id="@+id/layoutHeaderActionsBlog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_person_badge"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="Integrantes"/>
-            </androidx.cardview.widget.CardView>
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSubjectDetailBlog"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="3dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="?attr/colorPrimary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+                    <ImageView
+                        android:id="@+id/btnSubjectDetailBlog"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_book"
+                        app:tint="@color/white"
+                        android:padding="10dp"
+                        android:contentDescription="Detalle Materia" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnViewParticipantsBlog"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="3dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="?attr/colorPrimary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_person_badge"
+                        app:tint="@color/white"
+                        android:padding="10dp"
+                        android:contentDescription="Integrantes"/>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
 
         </RelativeLayout>
 

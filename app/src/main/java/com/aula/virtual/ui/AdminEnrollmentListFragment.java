@@ -1,29 +1,36 @@
 package com.aula.virtual.ui;
 
-import androidx.appcompat.app.AlertDialog;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.aula.virtual.R;
 import com.aula.virtual.data.StudentGradeInfo;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.databinding.FragmentAdminDashboardBinding;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AdminEnrollmentListFragment extends Fragment {
     private FragmentAdminDashboardBinding binding;
     private MainViewModel viewModel;
     private GradeAdapter adapter;
     private int studentId;
+    private List<StudentGradeInfo> allGradeInfos = new ArrayList<>();
 
     @Nullable
     @Override
@@ -44,7 +51,10 @@ public class AdminEnrollmentListFragment extends Fragment {
         
         studentId = getArguments().getInt("studentId");
 
-        binding.tvTitle.setText("Mis Materias");
+        binding.tvTitle.setText("Materias y Notas");
+        binding.spinnerFilter.setVisibility(View.GONE);
+        binding.etSearch.setHint("Buscar materia...");
+
         viewModel.getUserById(studentId, user -> {
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
@@ -69,9 +79,23 @@ public class AdminEnrollmentListFragment extends Fragment {
         binding.btnHeaderAction.setOnClickListener(openStudentTimetable);
         binding.cardHeaderAction.setOnClickListener(openStudentTimetable);
 
+        // Carnet / Student Detail Header Action
+        binding.cardHeaderDetail.setVisibility(View.VISIBLE);
+        binding.btnHeaderDetail.setVisibility(View.VISIBLE);
+
+        View.OnClickListener openStudentDetail = v -> {
+            Bundle args = new Bundle();
+            args.putInt("studentId", studentId);
+            Navigation.findNavController(view).navigate(R.id.action_adminEnrollmentListFragment_to_studentDetailFragment, args);
+        };
+        binding.btnHeaderDetail.setOnClickListener(openStudentDetail);
+        binding.cardHeaderDetail.setOnClickListener(openStudentDetail);
+
         adapter = new GradeAdapter(true);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
+
+        setupSearch();
 
         viewModel.fetchSubjectFacilityMap(map -> {
             if (adapter != null && map != null) {
@@ -87,12 +111,12 @@ public class AdminEnrollmentListFragment extends Fragment {
         });
 
         viewModel.getGradeInfoForStudent(studentId).observe(getViewLifecycleOwner(), gradeInfos -> {
-            adapter.setGradeInfos(gradeInfos);
             if (gradeInfos != null) {
-                binding.tvRecordCount.setText(gradeInfos.size() + (gradeInfos.size() == 1 ? " materia" : " materias"));
+                allGradeInfos = new ArrayList<>(gradeInfos);
             } else {
-                binding.tvRecordCount.setText("0 materias");
+                allGradeInfos = new ArrayList<>();
             }
+            applyFilter();
         });
 
         adapter.setOnGradeActionListener(new GradeAdapter.OnGradeActionListener() {
@@ -107,17 +131,17 @@ public class AdminEnrollmentListFragment extends Fragment {
             public void onViewBlog(StudentGradeInfo info) {
                 Bundle args = new Bundle();
                 args.putInt("subjectId", info.subject.id);
-                // For admin, we use the same blog fragment but it should detect admin role from viewModel
                 Navigation.findNavController(requireView()).navigate(R.id.action_adminEnrollmentListFragment_to_subjectBlogFragment, args);
             }
 
             @Override
             public void onDeleteEnrollment(StudentGradeInfo info) {
                 if (info == null || info.enrollment == null) return;
+                String subjName = (info.subject != null ? info.subject.name : "esta materia");
                 new MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Confirmar Desinscripción")
-                    .setMessage("¿Estás seguro de que deseas eliminar esta materia inscrita?")
-                    .setPositiveButton("Eliminar", (dialog, which) -> {
+                    .setTitle("Desinscribir Materia")
+                    .setMessage("¿Estás seguro de desinscribir a este alumno de la materia \"" + subjName + "\"? Se eliminará su inscripción y sus calificaciones.")
+                    .setPositiveButton("Desinscribir", (dialog, which) -> {
                         viewModel.performOnlineAction(() -> {
                             viewModel.deleteEnrollment(info.enrollment);
                             Toast.makeText(getContext(), "Inscripción eliminada", Toast.LENGTH_SHORT).show();
@@ -132,8 +156,49 @@ public class AdminEnrollmentListFragment extends Fragment {
         binding.btnAdd.setOnClickListener(v -> showEnrollDialog());
     }
 
+    private void setupSearch() {
+        binding.etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                applyFilter();
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void applyFilter() {
+        String query = binding.etSearch.getText().toString().toLowerCase().trim();
+        if (query.isEmpty()) {
+            adapter.setGradeInfos(allGradeInfos);
+            binding.tvRecordCount.setText(allGradeInfos.size() + (allGradeInfos.size() == 1 ? " materia" : " materias"));
+            return;
+        }
+
+        List<StudentGradeInfo> filtered = allGradeInfos.stream().filter(info -> {
+            if (info == null || info.subject == null) return false;
+            String name = info.subject.name != null ? info.subject.name.toLowerCase() : "";
+            String desc = info.subject.description != null ? info.subject.description.toLowerCase() : "";
+            return name.contains(query) || desc.contains(query);
+        }).collect(Collectors.toList());
+
+        adapter.setGradeInfos(filtered);
+        binding.tvRecordCount.setText(filtered.size() + (filtered.size() == 1 ? " materia" : " materias"));
+    }
+
+    private <T> void observeOnce(androidx.lifecycle.LiveData<T> liveData, androidx.lifecycle.Observer<T> observer) {
+        liveData.observe(getViewLifecycleOwner(), new androidx.lifecycle.Observer<T>() {
+            @Override
+            public void onChanged(T t) {
+                if (t != null) {
+                    liveData.removeObserver(this);
+                    observer.onChanged(t);
+                }
+            }
+        });
+    }
+
     private void showEnrollDialog() {
-        viewModel.getAllSubjects().observe(getViewLifecycleOwner(), subjects -> {
+        observeOnce(viewModel.getAllSubjects(), subjects -> {
             String[] names = new String[subjects.size()];
             for (int i = 0; i < subjects.size(); i++) {
                 Subject s = subjects.get(i);

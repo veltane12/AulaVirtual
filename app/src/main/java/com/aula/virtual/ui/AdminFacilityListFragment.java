@@ -43,7 +43,7 @@ public class AdminFacilityListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        binding.tvTitle.setText("Gestión de Instalaciones");
+        binding.tvTitle.setText("Listado de Instalaciones");
         adapter = new FacilityAdapter();
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
@@ -65,7 +65,7 @@ public class AdminFacilityListFragment extends Fragment {
         adapter.setOnItemClickListener(facility -> {
             Bundle args = new Bundle();
             args.putInt("facilityId", facility.id);
-            Navigation.findNavController(view).navigate(R.id.action_adminFacilityListFragment_to_adminFacilityDetailFragment, args);
+            Navigation.findNavController(view).navigate(R.id.action_adminFacilityListFragment_to_adminFacilitySchedulesFragment, args);
         });
 
         binding.btnAdd.setOnClickListener(v -> showAddFacilityDialog());

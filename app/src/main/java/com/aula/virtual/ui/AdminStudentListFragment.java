@@ -51,7 +51,7 @@ public class AdminStudentListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        binding.tvTitle.setText("Gestión de Alumnos");
+        binding.tvTitle.setText("Listado de Alumnos");
         adapter = new StudentAdapter();
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
@@ -81,7 +81,7 @@ public class AdminStudentListFragment extends Fragment {
         adapter.setOnItemClickListener(student -> {
             Bundle args = new Bundle();
             args.putInt("studentId", student.id);
-            Navigation.findNavController(view).navigate(R.id.action_adminStudentListFragment_to_studentDetailFragment, args);
+            Navigation.findNavController(view).navigate(R.id.action_adminStudentListFragment_to_adminEnrollmentListFragment, args);
         });
 
         binding.btnAdd.setOnClickListener(v -> showAddUserDialog());

@@ -18,13 +18,35 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
     private List<Subject> subjects = new ArrayList<>();
     private Map<Integer, String> facilityMap = new HashMap<>();
     private OnItemClickListener listener;
+    private OnDeleteClickListener deleteListener;
+    private boolean showDeleteButton = false;
 
     public interface OnItemClickListener {
         void onItemClick(Subject subject);
     }
 
+    public interface OnDeleteClickListener {
+        void onDeleteClick(Subject subject);
+    }
+
+    private String manageButtonText = "Gestionar";
+
+    public void setManageButtonText(String text) {
+        this.manageButtonText = text;
+        notifyDataSetChanged();
+    }
+
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
+    }
+
+    public void setOnDeleteClickListener(OnDeleteClickListener deleteListener) {
+        this.deleteListener = deleteListener;
+    }
+
+    public void setShowDeleteButton(boolean show) {
+        this.showDeleteButton = show;
+        notifyDataSetChanged();
     }
 
     public void setSubjects(List<Subject> subjects) {
@@ -53,7 +75,8 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
         
         holder.tvName.setText(subject.name != null ? subject.name : "Sin nombre");
         holder.tvFaculty.setText(subject.faculty != null ? subject.faculty : "Sin Facultad");
-        holder.tvSection.setText(subject.section != null ? "Sección: " + subject.section : "Sección: 01");
+        String sec = (subject.section != null && !subject.section.isEmpty()) ? subject.section : "01";
+        holder.tvSection.setText("Sección " + sec);
         holder.tvDescription.setText(subject.description != null ? subject.description : "");
 
         if (holder.tvFacility != null) {
@@ -66,9 +89,17 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
             }
         }
         
+        holder.btnManage.setText(manageButtonText != null ? manageButtonText : "Gestionar");
         holder.btnManage.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(subject);
         });
+
+        if (holder.btnDelete != null) {
+            holder.btnDelete.setVisibility(showDeleteButton ? View.VISIBLE : View.GONE);
+            holder.btnDelete.setOnClickListener(v -> {
+                if (deleteListener != null) deleteListener.onDeleteClick(subject);
+            });
+        }
     }
 
     @Override
@@ -78,7 +109,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvFaculty, tvDescription, tvSection, tvFacility;
-        Button btnManage;
+        Button btnManage, btnDelete;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -88,6 +119,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvFacility = itemView.findViewById(R.id.tvFacility);
             btnManage = itemView.findViewById(R.id.btnManage);
+            btnDelete = itemView.findViewById(R.id.btnDeleteSubject);
         }
     }
 }

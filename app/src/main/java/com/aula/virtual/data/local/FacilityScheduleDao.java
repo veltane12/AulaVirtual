@@ -30,6 +30,9 @@ public interface FacilityScheduleDao {
     @Query("DELETE FROM facility_schedules WHERE facilityId = :facId")
     void deleteByFacilityId(int facId);
 
+    @Query("DELETE FROM facility_schedules WHERE subjectId = :subjectId")
+    void deleteBySubjectId(int subjectId);
+
     @Query("DELETE FROM facility_schedules")
     void deleteAll();
 }

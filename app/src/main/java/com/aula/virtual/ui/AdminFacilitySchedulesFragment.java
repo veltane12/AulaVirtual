@@ -79,7 +79,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
             }
         });
 
-        binding.btnAdd.setText("➕ Programar Clase");
+        binding.btnAdd.setText("Programar Clase");
         binding.btnAdd.setOnClickListener(v -> showAddScheduleDialog(null));
         binding.spinnerFilter.setVisibility(View.GONE);
         binding.etSearch.setVisibility(View.GONE);
@@ -96,6 +96,21 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         };
         binding.btnHeaderAction.setOnClickListener(openTimetable);
         binding.cardHeaderAction.setOnClickListener(openTimetable);
+
+        // Make Detalle Header Action VISIBLE and Clickable (with ic_building, theme accent color)
+        binding.cardHeaderDetail.setVisibility(View.VISIBLE);
+        binding.btnHeaderDetail.setVisibility(View.VISIBLE);
+        binding.btnHeaderDetail.setImageResource(R.drawable.ic_building);
+        int accentColor = ThemeHelper.getSubjectColor(requireContext(), ThemeHelper.getAccentColorName(requireContext()));
+        binding.cardHeaderDetail.setCardBackgroundColor(accentColor);
+
+        View.OnClickListener openFacilityDetail = v -> {
+            Bundle args = new Bundle();
+            args.putInt("facilityId", facilityId);
+            Navigation.findNavController(view).navigate(R.id.action_adminFacilitySchedulesFragment_to_adminFacilityDetailFragment, args);
+        };
+        binding.btnHeaderDetail.setOnClickListener(openFacilityDetail);
+        binding.cardHeaderDetail.setOnClickListener(openFacilityDetail);
     }
 
     private void observeViewModel() {
@@ -256,7 +271,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
                 return;
             }
 
-            String conflict = checkScheduleConflicts(existing != null ? existing.id : -1, selectedDays[0], start, end);
+            String conflict = checkScheduleConflicts(existing != null ? existing.id : -1, selectedSubId[0], selectedProfId[0], selectedDays[0], start, end);
             if (conflict != null) {
                 Toast.makeText(getContext(), "CONFLICTO: " + conflict, Toast.LENGTH_LONG).show();
                 return;
@@ -366,14 +381,28 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         dialog.show();
     }
 
-    private String checkScheduleConflicts(int currentSchId, String newDays, String newStart, String newEnd) {
+    private String checkScheduleConflicts(int currentSchId, int selectedSubId, int selectedProfId, String newDays, String newStart, String newEnd) {
+        // 0. Restriction: No same Subject AND same Professor in the same Facility
+        for (ScheduleInfo info : currentSchedules) {
+            if (info.schedule != null && info.schedule.id == currentSchId) continue;
+            if (info.schedule != null && info.schedule.facilityId == facilityId && info.schedule.professorId == selectedProfId && info.schedule.subjectId == selectedSubId) {
+                return "Ya existe una clase programada para esta misma Materia y Profesor en esta Instalación.";
+            }
+        }
+        for (ScheduleInfo info : professorSchedules) {
+            if (info.schedule != null && info.schedule.id == currentSchId) continue;
+            if (info.schedule != null && info.schedule.facilityId == facilityId && info.schedule.professorId == selectedProfId && info.schedule.subjectId == selectedSubId) {
+                return "Ya existe una clase programada para esta misma Materia y Profesor en esta Instalación.";
+            }
+        }
+
         List<String> newDaysList = Arrays.asList(newDays.split(", "));
         int newStartMin = timeToMinutes(newStart);
         int newEndMin = timeToMinutes(newEnd);
 
         // 1. Conflict in this Facility (Aula)
         for (ScheduleInfo info : currentSchedules) {
-            if (info.schedule.id == currentSchId) continue;
+            if (info.schedule != null && info.schedule.id == currentSchId) continue;
             if (overlaps(info, newDaysList, newStartMin, newEndMin)) {
                 return "Esta aula ya tiene una clase en este horario (" + info.subjectName + ")";
             }
@@ -381,7 +410,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
 
         // 2. Conflict for the Professor in ANY Facility
         for (ScheduleInfo info : professorSchedules) {
-            if (info.schedule.id == currentSchId) continue;
+            if (info.schedule != null && info.schedule.id == currentSchId) continue;
             if (overlaps(info, newDaysList, newStartMin, newEndMin)) {
                 return "El profesor ya tiene una clase en este horario (" + info.subjectName + ")";
             }

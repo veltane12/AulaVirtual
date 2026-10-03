@@ -122,8 +122,8 @@
                 android:layout_centerInParent="true"
                 app:cardCornerRadius="50dp"
                 app:cardElevation="2dp"
-                app:strokeColor="?attr/colorPrimary"
-                app:strokeWidth="2dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="?attr/colorPrimary"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
@@ -131,10 +131,9 @@
                     android:id="@+id/ivProfileImageDetail"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_person"
+                    android:src="@drawable/ic_person_badge"
                     android:scaleType="centerCrop"
-                    app:tint="?attr/colorPrimary"
-                    android:padding="16dp"
+                    android:padding="0dp"
                     android:contentDescription="Foto de perfil"/>
             </com.google.android.material.card.MaterialCardView>
 

@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import com.aula.virtual.R;
 import com.aula.virtual.data.entity.Facility;
@@ -67,9 +68,7 @@ public class AdminFacilityDetailFragment extends Fragment {
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
         
-        binding.btnManageGrades.setText("Gestionar Horarios");
-        binding.btnManageGrades.setVisibility(View.VISIBLE);
-        binding.btnManageGrades.setOnClickListener(v -> navigateToSchedules());
+        binding.btnManageGrades.setVisibility(View.GONE);
 
         DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
     }
@@ -114,6 +113,14 @@ public class AdminFacilityDetailFragment extends Fragment {
         }
     }
 
+    private void popBackToFacilityManagement() {
+        NavController navController = Navigation.findNavController(requireView());
+        if (navController.popBackStack(R.id.adminFacilityListFragment, false)) {
+            return;
+        }
+        navController.popBackStack();
+    }
+
     private void showDeleteConfirmation() {
         new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Confirmar Eliminación")
@@ -123,19 +130,12 @@ public class AdminFacilityDetailFragment extends Fragment {
                     viewModel.performOnlineAction(() -> {
                         viewModel.deleteFacility(facility.id);
                         Toast.makeText(getContext(), "Instalación eliminada", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(requireView()).popBackStack();
+                        popBackToFacilityManagement();
                     });
                 }
             })
             .setNegativeButton("Cancelar", null)
             .show();
-    }
-
-    private void navigateToSchedules() {
-        if (facility == null) return;
-        Bundle args = new Bundle();
-        args.putInt("facilityId", facilityId);
-        Navigation.findNavController(requireView()).navigate(R.id.action_adminFacilityDetailFragment_to_adminFacilitySchedulesFragment, args);
     }
 
     @Override

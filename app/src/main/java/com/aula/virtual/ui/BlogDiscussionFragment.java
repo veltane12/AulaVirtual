@@ -93,7 +93,7 @@ public class BlogDiscussionFragment extends Fragment {
             binding.btnClearChat.setOnClickListener(v -> showClearChatConfirmation());
         }
 
-        adapter.setOnCommentLongClickListener(this::showDeleteConfirmation);
+        adapter.setOnCommentLongClickListener(comment -> showMessageOptionsDialog(comment, currentUserId, isAdmin));
 
         viewModel.getModificationError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
@@ -134,14 +134,25 @@ public class BlogDiscussionFragment extends Fragment {
         });
     }
 
-    private void showDeleteConfirmation(BlogComment comment) {
+    private void showMessageOptionsDialog(BlogComment comment, int currentUserId, boolean isAdmin) {
+        boolean canDelete = (comment.userId == currentUserId || isAdmin);
+        CharSequence[] options = canDelete ? new CharSequence[]{"Copiar mensaje", "Eliminar"} : new CharSequence[]{"Copiar mensaje"};
+
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Eliminar mensaje")
-                .setMessage("¿Estás seguro de que deseas eliminar este mensaje definitivamente?")
-                .setPositiveButton("Eliminar", (dialog, which) -> {
-                    viewModel.performOnlineAction(() -> viewModel.deleteBlogComment(comment));
+                .setTitle("Opciones de mensaje")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                        android.content.ClipData clip = android.content.ClipData.newPlainText("Mensaje del foro", comment.content);
+                        if (clipboard != null) {
+                            clipboard.setPrimaryClip(clip);
+                            Toast.makeText(getContext(), "Mensaje copiado al portapapeles", Toast.LENGTH_SHORT).show();
+                        }
+                    } else if (which == 1 && canDelete) {
+                        viewModel.performOnlineAction(() -> viewModel.deleteBlogComment(comment));
+                        Toast.makeText(getContext(), "Mensaje eliminado", Toast.LENGTH_SHORT).show();
+                    }
                 })
-                .setNegativeButton("Cancelar", null)
                 .show();
     }
 

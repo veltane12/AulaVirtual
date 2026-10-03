@@ -50,8 +50,9 @@ public class AdminSubjectListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        binding.tvTitle.setText("Gestión de Materias");
+        binding.tvTitle.setText("Listado de Materias");
         adapter = new SubjectAdapter();
+        adapter.setManageButtonText("Gestionar");
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
 
@@ -80,7 +81,7 @@ public class AdminSubjectListFragment extends Fragment {
         adapter.setOnItemClickListener(subject -> {
             Bundle args = new Bundle();
             args.putInt("subjectId", subject.id);
-            Navigation.findNavController(view).navigate(R.id.action_adminSubjectListFragment_to_subjectDetailFragment, args);
+            Navigation.findNavController(view).navigate(R.id.action_adminSubjectListFragment_to_subjectBlogFragment, args);
         });
 
         binding.btnAdd.setOnClickListener(v -> showAddSubjectDialog());

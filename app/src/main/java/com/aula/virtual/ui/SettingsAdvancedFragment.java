@@ -69,9 +69,15 @@ public class SettingsAdvancedFragment extends Fragment {
         boolean isAdmin = currentUser != null && "ADMIN".equals(currentUser.role);
 
         if (ThemeHelper.MODE_LOCAL.equals(currentMode)) {
-            binding.btnDownloadOfflineData.setVisibility(View.VISIBLE);
-            binding.btnUploadOfflineData.setVisibility(View.VISIBLE);
-            binding.btnClearOfflineData.setVisibility(View.VISIBLE);
+            if (isAdmin) {
+                binding.btnDownloadOfflineData.setVisibility(View.VISIBLE);
+                binding.btnUploadOfflineData.setVisibility(View.VISIBLE);
+                binding.btnClearOfflineData.setVisibility(View.VISIBLE);
+            } else {
+                binding.btnDownloadOfflineData.setVisibility(View.GONE);
+                binding.btnUploadOfflineData.setVisibility(View.GONE);
+                binding.btnClearOfflineData.setVisibility(View.GONE);
+            }
             binding.btnConfigureServerUrl.setVisibility(View.GONE);
         } else {
             binding.btnDownloadOfflineData.setVisibility(View.GONE);
@@ -278,6 +284,11 @@ public class SettingsAdvancedFragment extends Fragment {
     }
 
     private void downloadOfflineData() {
+        User currentUser = viewModel.getCurrentUser().getValue();
+        if (ThemeHelper.isLocalMode(requireContext()) && currentUser != null && !"ADMIN".equals(currentUser.role)) {
+            Toast.makeText(getContext(), "Acción no permitida: Los Profesores y Estudiantes no pueden descargar datos del servidor en Modo Local.", Toast.LENGTH_LONG).show();
+            return;
+        }
         if (!viewModel.performOnlineAction(() -> {})) return;
         
         new MaterialAlertDialogBuilder(requireContext())
@@ -317,6 +328,11 @@ public class SettingsAdvancedFragment extends Fragment {
     }
 
     private void confirmClearOfflineData() {
+        User currentUser = viewModel.getCurrentUser().getValue();
+        if (ThemeHelper.isLocalMode(requireContext()) && currentUser != null && !"ADMIN".equals(currentUser.role)) {
+            Toast.makeText(getContext(), "Acción no permitida: Los Profesores y Estudiantes no pueden eliminar datos de la aplicación en Modo Local.", Toast.LENGTH_LONG).show();
+            return;
+        }
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Eliminar Datos Descargados")
                 .setMessage("¿Estás seguro de que deseas eliminar del dispositivo todos los datos descargados previamente del servidor?")
@@ -347,6 +363,11 @@ public class SettingsAdvancedFragment extends Fragment {
     }
 
     private void confirmUploadOfflineData() {
+        User currentUser = viewModel.getCurrentUser().getValue();
+        if (ThemeHelper.isLocalMode(requireContext()) && currentUser != null && !"ADMIN".equals(currentUser.role)) {
+            Toast.makeText(getContext(), "Acción no permitida: Los Profesores y Estudiantes no pueden subir datos al servidor en Modo Local.", Toast.LENGTH_LONG).show();
+            return;
+        }
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("📤 Subir Registros Locales al Servidor")
                 .setMessage("⚠️ PRECAUCIÓN Y ADVERTENCIA:\n\nTodos los registros actuales almacenados en el dispositivo (Modo Offline) se subirán y se SUMARÁN a los registros actuales del Servidor SQL en línea como NUEVOS REGISTROS.\n\nEsta acción registrará tus materias, facultades, instalaciones, usuarios, foros y notificaciones locales directamente en el servidor como entradas completamente nuevas. ¿Deseas continuar?")

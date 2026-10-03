@@ -38,7 +38,7 @@
                     android:scaleType="centerInside"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_back"
-                    app:tint="?attr/colorOnPrimary"
+                    app:tint="@color/white"
                     android:contentDescription="Atrás" />
 
                 <ImageButton
@@ -48,7 +48,7 @@
                     android:scaleType="centerInside"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_refresh"
-                    app:tint="?attr/colorOnPrimary"
+                    app:tint="@color/white"
                     android:contentDescription="Recargar página" />
 
                 <ImageButton
@@ -58,7 +58,7 @@
                     android:scaleType="centerInside"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_home"
-                    app:tint="?attr/colorOnPrimary"
+                    app:tint="@color/white"
                     android:contentDescription="Inicio" />
 
                 <TextView
@@ -68,7 +68,7 @@
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"
-                    android:textColor="?attr/colorOnPrimary"
+                    android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:maxLines="1"
@@ -82,7 +82,7 @@
                     android:scaleType="centerInside"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_notification"
-                    app:tint="?attr/colorOnPrimary"
+                    app:tint="@color/white"
                     android:contentDescription="Notificaciones" />
 
             </LinearLayout>

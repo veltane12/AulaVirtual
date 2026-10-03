@@ -2,8 +2,26 @@
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
-    android:viewportHeight="24">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M2.01,21L23,12 2.01,3 2,10l15,2 -15,2z" />
+    android:viewportHeight="24"
+    android:autoMirrored="true">
+
+    <group
+        android:translateX="-1.2"
+        android:translateY="1.2">
+        <!-- Ala superior -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="0.8"
+            android:strokeLineJoin="round"
+            android:pathData="M21,3.2L3.4,10.4L9.6,12.9z"/>
+
+        <!-- Ala inferior / cola (separada por el pliegue) -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="0.8"
+            android:strokeLineJoin="round"
+            android:pathData="M21,3.2L13.6,20.6L11.2,14.4z"/>
+    </group>
 </vector>

@@ -49,7 +49,7 @@ public class AdminProfessorListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        binding.tvTitle.setText("Gestión de Profesores");
+        binding.tvTitle.setText("Listado de Profesores");
         adapter = new StudentAdapter();
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
@@ -78,8 +78,8 @@ public class AdminProfessorListFragment extends Fragment {
 
         adapter.setOnItemClickListener(prof -> {
             Bundle args = new Bundle();
-            args.putInt("adminId", prof.id); // Reuse adminId arg for Detail
-            Navigation.findNavController(view).navigate(R.id.action_adminProfessorListFragment_to_adminDetailFragment, args);
+            args.putInt("professorId", prof.id);
+            Navigation.findNavController(view).navigate(R.id.action_adminProfessorListFragment_to_professorSubjectListFragment, args);
         });
 
         binding.btnAdd.setOnClickListener(v -> showAddProfessorDialog());

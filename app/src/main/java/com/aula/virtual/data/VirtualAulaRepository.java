@@ -344,6 +344,7 @@ public class VirtualAulaRepository {
                             ScheduleInfo info = new ScheduleInfo();
                             info.schedule = sch;
                             info.subjectName = sub != null ? sub.name : "";
+                            info.subjectSection = sub != null ? sub.section : "01";
                             info.subjectColor = chosenColor;
                             info.professorName = prof != null ? prof.name : "";
                             infos.add(info);
@@ -398,6 +399,7 @@ public class VirtualAulaRepository {
                                     ScheduleInfo info = new ScheduleInfo();
                                     info.schedule = sch;
                                     info.subjectName = sub != null ? sub.name : "";
+                                    info.subjectSection = sub != null ? sub.section : "01";
                                     info.subjectColor = chosenColor;
                                     info.professorName = prof != null ? prof.name : "";
                                     infos.add(info);
@@ -429,6 +431,7 @@ public class VirtualAulaRepository {
                         ScheduleInfo info = new ScheduleInfo();
                         info.schedule = sch;
                         info.subjectName = sub != null ? sub.name : "";
+                        info.subjectSection = sub != null ? sub.section : "01";
                         info.subjectColor = chosenColor;
                         info.professorName = prof != null ? prof.name : "";
                         infos.add(info);
@@ -480,6 +483,7 @@ public class VirtualAulaRepository {
                                 ScheduleInfo info = new ScheduleInfo();
                                 info.schedule = sch;
                                 info.subjectName = sub != null ? sub.name : "";
+                                info.subjectSection = sub != null ? sub.section : "01";
                                 info.subjectColor = chosenColor;
                                 info.professorName = prof != null ? prof.name : "";
                                 infos.add(info);
@@ -692,6 +696,8 @@ public class VirtualAulaRepository {
                 executor.execute(() -> {
                     try {
                         db.subjectDao().deleteById(subId);
+                        db.enrollmentDao().deleteBySubjectId(subId);
+                        db.facilityScheduleDao().deleteBySubjectId(subId);
                         mainHandler.post(() -> {
                             if (callback != null) callback.onResponse(null, Response.success(null));
                         });
@@ -1206,6 +1212,7 @@ public class VirtualAulaRepository {
                                 ScheduleInfo info = new ScheduleInfo();
                                 info.schedule = sch;
                                 info.subjectName = sub != null ? sub.name : "";
+                                info.subjectSection = sub != null ? sub.section : "01";
                                 info.subjectColor = (sch.color != null && !sch.color.isEmpty()) ? sch.color : (sub != null ? sub.color : "BLUE");
                                 info.professorName = prof != null ? prof.name : "";
                                 infos.add(info);
@@ -1234,6 +1241,7 @@ public class VirtualAulaRepository {
                             ScheduleInfo info = new ScheduleInfo();
                             info.schedule = sch;
                             info.subjectName = sub != null ? sub.name : "";
+                            info.subjectSection = sub != null ? sub.section : "01";
                             info.subjectColor = (sch.color != null && !sch.color.isEmpty()) ? sch.color : (sub != null ? sub.color : "BLUE");
                             info.professorName = prof != null ? prof.name : "";
                             infos.add(info);
@@ -1262,6 +1270,7 @@ public class VirtualAulaRepository {
                                 ScheduleInfo info = new ScheduleInfo();
                                 info.schedule = sch;
                                 info.subjectName = sub != null ? sub.name : "";
+                                info.subjectSection = sub != null ? sub.section : "01";
                                 info.subjectColor = (sch.color != null && !sch.color.isEmpty()) ? sch.color : (sub != null ? sub.color : "BLUE");
                                 info.professorName = prof != null ? prof.name : "";
                                 infos.add(info);

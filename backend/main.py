@@ -237,6 +237,7 @@ class FacilitySchedule(FacilityScheduleBase):
 class ScheduleInfo(BaseModel):
     schedule: FacilitySchedule
     subjectName: str
+    subjectSection: str = "01"
     subjectColor: str
     professorName: str
 
@@ -313,7 +314,7 @@ def get_student_timetable(student_id: int, db: Session = Depends(get_db)):
         .join(EnrollmentDB, SubjectDB.id == EnrollmentDB.subjectId)\
         .filter(EnrollmentDB.studentId == student_id).all()
 
-    return [{"schedule": sch, "subjectName": s.name, "subjectColor": s.color, "professorName": u.name} for sch, s, u in results]
+    return [{"schedule": sch, "subjectName": s.name, "subjectSection": s.section if s.section else "01", "subjectColor": s.color, "professorName": u.name} for sch, s, u in results]
 
 @app.get("/users/professor/{professor_id}/schedules", response_model=List[ScheduleInfo])
 def get_professor_timetable(professor_id: int, db: Session = Depends(get_db)):
@@ -322,27 +323,9 @@ def get_professor_timetable(professor_id: int, db: Session = Depends(get_db)):
         .join(UserDB, FacilityScheduleDB.professorId == UserDB.id)\
         .filter(FacilityScheduleDB.professorId == professor_id).all()
 
-    return [{"schedule": sch, "subjectName": s.name, "subjectColor": s.color, "professorName": u.name} for sch, s, u in results]
+    return [{"schedule": sch, "subjectName": s.name, "subjectSection": s.section if s.section else "01", "subjectColor": s.color, "professorName": u.name} for sch, s, u in results]
 
-# --- User-specific Schedules ---
-@app.get("/users/student/{student_id}/schedules", response_model=List[ScheduleInfo])
-def get_student_timetable(student_id: int, db: Session = Depends(get_db)):
-    results = db.query(FacilityScheduleDB, SubjectDB, UserDB)\
-        .join(SubjectDB, FacilityScheduleDB.subjectId == SubjectDB.id)\
-        .join(UserDB, FacilityScheduleDB.professorId == UserDB.id)\
-        .join(EnrollmentDB, SubjectDB.id == EnrollmentDB.subjectId)\
-        .filter(EnrollmentDB.studentId == student_id).all()
-
-    return [{"schedule": sch, "subjectName": s.name, "subjectColor": s.color, "professorName": u.name} for sch, s, u in results]
-
-@app.get("/users/professor/{professor_id}/schedules", response_model=List[ScheduleInfo])
-def get_professor_timetable(professor_id: int, db: Session = Depends(get_db)):
-    results = db.query(FacilityScheduleDB, SubjectDB, UserDB)\
-        .join(SubjectDB, FacilityScheduleDB.subjectId == SubjectDB.id)\
-        .join(UserDB, FacilityScheduleDB.professorId == UserDB.id)\
-        .filter(FacilityScheduleDB.professorId == professor_id).all()
-
-    return [{"schedule": sch, "subjectName": s.name, "subjectColor": s.color, "professorName": u.name} for sch, s, u in results]
+    return [{"schedule": sch, "subjectName": s.name, "subjectSection": s.section if s.section else "01", "subjectColor": s.color, "professorName": u.name} for sch, s, u in results]
 
 @app.post("/users", response_model=User)
 def create_user(user: UserBase, db: Session = Depends(get_db)):
@@ -428,7 +411,10 @@ def get_subject_by_id(sub_id: int, db: Session = Depends(get_db)):
 
 @app.get("/subjects/professor/{prof_id}", response_model=List[Subject])
 def get_subjects_by_professor(prof_id: int, db: Session = Depends(get_db)):
-    return db.query(SubjectDB).join(FacilityScheduleDB, SubjectDB.id == FacilityScheduleDB.subjectId).filter(FacilityScheduleDB.professorId == prof_id).distinct().all()
+    return db.query(SubjectDB).filter(
+        (SubjectDB.professorId == prof_id) |
+        (SubjectDB.id.in_(db.query(FacilityScheduleDB.subjectId).filter(FacilityScheduleDB.professorId == prof_id)))
+    ).distinct().all()
 
 # --- Faculties ---
 @app.get("/faculties", response_model=List[Faculty])
@@ -675,7 +661,7 @@ def get_facility_schedules(fac_id: int, db: Session = Depends(get_db)):
         .join(UserDB, FacilityScheduleDB.professorId == UserDB.id)\
         .filter(FacilityScheduleDB.facilityId == fac_id).all()
 
-    return [{"schedule": sch, "subjectName": s.name, "subjectColor": sch.color if sch.color else (s.color if s.color else "BLUE"), "professorName": u.name} for sch, s, u in results]
+    return [{"schedule": sch, "subjectName": s.name, "subjectSection": s.section if s.section else "01", "subjectColor": sch.color if sch.color else (s.color if s.color else "BLUE"), "professorName": u.name} for sch, s, u in results]
 
 def time_to_minutes(time_str: str) -> int:
     try:
@@ -793,7 +779,7 @@ def get_student_personal_schedules(student_id: int, db: Session = Depends(get_db
         .join(EnrollmentDB, SubjectDB.id == EnrollmentDB.subjectId)\
         .filter(EnrollmentDB.studentId == student_id).all()
 
-    return [{"schedule": sch, "subjectName": s.name, "subjectColor": e.color if e.color else (s.color if s.color else "BLUE"), "professorName": u.name} for sch, s, u, e in results]
+    return [{"schedule": sch, "subjectName": s.name, "subjectSection": s.section if s.section else "01", "subjectColor": e.color if e.color else (s.color if s.color else "BLUE"), "professorName": u.name} for sch, s, u, e in results]
 
 @app.get("/users/professor/{prof_id}/schedules", response_model=List[ScheduleInfo])
 def get_professor_personal_schedules(prof_id: int, db: Session = Depends(get_db)):
@@ -806,7 +792,7 @@ def get_professor_personal_schedules(prof_id: int, db: Session = Depends(get_db)
     for sch, s, u in results:
         usc = db.query(UserSubjectColorDB).filter(UserSubjectColorDB.userId == prof_id, UserSubjectColorDB.subjectId == s.id).first()
         color = usc.color if (usc and usc.color) else (s.color if s.color else "BLUE")
-        output.append({"schedule": sch, "subjectName": s.name, "subjectColor": color, "professorName": u.name})
+        output.append({"schedule": sch, "subjectName": s.name, "subjectSection": s.section if s.section else "01", "subjectColor": color, "professorName": u.name})
     return output
 
 @app.delete("/blog/entries/{entry_id}/comments")

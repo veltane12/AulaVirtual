@@ -27,6 +27,9 @@ public interface EnrollmentDao {
     @Query("DELETE FROM enrollments WHERE id = :id")
     void deleteById(int id);
 
+    @Query("DELETE FROM enrollments WHERE subjectId = :subjectId")
+    void deleteBySubjectId(int subjectId);
+
     @Query("DELETE FROM enrollments")
     void deleteAll();
 }

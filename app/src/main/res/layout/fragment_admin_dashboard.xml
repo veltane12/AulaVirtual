@@ -73,8 +73,7 @@
                 android:layout_height="44dp"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="3dp"
-                app:strokeColor="?attr/colorPrimary"
-                app:strokeWidth="1.5dp"
+                app:strokeWidth="0dp"
                 app:cardBackgroundColor="?attr/colorPrimary"
                 android:visibility="gone"
                 android:clickable="true"
@@ -88,6 +87,29 @@
                     app:tint="@color/white"
                     android:padding="10dp"
                     android:contentDescription="Acción" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardHeaderDetail"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="?attr/colorPrimary"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <ImageView
+                    android:id="@+id/btnHeaderDetail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_carnet"
+                    app:tint="@color/white"
+                    android:padding="10dp"
+                    android:contentDescription="Detalle Estudiante" />
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
