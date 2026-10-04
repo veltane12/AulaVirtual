@@ -1334,6 +1334,24 @@ public class VirtualAulaRepository {
         performCall(getApiService().updateSchedule(schedule.id, schedule), callback);
     }
 
+    public void updateSchedulesProfessorBySubject(int subjectId, int newProfId) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    List<FacilitySchedule> schedules = db.facilityScheduleDao().getBySubjectId(subjectId);
+                    if (schedules != null) {
+                        for (FacilitySchedule sch : schedules) {
+                            sch.professorId = newProfId;
+                            db.facilityScheduleDao().insert(sch);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
     public void deleteSchedule(int schId, Callback<Void> callback) {
         if (isLocalMode()) {
             if (db != null) {

@@ -82,6 +82,7 @@ public class ProfessorSubjectListFragment extends Fragment {
                 binding.btnAdd.setOnClickListener(v -> showAssignSubjectDialog(profId));
 
                 adapter.setShowDeleteButton(true);
+                adapter.setDeleteButtonText("Desinscribir");
                 adapter.setOnDeleteClickListener(subject -> showUnassignSubjectDialog(profId, subject));
 
                 // Carnet / Professor Detail Header Action
@@ -182,6 +183,7 @@ public class ProfessorSubjectListFragment extends Fragment {
                     selected.professorId = profId;
                     viewModel.performOnlineAction(() -> {
                         viewModel.updateSubject(selected);
+                        viewModel.updateSchedulesProfessorBySubject(selected.id, profId);
                         Toast.makeText(getContext(), "¡Profesor inscrito/asignado a la materia!", Toast.LENGTH_SHORT).show();
                         viewModel.getSubjectsByProfessor(profId);
                         viewModel.refreshData();
@@ -195,22 +197,12 @@ public class ProfessorSubjectListFragment extends Fragment {
         if (subject == null) return;
         new MaterialAlertDialogBuilder(requireContext())
             .setTitle("Desinscribir Materia")
-            .setMessage("¿Estás seguro de desinscribir a este profesor de la materia \"" + subject.name + "\"? Se eliminará la asignación y sus horarios programados.")
+            .setMessage("¿Estás seguro de desinscribir a este profesor de la materia \"" + subject.name + "\"? Se eliminará la asignación del profesor.")
             .setPositiveButton("Desinscribir", (dialog, which) -> {
                 viewModel.performOnlineAction(() -> {
                     subject.professorId = null;
                     viewModel.updateSubject(subject);
-
-                    // Delete professor schedules for this subject
-                    observeOnce(viewModel.getProfessorSchedules(profId), schedules -> {
-                        if (schedules != null) {
-                            for (ScheduleInfo info : schedules) {
-                                if (info.schedule != null && info.schedule.subjectId == subject.id) {
-                                    viewModel.deleteSchedule(info.schedule);
-                                }
-                            }
-                        }
-                    });
+                    viewModel.updateSchedulesProfessorBySubject(subject.id, 0);
 
                     Toast.makeText(getContext(), "Inscripción eliminada", Toast.LENGTH_SHORT).show();
                     viewModel.getSubjectsByProfessor(profId);

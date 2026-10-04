@@ -42,17 +42,24 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnManage"
         style="@style/Widget.Material3.Button.TonalButton"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:text="Gestionar"
-        android:textSize="11sp"
-        android:textAllCaps="false"
-        app:cornerRadius="18dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
         android:insetTop="0dp"
         android:insetBottom="0dp"
+        android:insetLeft="0dp"
+        android:insetRight="0dp"
+        app:cornerRadius="22dp"
+        app:icon="@drawable/ic_manage"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="22dp"
+        app:iconTint="@color/white"
         app:backgroundTint="?attr/colorPrimary"
-        android:textColor="@color/white"/>
+        android:contentDescription="Gestionar"/>
 
 </RelativeLayout>

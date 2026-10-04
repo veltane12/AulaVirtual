@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Hoja de registros con filas recortadas y muesca para el engranaje -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M6,2h12a2,2 0 0 1 2,2v7.52A6.25,6.25 0 0 0 11.52,20H6a2,2 0 0 1 -2,-2V4a2,2 0 0 1 2,-2z
+                          M7,5.5h10v1.5H7z
+                          M7,9h7v1.5H7z
+                          M7,12.5h3.5v1.5H7z
+                          M7,16h2.5v1.5H7z"/>
+
+    <!-- Engranaje de gestión con 8 dientes y centro hueco -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M17,13.4a3.6,3.6 0 1,1 0,7.2a3.6,3.6 0 1,1 0,-7.2z
+                          M17,15.5a1.5,1.5 0 1,0 0,3a1.5,1.5 0 1,0 0,-3z
+                          M15.9,12h2.2v2h-2.2z
+                          M15.9,20h2.2v2h-2.2z
+                          M12,15.9h2v2.2h-2z
+                          M20,15.9h2v2.2h-2z
+                          M19.9,18.34L21.31,19.76L19.76,21.31L18.34,19.9z
+                          M15.66,19.9L14.24,21.31L12.69,19.76L14.1,18.34z
+                          M14.1,15.66L12.69,14.24L14.24,12.69L15.66,14.1z
+                          M18.34,14.1L19.76,12.69L21.31,14.24L19.9,15.66z"/>
+</vector>

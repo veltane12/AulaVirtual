@@ -30,9 +30,15 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
     }
 
     private String manageButtonText = "Gestionar";
+    private String deleteButtonText = "Borrar";
 
     public void setManageButtonText(String text) {
         this.manageButtonText = text;
+        notifyDataSetChanged();
+    }
+
+    public void setDeleteButtonText(String text) {
+        this.deleteButtonText = text;
         notifyDataSetChanged();
     }
 
@@ -89,7 +95,6 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
             }
         }
         
-        holder.btnManage.setText(manageButtonText != null ? manageButtonText : "Gestionar");
         holder.btnManage.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(subject);
         });
@@ -110,6 +115,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvFaculty, tvDescription, tvSection, tvFacility;
         Button btnManage, btnDelete;
+        View layoutButtons;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -120,6 +126,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
             tvFacility = itemView.findViewById(R.id.tvFacility);
             btnManage = itemView.findViewById(R.id.btnManage);
             btnDelete = itemView.findViewById(R.id.btnDeleteSubject);
+            layoutButtons = itemView.findViewById(R.id.layoutButtons);
         }
     }
 }

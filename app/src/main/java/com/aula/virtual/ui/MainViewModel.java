@@ -242,6 +242,10 @@ public class MainViewModel extends AndroidViewModel {
         });
     }
 
+    public void updateSchedulesProfessorBySubject(int subjectId, int newProfId) {
+        repository.updateSchedulesProfessorBySubject(subjectId, newProfId);
+    }
+
     public void deleteSchedule(FacilitySchedule schedule) {
         repository.deleteSchedule(schedule.id, new Callback<Void>() {
             @Override public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) { fetchSchedules(schedule.facilityId); }

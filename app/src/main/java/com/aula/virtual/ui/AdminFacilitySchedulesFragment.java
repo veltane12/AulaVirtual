@@ -146,39 +146,64 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         final String[] selectedDays = {existing != null ? existing.days : ""};
 
         professorSchedules = new ArrayList<>();
+
+        final TextView tvSubject = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Materia...", existing == null);
+        final TextView tvProfessor = DialogUtils.createDialogOptionButton(requireContext(), "Profesor: (Seleccione una materia)", true);
+        tvProfessor.setOnClickListener(v -> 
+            Toast.makeText(getContext(), "El profesor único se asigna desde el menú de Inscripción de Materias del Profesor", Toast.LENGTH_SHORT).show()
+        );
+
+        MainViewModel.DataCallback<Integer> loadProfForSubject = (subId) -> {
+            viewModel.getSubjectById(subId, s -> {
+                if (getActivity() == null) return;
+                if (s != null && s.professorId != null && s.professorId > 0) {
+                    selectedProfId[0] = s.professorId;
+                    viewModel.getUserById(s.professorId, u -> {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(() -> {
+                            if (u != null) {
+                                tvProfessor.setError(null);
+                                DialogUtils.setOptionState(tvProfessor, "Profesor Asignado: " + u.name + " [" + u.carnet + "]", false, requireContext());
+                            } else {
+                                selectedProfId[0] = 0;
+                                tvProfessor.setError(null);
+                                DialogUtils.setOptionState(tvProfessor, "Profesor: Sin Profesor Asignado", false, requireContext());
+                            }
+                        });
+                    });
+                    viewModel.getProfessorSchedules(s.professorId).observe(getViewLifecycleOwner(), schedules -> {
+                        professorSchedules = schedules;
+                    });
+                } else {
+                    selectedProfId[0] = 0;
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            tvProfessor.setError(null);
+                            DialogUtils.setOptionState(tvProfessor, "Profesor: Sin Profesor Asignado", false, requireContext());
+                        });
+                    }
+                    professorSchedules = new ArrayList<>();
+                }
+            });
+        };
+
         if (existing != null) {
-            viewModel.getProfessorSchedules(existing.professorId).observe(getViewLifecycleOwner(), schedules -> {
-                professorSchedules = schedules;
+            viewModel.getSubjectById(existing.subjectId, s -> {
+                if (s != null) {
+                    String sec = s.section != null ? s.section : "01";
+                    DialogUtils.setOptionState(tvSubject, "Materia: " + s.name + " (Sec " + sec + ")", false, requireContext());
+                    loadProfForSubject.onResult(s.id);
+                }
             });
         }
 
-        final TextView tvSubject = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Materia...", existing == null);
-        if (existing != null) {
-            viewModel.getSubjectById(existing.subjectId, s -> {
-                String sec = s.section != null ? s.section : "01";
-                DialogUtils.setOptionState(tvSubject, "Materia: " + s.name + " (Sec " + sec + ")", false, requireContext());
-            });
-        }
-        tvSubject.setOnClickListener(v -> showSearchDialog("Materia", (item) -> {
+        tvSubject.setOnClickListener(v -> showSubjectSearchDialog((item) -> {
             selectedSubId[0] = item.id;
             tvSubject.setError(null);
             DialogUtils.setOptionState(tvSubject, "Materia: " + item.text + " (" + item.subtext + ")", false, requireContext());
+            loadProfForSubject.onResult(item.id);
         }));
         layout.addView(tvSubject);
-
-        final TextView tvProfessor = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Profesor...", existing == null);
-        if (existing != null) {
-            viewModel.getUserById(existing.professorId, u -> DialogUtils.setOptionState(tvProfessor, "Profesor: " + u.name + " [" + u.carnet + "]", false, requireContext()));
-        }
-        tvProfessor.setOnClickListener(v -> showSearchDialog("Profesor", (item) -> {
-            selectedProfId[0] = item.id;
-            tvProfessor.setError(null);
-            DialogUtils.setOptionState(tvProfessor, "Profesor: " + item.text + " [" + item.subtext.replace("Carnet: ", "") + "]", false, requireContext());
-            
-            viewModel.getProfessorSchedules(item.id).observe(getViewLifecycleOwner(), schedules -> {
-                professorSchedules = schedules;
-            });
-        }));
         layout.addView(tvProfessor);
 
         final TextView tvDays = DialogUtils.createDialogOptionButton(requireContext(), selectedDays[0].isEmpty() ? "Seleccionar Días..." : "Días: " + selectedDays[0], selectedDays[0].isEmpty());
@@ -228,9 +253,8 @@ public class AdminFacilitySchedulesFragment extends Fragment {
                 tvSubject.setError("Debe seleccionar una materia");
                 isValid = false;
             }
-            if (selectedProfId[0] == -1) {
-                tvProfessor.setError("Debe seleccionar un profesor");
-                isValid = false;
+            if (selectedProfId[0] < 0) {
+                selectedProfId[0] = 0;
             }
             if (selectedDays[0].isEmpty()) {
                 tvDays.setError("Debe seleccionar al menos un día");
@@ -382,17 +406,11 @@ public class AdminFacilitySchedulesFragment extends Fragment {
     }
 
     private String checkScheduleConflicts(int currentSchId, int selectedSubId, int selectedProfId, String newDays, String newStart, String newEnd) {
-        // 0. Restriction: No same Subject AND same Professor in the same Facility
+        // 0. Restriction: No same Subject in the same Facility
         for (ScheduleInfo info : currentSchedules) {
             if (info.schedule != null && info.schedule.id == currentSchId) continue;
-            if (info.schedule != null && info.schedule.facilityId == facilityId && info.schedule.professorId == selectedProfId && info.schedule.subjectId == selectedSubId) {
-                return "Ya existe una clase programada para esta misma Materia y Profesor en esta Instalación.";
-            }
-        }
-        for (ScheduleInfo info : professorSchedules) {
-            if (info.schedule != null && info.schedule.id == currentSchId) continue;
-            if (info.schedule != null && info.schedule.facilityId == facilityId && info.schedule.professorId == selectedProfId && info.schedule.subjectId == selectedSubId) {
-                return "Ya existe una clase programada para esta misma Materia y Profesor en esta Instalación.";
+            if (info.schedule != null && info.schedule.facilityId == facilityId && info.schedule.subjectId == selectedSubId) {
+                return "Ya existe una clase programada para esta misma Materia en esta Instalación.";
             }
         }
 
@@ -408,11 +426,13 @@ public class AdminFacilitySchedulesFragment extends Fragment {
             }
         }
 
-        // 2. Conflict for the Professor in ANY Facility
-        for (ScheduleInfo info : professorSchedules) {
-            if (info.schedule != null && info.schedule.id == currentSchId) continue;
-            if (overlaps(info, newDaysList, newStartMin, newEndMin)) {
-                return "El profesor ya tiene una clase en este horario (" + info.subjectName + ")";
+        // 2. Conflict for the Professor in ANY Facility (only if professor assigned)
+        if (selectedProfId > 0) {
+            for (ScheduleInfo info : professorSchedules) {
+                if (info.schedule != null && info.schedule.id == currentSchId) continue;
+                if (overlaps(info, newDaysList, newStartMin, newEndMin)) {
+                    return "El profesor ya tiene una clase en este horario (" + info.subjectName + ")";
+                }
             }
         }
         return null;
@@ -454,7 +474,7 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         }
     }
 
-    private void showSearchDialog(String type, SearchableAdapter.OnItemClickListener onSelected) {
+    private void showSubjectSearchDialog(SearchableAdapter.OnItemClickListener onSelected) {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_searchable_list, null);
         AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext()).setView(dialogView).create();
         EditText etSearch = dialogView.findViewById(R.id.etSearchDialog);
@@ -462,20 +482,11 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         rvList.setLayoutManager(new LinearLayoutManager(getContext()));
 
         List<SearchableAdapter.SearchableItem> allItems = new ArrayList<>();
-        if (type.equals("Materia")) {
-            List<Subject> subjects = viewModel.getAllSubjects().getValue();
-            if (subjects != null) {
-                for (Subject s : subjects) {
-                    String sec = s.section != null ? s.section : "01";
-                    allItems.add(new SearchableAdapter.SearchableItem(s.id, s.name, "Sección " + sec));
-                }
-            }
-        } else {
-            List<User> profs = viewModel.getAllProfessors().getValue();
-            if (profs != null) {
-                for (User u : profs) {
-                    allItems.add(new SearchableAdapter.SearchableItem(u.id, u.name, "Carnet: " + u.carnet));
-                }
+        List<Subject> subjects = viewModel.getAllSubjects().getValue();
+        if (subjects != null) {
+            for (Subject s : subjects) {
+                String sec = s.section != null ? s.section : "01";
+                allItems.add(new SearchableAdapter.SearchableItem(s.id, s.name, "Sección " + sec));
             }
         }
 

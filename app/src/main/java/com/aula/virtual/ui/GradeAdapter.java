@@ -98,7 +98,6 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
                 }
             }
             holder.btnProfile.setVisibility(View.GONE); // No Profile button for subject cards
-            holder.btnBlog.setText("Gestionar");
             holder.btnBlog.setVisibility(View.VISIBLE);
             holder.btnBlog.setOnClickListener(v -> {
                 if (listener != null) {
