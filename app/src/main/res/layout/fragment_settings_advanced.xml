@@ -186,6 +186,17 @@
                     android:textAllCaps="true"
                     android:layout_marginBottom="12dp"/>
 
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchBiometricAutofill"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="🔒 Datos Biométricos / Autocompletado"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="14sp"
+                    android:checked="true"
+                    app:useMaterialThemeColors="true"/>
+
                 <Button
                     android:id="@+id/btnChangePassword"
                     style="@style/Widget.Bootstrap.Button.Primary"

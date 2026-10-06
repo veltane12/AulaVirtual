@@ -41,6 +41,9 @@ public class LoginFragment extends Fragment {
         viewModel.logout();
         credentialsManager = new CredentialsManager(requireContext());
 
+        boolean autofillEnabled = ThemeHelper.isBiometricAutofillEnabled(requireContext());
+        binding.btnSavedAccounts.setVisibility(autofillEnabled ? View.VISIBLE : View.GONE);
+
         binding.btnLogin.setOnClickListener(v -> {
             String carnet = binding.etCarnet.getText().toString();
             String password = binding.etPassword.getText().toString();
@@ -93,6 +96,11 @@ public class LoginFragment extends Fragment {
     }
 
     private void showSavedAccountsDialog() {
+        if (!ThemeHelper.isBiometricAutofillEnabled(requireContext())) {
+            Toast.makeText(getContext(), "El autocompletado de contraseñas está desactivado en Ajustes", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         List<String> accounts = credentialsManager.getRememberedAccounts();
         if (accounts.isEmpty()) {
             Toast.makeText(getContext(), "No hay cuentas guardadas", Toast.LENGTH_SHORT).show();

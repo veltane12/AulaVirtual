@@ -45,6 +45,7 @@ public class SettingsAdvancedFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         setupDataModeSelector();
+        setupBiometricAutofillSwitch();
         binding.btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
         binding.btnDownloadOfflineData.setOnClickListener(v -> downloadOfflineData());
         binding.btnUploadOfflineData.setOnClickListener(v -> confirmUploadOfflineData());
@@ -125,6 +126,16 @@ public class SettingsAdvancedFragment extends Fragment {
                     requireActivity().recreate();
                 }
             }
+        });
+    }
+
+    private void setupBiometricAutofillSwitch() {
+        boolean isEnabled = ThemeHelper.isBiometricAutofillEnabled(requireContext());
+        binding.switchBiometricAutofill.setChecked(isEnabled);
+        binding.switchBiometricAutofill.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            ThemeHelper.setBiometricAutofillEnabled(requireContext(), isChecked);
+            String message = isChecked ? "Autocompletado de contraseñas activado" : "Autocompletado de contraseñas desactivado";
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
         });
     }
 
