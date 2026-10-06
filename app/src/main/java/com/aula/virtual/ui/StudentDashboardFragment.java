@@ -53,7 +53,7 @@ public class StudentDashboardFragment extends Fragment {
             if (subject != null) {
                 Bundle args = new Bundle();
                 args.putInt("subjectId", subject.id);
-                Navigation.findNavController(requireView()).navigate(R.id.action_studentDashboardFragment_to_subjectDetailFragment, args);
+                Navigation.findNavController(requireView()).navigate(R.id.action_studentDashboardFragment_to_subjectBlogFragment, args);
             }
         });
 

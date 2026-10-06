@@ -208,7 +208,7 @@
     <fragment
         android:id="@+id/studentDashboardFragment"
         android:name="com.aula.virtual.ui.StudentDashboardFragment"
-        android:label="Mis Notas"
+        android:label="Mis Materias"
         tools:layout="@layout/fragment_student_dashboard">
         <action
             android:id="@+id/action_studentDashboardFragment_to_subjectBlogFragment"

@@ -84,7 +84,6 @@ public class SubjectDetailFragment extends Fragment {
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
         
         binding.btnManageStudents.setOnClickListener(v -> navigateToStudents());
-        binding.btnManageBlog.setOnClickListener(v -> navigateToBlog());
     }
 
     private void setupColorSelector() {
@@ -140,13 +139,6 @@ public class SubjectDetailFragment extends Fragment {
         }
     }
 
-    private void navigateToBlog() {
-        if (subject == null) return;
-        Bundle args = new Bundle();
-        args.putInt("subjectId", subject.id);
-        Navigation.findNavController(requireView()).navigate(R.id.action_subjectDetailFragment_to_subjectBlogFragment, args);
-    }
-
     private void navigateToStudents() {
         if (subject == null) return;
         Bundle args = new Bundle();
@@ -174,11 +166,9 @@ public class SubjectDetailFragment extends Fragment {
             if ("PROFESSOR".equals(currentUser.role)) {
                 binding.tvColorLabel.setText("Color Personalizado para tu Horario Semanal");
                 binding.btnManageStudents.setVisibility(View.VISIBLE);
-                binding.btnManageBlog.setVisibility(View.GONE);
             } else {
                 binding.tvColorLabel.setText("Color Materia");
                 binding.btnManageStudents.setVisibility(View.GONE);
-                binding.btnManageBlog.setVisibility(View.VISIBLE);
 
                 viewModel.getGradeInfoForStudent(currentUser.id).observe(getViewLifecycleOwner(), gradeInfos -> {
                     if (gradeInfos != null && subject != null && binding != null) {
@@ -225,7 +215,6 @@ public class SubjectDetailFragment extends Fragment {
             binding.btnSave.setText("Guardar Cambios");
             binding.btnSave.setVisibility(View.VISIBLE);
             binding.btnManageStudents.setVisibility(View.GONE);
-            binding.btnManageBlog.setVisibility(View.GONE);
         }
 
         DialogUtils.arrangeGridButtons(binding.layoutActionButtons);

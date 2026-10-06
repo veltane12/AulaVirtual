@@ -457,19 +457,7 @@
                 android:backgroundTint="?attr/colorPrimary"
                 android:visibility="gone"/>
 
-            <Button
-                android:id="@+id/btnManageBlog"
-                style="@style/Widget.Bootstrap.Button.Primary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_margin="4dp"
-                android:text="Foro de la Materia"
-                android:textAllCaps="false"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:backgroundTint="@color/bs_info"
-                android:visibility="gone"/>
+
 
             <Button
                 android:id="@+id/btnManageGrades"
