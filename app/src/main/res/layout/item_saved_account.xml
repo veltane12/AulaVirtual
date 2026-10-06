@@ -4,9 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="12dp"
-    android:background="?attr/selectableItemBackground"
-    android:clickable="true"
-    android:focusable="true">
+    android:background="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -55,6 +53,7 @@
         app:iconSize="20dp"
         app:iconTint="@color/white"
         app:backgroundTint="@color/bs_danger"
+        android:focusable="false"
         android:contentDescription="Eliminar cuenta guardada" />
 
 </RelativeLayout>

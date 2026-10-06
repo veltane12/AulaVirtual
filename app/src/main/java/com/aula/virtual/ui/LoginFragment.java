@@ -132,6 +132,19 @@ public class LoginFragment extends Fragment {
                     tvCarnet.setVisibility(View.GONE);
                 }
 
+                view.setOnClickListener(v -> {
+                    if (dialogRef[0] != null) dialogRef[0].dismiss();
+
+                    binding.etCarnet.setText(carnet);
+                    String savedPassword = credentialsManager.getPassword(carnet);
+                    if (savedPassword != null) {
+                        binding.etPassword.setText(savedPassword);
+                        binding.cbRemember.setChecked(true);
+                    }
+
+                    authenticateBiometrically(carnet);
+                });
+
                 btnDelete.setFocusable(false);
                 btnDelete.setOnClickListener(v -> {
                     showDeleteAccountConfirmation(carnet, name, () -> {
