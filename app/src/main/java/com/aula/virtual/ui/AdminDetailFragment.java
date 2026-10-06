@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -152,10 +153,20 @@ public class AdminDetailFragment extends Fragment {
                 admin = user;
                 
                 // Dynamic Title based on role
+                String title = "Detalle";
                 if ("PROFESSOR".equals(admin.role)) {
-                    binding.tvDetailTitle.setText("Detalle Administrador");
+                    title = "Detalle Profesor";
                 } else if ("ADMIN".equals(admin.role)) {
-                    binding.tvDetailTitle.setText("Detalle Administrador");
+                    title = "Detalle Administrador";
+                } else if ("STUDENT".equals(admin.role)) {
+                    title = "Detalle Estudiante";
+                }
+                binding.tvDetailTitle.setText(title);
+                if (getActivity() != null) {
+                    TextView tvNavTitle = getActivity().findViewById(R.id.tvNavTitle);
+                    if (tvNavTitle != null) {
+                        tvNavTitle.setText(title);
+                    }
                 }
 
                 binding.etField1.setText(admin.name);
