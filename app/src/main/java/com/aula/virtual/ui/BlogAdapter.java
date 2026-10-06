@@ -5,7 +5,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -167,7 +166,7 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.ViewHolder> {
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvCategory, tvTitle, tvContent, btnReadMore;
         View layoutAdminActions;
-        ImageButton btnEdit, btnDelete;
+        Button btnEdit, btnDelete;
         ImageView ivDragHandle;
         Button btnDiscussion;
 
