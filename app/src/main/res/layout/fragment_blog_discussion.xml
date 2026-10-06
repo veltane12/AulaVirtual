@@ -33,13 +33,26 @@
             android:layout_centerVertical="true"
             android:orientation="horizontal">
 
-            <ImageButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnClearChat"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_delete"
-                app:tint="@color/bs_danger"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                app:cornerRadius="22dp"
+                app:icon="@drawable/ic_delete"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="22dp"
+                app:iconTint="@color/white"
+                app:backgroundTint="@color/bs_danger"
+                android:contentDescription="Vaciar conversación"
                 android:visibility="gone"/>
         </LinearLayout>
     </RelativeLayout>
