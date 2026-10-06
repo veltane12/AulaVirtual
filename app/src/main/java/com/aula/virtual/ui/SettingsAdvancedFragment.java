@@ -141,7 +141,7 @@ public class SettingsAdvancedFragment extends Fragment {
             if (!isChecked) {
                 new MaterialAlertDialogBuilder(requireContext())
                         .setTitle("⚠️ Desactivar Datos Biométricos")
-                        .setMessage("Al desactivar la opción de Datos Biométricos y Autocompletado, se ELIMINARÁN TODAS las cuentas y contraseñas guardadas en este dispositivo.\n\n¿Deseas continuar?")
+                        .setMessage("Al desactivar los Datos Biométricos, se ELIMINARÁN TODAS las cuentas guardadas para inicio de sesión biométrico en este dispositivo.\n\n¿Deseas continuar?")
                         .setPositiveButton("Sí, Desactivar y Eliminar", (dialog, which) -> {
                             CredentialsManager manager = new CredentialsManager(requireContext());
                             manager.clearAllCredentials();
@@ -157,7 +157,7 @@ public class SettingsAdvancedFragment extends Fragment {
                         .show();
             } else {
                 ThemeHelper.setBiometricAutofillEnabled(requireContext(), true);
-                Toast.makeText(getContext(), "Autocompletado de contraseñas activado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Inicio de sesión biométrico activado", Toast.LENGTH_SHORT).show();
             }
         });
     }
