@@ -97,8 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnHome.setOnClickListener(v -> navigateToHome());
         btnBack.setOnClickListener(v -> {
-            if (isCurrentDestinationHome()) {
-                // User requested "no utility" on home screens
+            if (isCurrentDestinationHomeOrLogin()) {
                 return;
             }
             if (!navController.popBackStack()) {
@@ -173,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (isCurrentDestinationHome()) {
+                if (isCurrentDestinationHomeOrLogin()) {
                     showExitConfirmationDialog();
                 } else {
                     if (!navController.popBackStack()) {
@@ -255,12 +254,13 @@ public class MainActivity extends AppCompatActivity {
                 .build());
     }
 
-    private boolean isCurrentDestinationHome() {
-        if (navController.getCurrentDestination() == null) return false;
+    private boolean isCurrentDestinationHomeOrLogin() {
+        if (navController == null || navController.getCurrentDestination() == null) return false;
         int id = navController.getCurrentDestination().getId();
         return id == R.id.adminHomeFragment || 
                id == R.id.studentHomeFragment || 
-               id == R.id.professorHomeFragment;
+               id == R.id.professorHomeFragment ||
+               id == R.id.loginFragment;
     }
 
     private void applyNavbarPosition() {

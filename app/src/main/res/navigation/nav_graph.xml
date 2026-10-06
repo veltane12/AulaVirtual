@@ -41,7 +41,7 @@
         <action
             android:id="@+id/action_professorHomeFragment_to_loginFragment"
             app:destination="@id/loginFragment"
-            app:popUpTo="@id/professorHomeFragment"
+            app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_professorHomeFragment_to_studentProfileFragment"
@@ -117,7 +117,9 @@
             app:destination="@id/settingsFragment" />
         <action
             android:id="@+id/action_adminHomeFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_adminHomeFragment_to_studentProfileFragment"
             app:destination="@id/studentProfileFragment" />
@@ -149,7 +151,9 @@
             app:destination="@id/settingsFragment" />
         <action
             android:id="@+id/action_studentHomeFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_studentHomeFragment_to_studentProfileFragment"
             app:destination="@id/studentProfileFragment" />
@@ -468,7 +472,7 @@
     <action
         android:id="@+id/action_global_loginFragment"
         app:destination="@id/loginFragment"
-        app:popUpTo="@id/loginFragment"
+        app:popUpTo="@id/nav_graph"
         app:popUpToInclusive="true" />
 
     <fragment
