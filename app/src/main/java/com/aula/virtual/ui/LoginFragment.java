@@ -141,8 +141,6 @@ public class LoginFragment extends Fragment {
                         binding.etPassword.setText(savedPassword);
                         binding.cbRemember.setChecked(true);
                     }
-
-                    authenticateBiometrically(carnet);
                 });
 
                 btnDelete.setFocusable(false);
