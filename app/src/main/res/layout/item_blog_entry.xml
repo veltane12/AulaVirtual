@@ -1,94 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Widget.Bootstrap.Card"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:layout_marginBottom="10dp"
+    android:layout_marginHorizontal="2dp"
+    android:background="@drawable/bg_list_item">
+
+    <ImageView
+        android:id="@+id/ivDragHandle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_drag_handle"
+        android:visibility="gone"
+        android:layout_marginEnd="8dp"/>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="8dp">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/ivDragHandle"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_drag_handle"
-            android:visibility="gone"
-            android:layout_marginEnd="8dp"/>
+        <TextView
+            android:id="@+id/tvCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_badge_primary"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:text="Aviso"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Título"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Descripción"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/btnReadMore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Ver más"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/tvCategory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_badge_primary"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="2dp"
-                android:text="Aviso"
-                android:textColor="@color/white"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Título"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvContent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="Descripción"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/btnReadMore"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Ver más"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:visibility="gone"/>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDiscussion"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
+                    app:cornerRadius="22dp"
+                    app:icon="@drawable/ic_chat"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp"
+                    app:iconTint="@color/white"
+                    app:backgroundTint="?attr/colorPrimary"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:contentDescription="Discusión"/>
 
                 <LinearLayout
+                    android:id="@+id/layoutAdminActions"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:visibility="gone">
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnDiscussion"
+                        android:id="@+id/btnEdit"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="44dp"
                         android:layout_height="44dp"
@@ -100,73 +128,41 @@
                         android:insetLeft="0dp"
                         android:insetRight="0dp"
                         app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_chat"
+                        app:icon="@drawable/ic_edit"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp"
                         app:iconSize="22dp"
                         app:iconTint="@color/white"
-                        app:backgroundTint="?attr/colorPrimary"
+                        app:backgroundTint="@color/bs_success"
                         android:layout_marginStart="4dp"
                         android:layout_marginEnd="4dp"
-                        android:contentDescription="Discusión"/>
+                        android:contentDescription="Editar entrada"/>
 
-                    <LinearLayout
-                        android:id="@+id/layoutAdminActions"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:visibility="gone">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnEdit"
-                            style="@style/Widget.Material3.Button.TonalButton"
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:minWidth="0dp"
-                            android:minHeight="0dp"
-                            android:padding="0dp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:insetLeft="0dp"
-                            android:insetRight="0dp"
-                            app:cornerRadius="22dp"
-                            app:icon="@drawable/ic_edit"
-                            app:iconGravity="textStart"
-                            app:iconPadding="0dp"
-                            app:iconSize="22dp"
-                            app:iconTint="@color/white"
-                            app:backgroundTint="@color/bs_success"
-                            android:layout_marginStart="4dp"
-                            android:layout_marginEnd="4dp"
-                            android:contentDescription="Editar entrada"/>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnDelete"
-                            style="@style/Widget.Material3.Button.TonalButton"
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:minWidth="0dp"
-                            android:minHeight="0dp"
-                            android:padding="0dp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:insetLeft="0dp"
-                            android:insetRight="0dp"
-                            app:cornerRadius="22dp"
-                            app:icon="@drawable/ic_delete"
-                            app:iconGravity="textStart"
-                            app:iconPadding="0dp"
-                            app:iconSize="22dp"
-                            app:iconTint="@color/white"
-                            app:backgroundTint="@color/bs_danger"
-                            android:layout_marginStart="4dp"
-                            android:layout_marginEnd="4dp"
-                            android:contentDescription="Eliminar entrada"/>
-                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDelete"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:padding="0dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:insetLeft="0dp"
+                        android:insetRight="0dp"
+                        app:cornerRadius="22dp"
+                        app:icon="@drawable/ic_delete"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="22dp"
+                        app:iconTint="@color/white"
+                        app:backgroundTint="@color/bs_danger"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:contentDescription="Eliminar entrada"/>
                 </LinearLayout>
             </LinearLayout>
-
         </LinearLayout>
+
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</LinearLayout>
