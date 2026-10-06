@@ -103,6 +103,12 @@ public class AdminEnrollmentListFragment extends Fragment {
             }
         });
 
+        viewModel.fetchSubjectProfessorMap(map -> {
+            if (adapter != null && map != null) {
+                adapter.setProfessorMap(map);
+            }
+        });
+
         viewModel.getModificationError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();

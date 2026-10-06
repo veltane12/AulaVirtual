@@ -31,6 +31,7 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
     }
 
     private Map<Integer, String> facilityMap = new HashMap<>();
+    private Map<Integer, String> professorMap = new HashMap<>();
 
     public GradeAdapter(boolean isAdmin) {
         this(isAdmin, false);
@@ -53,6 +54,13 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
     public void setFacilityMap(Map<Integer, String> map) {
         if (map != null) {
             this.facilityMap = map;
+            notifyDataSetChanged();
+        }
+    }
+
+    public void setProfessorMap(Map<Integer, String> map) {
+        if (map != null) {
+            this.professorMap = map;
             notifyDataSetChanged();
         }
     }
@@ -125,6 +133,18 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
             }
         } else if (holder.tvFacility != null) {
             holder.tvFacility.setVisibility(View.GONE);
+        }
+
+        if (holder.tvProfessor != null && info.subject != null) {
+            String profName = professorMap.get(info.subject.id);
+            if (profName != null && !profName.isEmpty()) {
+                holder.tvProfessor.setText("👨‍🏫 " + profName);
+                holder.tvProfessor.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvProfessor.setVisibility(View.GONE);
+            }
+        } else if (holder.tvProfessor != null) {
+            holder.tvProfessor.setVisibility(View.GONE);
         }
         
         Enrollment e = info.enrollment;
@@ -208,7 +228,7 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvSection, tvFacility, tvP1, tvP2, tvP3, tvP4, tvP5, tvAverage;
+        TextView tvName, tvSection, tvFacility, tvProfessor, tvP1, tvP2, tvP3, tvP4, tvP5, tvAverage;
         Button btnBlog, btnEdit, btnDelete, btnProfile;
 
         ViewHolder(View itemView) {
@@ -216,6 +236,7 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
             tvName = itemView.findViewById(R.id.tvSubjectName);
             tvSection = itemView.findViewById(R.id.tvSection);
             tvFacility = itemView.findViewById(R.id.tvFacility);
+            tvProfessor = itemView.findViewById(R.id.tvProfessor);
             tvP1 = itemView.findViewById(R.id.tvP1);
             tvP2 = itemView.findViewById(R.id.tvP2);
             tvP3 = itemView.findViewById(R.id.tvP3);

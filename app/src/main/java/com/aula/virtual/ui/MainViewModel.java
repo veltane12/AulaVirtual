@@ -762,6 +762,44 @@ public class MainViewModel extends AndroidViewModel {
         });
     }
 
+    public void fetchSubjectProfessorMap(DataCallback<Map<Integer, String>> callback) {
+        Map<Integer, String> map = new HashMap<>();
+        repository.getAllProfessors(new Callback<List<User>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<User>> call, @NonNull Response<List<User>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Map<Integer, String> profMap = new HashMap<>();
+                    for (User u : response.body()) {
+                        profMap.put(u.id, u.name);
+                    }
+                    repository.getAllSubjects(new Callback<List<Subject>>() {
+                        @Override
+                        public void onResponse(@NonNull Call<List<Subject>> call, @NonNull Response<List<Subject>> subResponse) {
+                            if (subResponse.isSuccessful() && subResponse.body() != null) {
+                                for (Subject s : subResponse.body()) {
+                                    if (s.professorId != null && profMap.containsKey(s.professorId)) {
+                                        map.put(s.id, profMap.get(s.professorId));
+                                    }
+                                }
+                            }
+                            callback.onResult(map);
+                        }
+                        @Override
+                        public void onFailure(@NonNull Call<List<Subject>> call, @NonNull Throwable t) {
+                            callback.onResult(map);
+                        }
+                    });
+                } else {
+                    callback.onResult(map);
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<List<User>> call, @NonNull Throwable t) {
+                callback.onResult(map);
+            }
+        });
+    }
+
     private final MutableLiveData<List<Notification>> allNotifications = new MutableLiveData<>();
 
     public LiveData<List<Notification>> getAllNotifications() {
