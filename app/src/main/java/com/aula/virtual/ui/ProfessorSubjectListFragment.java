@@ -20,7 +20,9 @@ import com.aula.virtual.data.entity.User;
 import com.aula.virtual.databinding.FragmentAdminDashboardBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProfessorSubjectListFragment extends Fragment {
     private FragmentAdminDashboardBinding binding;
@@ -148,48 +150,63 @@ public class ProfessorSubjectListFragment extends Fragment {
     }
 
     private void showAssignSubjectDialog(int profId) {
-        observeOnce(viewModel.getAllSubjects(), subjects -> {
-            if (subjects == null || subjects.isEmpty()) {
+        observeOnce(viewModel.getAllSubjects(), allSubjects -> {
+            if (allSubjects == null || allSubjects.isEmpty()) {
                 Toast.makeText(getContext(), "No hay materias registradas", Toast.LENGTH_SHORT).show();
                 return;
             }
-            String[] names = new String[subjects.size()];
-            for (int i = 0; i < subjects.size(); i++) {
-                Subject s = subjects.get(i);
-                String sec = s.section != null ? s.section : "01";
-                names[i] = s.name + " (Sección: " + sec + ")";
-            }
+            observeOnce(viewModel.getSubjectsByProfessor(profId), assignedSubjects -> {
+                List<Integer> assignedSubjectIds = assignedSubjects != null ? 
+                    assignedSubjects.stream().map(s -> s.id).collect(Collectors.toList()) : 
+                    new ArrayList<>();
 
-            new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Inscribir Materia a Profesor")
-                .setItems(names, (dialog, which) -> {
-                    Subject selected = subjects.get(which);
-                    if (selected.professorId != null && selected.professorId != 0 && selected.professorId != profId) {
-                        viewModel.getUserById(selected.professorId, existingProf -> {
-                            String profName = existingProf != null ? existingProf.name : "otro profesor";
-                            if (getActivity() != null) {
-                                getActivity().runOnUiThread(() -> 
-                                    new MaterialAlertDialogBuilder(requireContext())
-                                        .setTitle("⚠️ Asignación Restringida")
-                                        .setMessage("La materia \"" + selected.name + "\" ya está asignada al profesor " + profName + ".\n\nSolo se permite UN Profesor por Materia.")
-                                        .setPositiveButton("Entendido", null)
-                                        .show()
-                                );
-                            }
+                List<Subject> availableSubjects = allSubjects.stream()
+                    .filter(s -> !assignedSubjectIds.contains(s.id))
+                    .collect(Collectors.toList());
+
+                if (availableSubjects.isEmpty()) {
+                    Toast.makeText(getContext(), "El profesor ya está inscrito en todas las materias disponibles.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String[] names = new String[availableSubjects.size()];
+                for (int i = 0; i < availableSubjects.size(); i++) {
+                    Subject s = availableSubjects.get(i);
+                    String sec = s.section != null ? s.section : "01";
+                    names[i] = s.name + " (Sección: " + sec + ")";
+                }
+
+                new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Inscribir Materia a Profesor")
+                    .setItems(names, (dialog, which) -> {
+                        Subject selected = availableSubjects.get(which);
+                        if (selected.professorId != null && selected.professorId != 0 && selected.professorId != profId) {
+                            viewModel.getUserById(selected.professorId, existingProf -> {
+                                String profName = existingProf != null ? existingProf.name : "otro profesor";
+                                if (getActivity() != null) {
+                                    getActivity().runOnUiThread(() -> 
+                                        new MaterialAlertDialogBuilder(requireContext())
+                                            .setTitle("⚠️ Asignación Restringida")
+                                            .setMessage("La materia \"" + selected.name + "\" ya está asignada al profesor " + profName + ".\n\nSolo se permite UN Profesor por Materia.")
+                                            .setPositiveButton("Entendido", null)
+                                            .show()
+                                    );
+                                }
+                            });
+                            return;
+                        }
+
+                        selected.professorId = profId;
+                        viewModel.performOnlineAction(() -> {
+                            viewModel.updateSubject(selected);
+                            viewModel.updateSchedulesProfessorBySubject(selected.id, profId);
+                            Toast.makeText(getContext(), "¡Profesor inscrito/asignado a la materia!", Toast.LENGTH_SHORT).show();
+                            viewModel.getSubjectsByProfessor(profId);
+                            viewModel.refreshData();
                         });
-                        return;
-                    }
-
-                    selected.professorId = profId;
-                    viewModel.performOnlineAction(() -> {
-                        viewModel.updateSubject(selected);
-                        viewModel.updateSchedulesProfessorBySubject(selected.id, profId);
-                        Toast.makeText(getContext(), "¡Profesor inscrito/asignado a la materia!", Toast.LENGTH_SHORT).show();
-                        viewModel.getSubjectsByProfessor(profId);
-                        viewModel.refreshData();
-                    });
-                })
-                .show();
+                    })
+                    .show();
+            });
         });
     }
 

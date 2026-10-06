@@ -158,6 +158,7 @@
             app:iconSize="22dp"
             app:iconTint="@color/white"
             app:backgroundTint="@color/bs_success"
+            android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             android:visibility="gone"
             android:contentDescription="Notas"/>
@@ -181,6 +182,7 @@
             app:iconSize="22dp"
             app:iconTint="@color/white"
             app:backgroundTint="?attr/colorPrimary"
+            android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             android:contentDescription="Gestionar"/>
 
@@ -204,6 +206,7 @@
             app:iconTint="@color/white"
             app:backgroundTint="@color/bs_danger"
             android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             android:contentDescription="Desinscribir"
             android:visibility="gone"/>
 

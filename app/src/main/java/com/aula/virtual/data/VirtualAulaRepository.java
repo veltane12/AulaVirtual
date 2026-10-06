@@ -794,6 +794,16 @@ public class VirtualAulaRepository {
             if (db != null) {
                 executor.execute(() -> {
                     try {
+                        List<Enrollment> existing = db.enrollmentDao().getByStudentId(enrollment.studentId);
+                        for (Enrollment e : existing) {
+                            if (e.subjectId == enrollment.subjectId) {
+                                mainHandler.post(() -> {
+                                    if (callback != null) callback.onFailure(null, new Throwable("El alumno ya está inscrito en esta materia."));
+                                });
+                                return;
+                            }
+                        }
+
                         if (enrollment.id == 0) enrollment.id = (int) (System.currentTimeMillis() & 0x7fffffff);
                         db.enrollmentDao().insert(enrollment);
                         mainHandler.post(() -> {

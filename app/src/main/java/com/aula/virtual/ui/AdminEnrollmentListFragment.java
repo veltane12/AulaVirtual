@@ -199,9 +199,23 @@ public class AdminEnrollmentListFragment extends Fragment {
 
     private void showEnrollDialog() {
         observeOnce(viewModel.getAllSubjects(), subjects -> {
-            String[] names = new String[subjects.size()];
-            for (int i = 0; i < subjects.size(); i++) {
-                Subject s = subjects.get(i);
+            List<Integer> enrolledSubjectIds = allGradeInfos.stream()
+                .filter(info -> info != null && info.subject != null)
+                .map(info -> info.subject.id)
+                .collect(Collectors.toList());
+
+            List<Subject> availableSubjects = subjects.stream()
+                .filter(s -> !enrolledSubjectIds.contains(s.id))
+                .collect(Collectors.toList());
+
+            if (availableSubjects.isEmpty()) {
+                Toast.makeText(getContext(), "El alumno ya está inscrito en todas las materias disponibles.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String[] names = new String[availableSubjects.size()];
+            for (int i = 0; i < availableSubjects.size(); i++) {
+                Subject s = availableSubjects.get(i);
                 names[i] = s.name + " (Sección: " + (s.section != null ? s.section : "01") + ")";
             }
 
@@ -209,7 +223,7 @@ public class AdminEnrollmentListFragment extends Fragment {
                 .setTitle("Seleccionar Materia")
                 .setItems(names, (dialog, which) -> {
                     viewModel.performOnlineAction(() -> {
-                        viewModel.enrollStudent(studentId, subjects.get(which).id, error -> {
+                        viewModel.enrollStudent(studentId, availableSubjects.get(which).id, error -> {
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(() -> 
                                     Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show()
