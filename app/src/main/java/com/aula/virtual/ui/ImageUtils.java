@@ -112,7 +112,7 @@ public class ImageUtils {
         int accentColor = ThemeHelper.getSubjectColor(context, ThemeHelper.getAccentColorName(context));
         int pad = dpToPx(context, 8);
         iv.setPadding(pad, pad, pad, pad);
-        iv.setImageResource(R.drawable.ic_person_badge);
+        iv.setImageResource(R.drawable.ic_image_missing);
         if (iv.getParent() instanceof CardView) {
             CardView card = (CardView) iv.getParent();
             card.setCardBackgroundColor(accentColor);
