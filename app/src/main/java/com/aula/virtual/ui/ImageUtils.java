@@ -110,8 +110,7 @@ public class ImageUtils {
         }
 
         int accentColor = ThemeHelper.getSubjectColor(context, ThemeHelper.getAccentColorName(context));
-        int pad = dpToPx(context, 8);
-        iv.setPadding(pad, pad, pad, pad);
+        iv.setPadding(0, 0, 0, 0);
         iv.setImageResource(R.drawable.ic_image_missing);
         if (iv.getParent() instanceof CardView) {
             CardView card = (CardView) iv.getParent();
