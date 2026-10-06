@@ -53,8 +53,6 @@ public class AdminSubjectListFragment extends Fragment {
         binding.tvTitle.setText("Listado de Materias");
         adapter = new SubjectAdapter();
         adapter.setManageButtonText("Gestionar");
-        adapter.setShowDeleteButton(true);
-        adapter.setOnDeleteClickListener(this::showDeleteSubjectDialog);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
 
@@ -232,21 +230,7 @@ public class AdminSubjectListFragment extends Fragment {
         });
     }
 
-    private void showDeleteSubjectDialog(Subject subject) {
-        if (subject == null) return;
-        new MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Borrar Materia")
-            .setMessage("¿Estás seguro de eliminar la materia \"" + subject.name + "\"? Esta acción no se puede deshacer.")
-            .setPositiveButton("Borrar", (dialog, which) -> {
-                viewModel.performOnlineAction(() -> {
-                    viewModel.deleteSubject(subject);
-                    Toast.makeText(getContext(), "Materia eliminada", Toast.LENGTH_SHORT).show();
-                    viewModel.refreshData();
-                });
-            })
-            .setNegativeButton("Cancelar", null)
-            .show();
-    }
+
 
     @Override
     public void onDestroyView() {
