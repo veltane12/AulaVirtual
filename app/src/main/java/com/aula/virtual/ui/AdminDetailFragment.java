@@ -105,7 +105,7 @@ public class AdminDetailFragment extends Fragment {
         
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
-        binding.cardProfileImage.setOnClickListener(v -> showImpersonateConfirmationDialog());
+        binding.btnImpersonateAction.setOnClickListener(v -> showImpersonateConfirmationDialog());
 
         setupCopyButtons();
     }
@@ -215,14 +215,14 @@ public class AdminDetailFragment extends Fragment {
 
                     // Show copy/toggle buttons for both Admin and Professor management
                     binding.layoutCopyToggles.setVisibility(View.VISIBLE);
-                    binding.layoutProfileHeader.setVisibility(View.VISIBLE);
+                    binding.layoutProfileHeaderContainer.setVisibility(View.VISIBLE);
 
                     if ("PROFESSOR".equals(admin.role)) {
-                        binding.cardImpersonateIndicator.setVisibility(View.VISIBLE);
+                        binding.btnImpersonateAction.setVisibility(View.VISIBLE);
                         binding.btnImpersonate.setVisibility(View.GONE);
                         binding.btnManageGrades.setVisibility(View.GONE);
                     } else {
-                        binding.cardImpersonateIndicator.setVisibility(View.GONE);
+                        binding.btnImpersonateAction.setVisibility(View.GONE);
                         binding.btnImpersonate.setVisibility(View.GONE);
                         binding.btnManageGrades.setVisibility(View.GONE);
                     }
@@ -232,7 +232,7 @@ public class AdminDetailFragment extends Fragment {
                     binding.layoutAddress.setVisibility(View.GONE);
                     binding.layoutPersonalEmail.setVisibility(View.GONE);
                     binding.switchLockPhoto.setVisibility(View.GONE);
-                    binding.cardImpersonateIndicator.setVisibility(View.GONE);
+                    binding.btnImpersonateAction.setVisibility(View.GONE);
                     binding.btnImpersonate.setVisibility(View.GONE);
                 }
 
