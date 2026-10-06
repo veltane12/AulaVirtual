@@ -43,6 +43,10 @@ public class LoginFragment extends Fragment {
 
         boolean autofillEnabled = ThemeHelper.isBiometricAutofillEnabled(requireContext());
         binding.btnSavedAccounts.setVisibility(autofillEnabled ? View.VISIBLE : View.GONE);
+        binding.cbRemember.setVisibility(autofillEnabled ? View.VISIBLE : View.GONE);
+        if (!autofillEnabled) {
+            binding.cbRemember.setChecked(false);
+        }
 
         binding.btnLogin.setOnClickListener(v -> {
             String carnet = binding.etCarnet.getText().toString();
@@ -64,7 +68,7 @@ public class LoginFragment extends Fragment {
         viewModel.login(carnet, password, new MainViewModel.LoginCallback() {
             @Override
             public void onSuccess(User user) {
-                if (remember) {
+                if (remember && ThemeHelper.isBiometricAutofillEnabled(requireContext())) {
                     credentialsManager.saveCredentials(carnet, password, user.name);
                 }
                 

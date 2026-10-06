@@ -81,4 +81,9 @@ public class CredentialsManager {
         updatedAccounts.remove(carnet);
         sharedPreferences.edit().putStringSet(KEY_ACCOUNTS, updatedAccounts).apply();
     }
+
+    public void clearAllCredentials() {
+        if (sharedPreferences == null) return;
+        sharedPreferences.edit().clear().apply();
+    }
 }

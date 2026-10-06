@@ -129,13 +129,36 @@ public class SettingsAdvancedFragment extends Fragment {
         });
     }
 
+    private boolean isUpdatingSwitch = false;
+
     private void setupBiometricAutofillSwitch() {
         boolean isEnabled = ThemeHelper.isBiometricAutofillEnabled(requireContext());
         binding.switchBiometricAutofill.setChecked(isEnabled);
+
         binding.switchBiometricAutofill.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            ThemeHelper.setBiometricAutofillEnabled(requireContext(), isChecked);
-            String message = isChecked ? "Autocompletado de contraseñas activado" : "Autocompletado de contraseñas desactivado";
-            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            if (isUpdatingSwitch) return;
+
+            if (!isChecked) {
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("⚠️ Desactivar Datos Biométricos")
+                        .setMessage("Al desactivar la opción de Datos Biométricos y Autocompletado, se ELIMINARÁN TODAS las cuentas y contraseñas guardadas en este dispositivo.\n\n¿Deseas continuar?")
+                        .setPositiveButton("Sí, Desactivar y Eliminar", (dialog, which) -> {
+                            CredentialsManager manager = new CredentialsManager(requireContext());
+                            manager.clearAllCredentials();
+                            ThemeHelper.setBiometricAutofillEnabled(requireContext(), false);
+                            Toast.makeText(getContext(), "Datos biométricos desactivados y cuentas guardadas eliminadas", Toast.LENGTH_LONG).show();
+                        })
+                        .setNegativeButton("Cancelar", (dialog, which) -> {
+                            isUpdatingSwitch = true;
+                            binding.switchBiometricAutofill.setChecked(true);
+                            isUpdatingSwitch = false;
+                        })
+                        .setCancelable(false)
+                        .show();
+            } else {
+                ThemeHelper.setBiometricAutofillEnabled(requireContext(), true);
+                Toast.makeText(getContext(), "Autocompletado de contraseñas activado", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
