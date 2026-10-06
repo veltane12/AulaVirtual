@@ -3,7 +3,7 @@ package com.aula.virtual.ui;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -62,7 +62,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvSubject, tvSection, tvProfessor, tvTime;
-        ImageButton btnDelete, btnEdit;
+        Button btnDelete, btnEdit;
 
         ViewHolder(View itemView) {
             super(itemView);
