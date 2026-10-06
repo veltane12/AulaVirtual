@@ -2,8 +2,29 @@
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+
+    <!-- Ojo recortado: deja un espacio de 1dp a cada lado de la diagonal -->
+    <group>
+        <clip-path android:pathData="M2.8,0L24,0L24,21.2zM0,2.8L0,24L21.2,24z" />
+
+        <!-- Contorno del ojo -->
+        <path
+            android:fillColor="@android:color/white"
+            android:fillType="evenOdd"
+            android:pathData="M12,5C7.45,5 3.57,7.83 2,12c1.57,4.17 5.45,7 10,7s8.43,-2.83 10,-7C20.43,7.83 16.55,5 12,5zM12,17c-2.76,0 -5,-2.24 -5,-5s2.24,-5 5,-5 5,2.24 5,5 -2.24,5 -5,5z" />
+
+        <!-- Pupila -->
+        <path
+            android:fillColor="@android:color/white"
+            android:pathData="M12,9.5c-1.38,0 -2.5,1.12 -2.5,2.5s1.12,2.5 2.5,2.5 2.5,-1.12 2.5,-2.5 -1.12,-2.5 -2.5,-2.5z" />
+    </group>
+
+    <!-- Línea diagonal de "oculto" con extremos redondeados -->
     <path
-        android:fillColor="#000000"
-        android:pathData="M12,7c2.76,0 5,2.24 5,5 0,0.65 -0.13,1.26 -0.36,1.82l2.92,2.92C21.35,15.2 22.59,13.7 23,12c-1.73,-4.39 -6,-7.5 -11,-7.5 -1.4,0 -2.71,0.25 -3.91,0.69l2.13,2.13C10.74,7.13 11.35,7 12,7zM2,4.27l2.28,2.28 -0.46,0.45C2.41,8.4 1.17,9.9 1,12c1.73,4.39 6,7.5 11,7.5 1.55,0 3.03,-0.3 4.39,-0.84l0.42,0.42L19.73,22 21,20.73 3.27,3 2,4.27zM7.53,9.8l1.55,1.55c-0.05,0.21 -0.08,0.43 -0.08,0.65 0,1.66 1.34,3 3,3 0.22,0 0.44,-0.03 0.65,-0.08l1.55,1.55c-0.67,0.33 -1.41,0.53 -2.2,0.53 -2.76,0 -5,-2.24 -5,-5 0,-0.79 0.2,-1.53 0.53,-2.2zM11.84,9.02l3.15,3.15 0.01,-0.17c0,-1.66 -1.34,-3 -3,-3l-0.16,0.02z" />
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M4,4L20,20" />
 </vector>
