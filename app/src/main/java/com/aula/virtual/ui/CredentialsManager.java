@@ -35,14 +35,26 @@ public class CredentialsManager {
     }
 
     public void saveCredentials(String carnet, String password) {
+        saveCredentials(carnet, password, carnet);
+    }
+
+    public void saveCredentials(String carnet, String password, String name) {
         if (sharedPreferences == null) return;
         
-        sharedPreferences.edit().putString(carnet, password).apply();
+        sharedPreferences.edit()
+                .putString(carnet, password)
+                .putString(carnet + "_name", name != null ? name : carnet)
+                .apply();
         
         Set<String> accounts = sharedPreferences.getStringSet(KEY_ACCOUNTS, new HashSet<>());
         Set<String> updatedAccounts = new HashSet<>(accounts);
         updatedAccounts.add(carnet);
         sharedPreferences.edit().putStringSet(KEY_ACCOUNTS, updatedAccounts).apply();
+    }
+
+    public String getUserName(String carnet) {
+        if (sharedPreferences == null) return carnet;
+        return sharedPreferences.getString(carnet + "_name", carnet);
     }
 
     public String getPassword(String carnet) {
@@ -59,7 +71,10 @@ public class CredentialsManager {
     public void removeCredentials(String carnet) {
         if (sharedPreferences == null) return;
         
-        sharedPreferences.edit().remove(carnet).apply();
+        sharedPreferences.edit()
+                .remove(carnet)
+                .remove(carnet + "_name")
+                .apply();
         
         Set<String> accounts = sharedPreferences.getStringSet(KEY_ACCOUNTS, new HashSet<>());
         Set<String> updatedAccounts = new HashSet<>(accounts);

@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -59,7 +62,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onSuccess(User user) {
                 if (remember) {
-                    credentialsManager.saveCredentials(carnet, password);
+                    credentialsManager.saveCredentials(carnet, password, user.name);
                 }
                 
                 if (getActivity() == null || getView() == null) return;
@@ -96,17 +99,87 @@ public class LoginFragment extends Fragment {
             return;
         }
 
-        String[] items = accounts.toArray(new String[0]);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        builder.setTitle("Seleccionar cuenta");
+
+        ListView listView = new ListView(requireContext());
+        listView.setDivider(null);
+        listView.setPadding(0, 8, 0, 8);
+
+        final androidx.appcompat.app.AlertDialog[] dialogRef = new androidx.appcompat.app.AlertDialog[1];
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(requireContext(), R.layout.item_saved_account, accounts) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = convertView;
+                if (view == null) {
+                    view = LayoutInflater.from(getContext()).inflate(R.layout.item_saved_account, parent, false);
+                }
+
+                String carnet = getItem(position);
+                TextView tvName = view.findViewById(R.id.tvAccountName);
+                TextView tvCarnet = view.findViewById(R.id.tvAccountCarnet);
+                View btnDelete = view.findViewById(R.id.btnDeleteAccount);
+
+                String name = credentialsManager.getUserName(carnet);
+                if (name != null && !name.equals(carnet)) {
+                    tvName.setText(name);
+                    tvCarnet.setText("Carné: " + carnet);
+                    tvCarnet.setVisibility(View.VISIBLE);
+                } else {
+                    tvName.setText(carnet);
+                    tvCarnet.setVisibility(View.GONE);
+                }
+
+                btnDelete.setFocusable(false);
+                btnDelete.setOnClickListener(v -> {
+                    showDeleteAccountConfirmation(carnet, name, () -> {
+                        credentialsManager.removeCredentials(carnet);
+                        Toast.makeText(getContext(), "Cuenta eliminada", Toast.LENGTH_SHORT).show();
+                        remove(carnet);
+                        notifyDataSetChanged();
+                        if (isEmpty()) {
+                            if (dialogRef[0] != null) dialogRef[0].dismiss();
+                            Toast.makeText(getContext(), "No quedan cuentas guardadas", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
+
+                return view;
+            }
+        };
+
+        listView.setAdapter(adapter);
+        builder.setView(listView);
+        builder.setNegativeButton("Cerrar", null);
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialogRef[0] = dialog;
+
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedCarnet = adapter.getItem(position);
+            dialog.dismiss();
+            authenticateBiometrically(selectedCarnet);
+        });
+
+        dialog.show();
+    }
+
+    private void showDeleteAccountConfirmation(String carnet, String name, Runnable onDelete) {
+        String displayName = (name != null && !name.equals(carnet)) ? name : carnet;
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Seleccionar cuenta")
-                .setItems(items, (dialog, which) -> {
-                    String selectedCarnet = items[which];
-                    authenticateBiometrically(selectedCarnet);
-                })
+                .setTitle("Eliminar cuenta guardada")
+                .setMessage("¿Deseas eliminar las credenciales guardadas para \"" + displayName + "\"?")
+                .setPositiveButton("Eliminar", (dialog, which) -> onDelete.run())
+                .setNegativeButton("Cancelar", null)
                 .show();
     }
 
     private void authenticateBiometrically(String carnet) {
+        String name = credentialsManager.getUserName(carnet);
+        String displayName = (name != null && !name.equals(carnet)) ? name + " (" + carnet + ")" : carnet;
+
         Executor executor = ContextCompat.getMainExecutor(requireContext());
         BiometricPrompt biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback() {
             @Override
@@ -127,7 +200,7 @@ public class LoginFragment extends Fragment {
 
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Inicio de sesión biométrico")
-                .setSubtitle("Usa tu huella o rostro para entrar a " + carnet)
+                .setSubtitle("Usa tu huella o rostro para entrar como " + displayName)
                 .setNegativeButtonText("Cancelar")
                 .build();
 
