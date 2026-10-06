@@ -6,13 +6,13 @@
     android:viewportHeight="24"
     android:tint="?attr/colorControlNormal">
 
-    <!-- Anillo exterior (radio 10, trazo de 1.5dp) -->
+    <!-- Anillo exterior delgado (borde externo en radio 10, trazo de 1dp) -->
     <path
-        android:fillColor="@android:color/white"
-        android:fillType="evenOdd"
-        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2zM12,3.5c4.69,0 8.5,3.81 8.5,8.5s-3.81,8.5 -8.5,8.5S3.5,16.69 3.5,12 7.31,3.5 12,3.5z" />
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1"
+        android:pathData="M12,2.5a9.5,9.5 0,1 0,0 19a9.5,9.5 0,1 0,0 -19z" />
 
-    <!-- Paisaje recortado en un círculo interior: la base sigue la curva del anillo -->
+    <!-- Paisaje recortado en un círculo interior -->
     <group>
         <clip-path android:pathData="M12,5.5a6.5,6.5 0,1 0,0 13a6.5,6.5 0,1 0,0 -13z" />
 
