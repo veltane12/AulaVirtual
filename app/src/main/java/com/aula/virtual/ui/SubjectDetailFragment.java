@@ -4,10 +4,16 @@ import androidx.appcompat.app.AlertDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.graphics.Typeface;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -17,6 +23,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.aula.virtual.R;
 import com.aula.virtual.data.StudentGradeInfo;
 import com.aula.virtual.data.entity.Enrollment;
@@ -24,9 +32,12 @@ import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
 import com.aula.virtual.databinding.FragmentDetailBinding;
 import com.google.android.material.button.MaterialButton;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SubjectDetailFragment extends Fragment {
     private FragmentDetailBinding binding;
@@ -82,8 +93,8 @@ public class SubjectDetailFragment extends Fragment {
 
         binding.btnSave.setOnClickListener(v -> saveChanges());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirmation());
-        
         binding.btnManageStudents.setOnClickListener(v -> navigateToStudents());
+        binding.btnUnenrollMember.setOnClickListener(v -> showUnenrollMemberDialog());
     }
 
     private void setupColorSelector() {
@@ -215,6 +226,13 @@ public class SubjectDetailFragment extends Fragment {
             binding.btnSave.setText("Guardar Cambios");
             binding.btnSave.setVisibility(View.VISIBLE);
             binding.btnManageStudents.setVisibility(View.GONE);
+        }
+
+        boolean canManageMembers = currentUser != null && ("ADMIN".equals(currentUser.role) || "PROFESSOR".equals(currentUser.role));
+        if (canManageMembers) {
+            binding.btnUnenrollMember.setVisibility(View.VISIBLE);
+        } else {
+            binding.btnUnenrollMember.setVisibility(View.GONE);
         }
 
         DialogUtils.arrangeGridButtons(binding.layoutActionButtons);
@@ -400,6 +418,225 @@ public class SubjectDetailFragment extends Fragment {
             })
             .setNegativeButton("Cancelar", null)
             .show();
+    }
+
+    private void showUnenrollMemberDialog() {
+        if (subject == null) return;
+
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_searchable_list, null);
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Desinscribir Integrante");
+        builder.setView(dialogView);
+        builder.setNegativeButton("Cerrar", null);
+
+        AlertDialog dialog = builder.create();
+
+        EditText etSearch = dialogView.findViewById(R.id.etSearchDialog);
+        RecyclerView rvList = dialogView.findViewById(R.id.rvDialogList);
+        rvList.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        etSearch.setHint("Buscar integrante...");
+
+        viewModel.getStudentsBySubject(subject.id).observe(getViewLifecycleOwner(), studentGrades -> {
+            List<StudentGradeInfo> list = new ArrayList<>();
+
+            Runnable updateAdapter = () -> {
+                UnenrollAdapter adapter = new UnenrollAdapter(list, info -> {
+                    boolean isProf = (info.enrollment == null && info.student != null);
+                    String studentName = (info.student != null && info.student.name != null) ? info.student.name : "este integrante";
+                    String msg = isProf ?
+                        "¿Estás seguro de desinscribir al profesor \"" + studentName + "\" de la materia \"" + subject.name + "\"? Se eliminará la asignación del profesor." :
+                        "¿Estás seguro de desinscribir a \"" + studentName + "\" de la materia \"" + subject.name + "\"? Se eliminará su inscripción.";
+
+                    new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Desinscribir Integrante")
+                        .setMessage(msg)
+                        .setPositiveButton("Desinscribir", (confirmDialog, which) -> {
+                            viewModel.performOnlineAction(() -> {
+                                if (isProf) {
+                                    subject.professorId = null;
+                                    viewModel.updateSubject(subject);
+                                    viewModel.updateSchedulesProfessorBySubject(subject.id, 0);
+                                    Toast.makeText(getContext(), "Profesor desinscrito exitosamente", Toast.LENGTH_SHORT).show();
+                                    viewModel.refreshData();
+                                    dialog.dismiss();
+                                } else if (info.enrollment != null) {
+                                    viewModel.deleteEnrollment(info.enrollment);
+                                    Toast.makeText(getContext(), "Integrante desinscrito exitosamente", Toast.LENGTH_SHORT).show();
+                                    viewModel.getStudentsBySubject(subject.id);
+                                }
+                            });
+                        })
+                        .setNegativeButton("Cancelar", null)
+                        .show();
+                });
+
+                rvList.setAdapter(adapter);
+
+                etSearch.addTextChangedListener(new TextWatcher() {
+                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        adapter.filter(s.toString());
+                    }
+                    @Override public void afterTextChanged(Editable s) {}
+                });
+            };
+
+            if (studentGrades != null) {
+                list.addAll(studentGrades);
+            }
+
+            if (subject.professorId != null && subject.professorId > 0) {
+                viewModel.getUserById(subject.professorId, prof -> {
+                    if (prof != null) {
+                        StudentGradeInfo profInfo = new StudentGradeInfo();
+                        profInfo.student = prof;
+                        profInfo.enrollment = null;
+                        profInfo.subject = subject;
+                        if (list.stream().noneMatch(i -> i.enrollment == null && i.student != null && i.student.id == prof.id)) {
+                            list.add(0, profInfo);
+                        }
+                    }
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(updateAdapter);
+                    }
+                });
+            } else {
+                updateAdapter.run();
+            }
+        });
+
+        dialog.show();
+    }
+
+    static class UnenrollAdapter extends RecyclerView.Adapter<UnenrollAdapter.ViewHolder> {
+        private final List<StudentGradeInfo> originalList;
+        private List<StudentGradeInfo> filteredList;
+        private final OnUnenrollClickListener listener;
+
+        interface OnUnenrollClickListener {
+            void onUnenroll(StudentGradeInfo info);
+        }
+
+        UnenrollAdapter(List<StudentGradeInfo> list, OnUnenrollClickListener listener) {
+            this.originalList = list;
+            this.filteredList = new ArrayList<>(list);
+            this.listener = listener;
+        }
+
+        void filter(String query) {
+            String q = query.toLowerCase().trim();
+            if (q.isEmpty()) {
+                filteredList = new ArrayList<>(originalList);
+            } else {
+                filteredList = originalList.stream().filter(info -> {
+                    if (info == null) return false;
+                    String name = "";
+                    String carnet = "";
+                    String faculty = "";
+                    if (info.student != null) {
+                        name = info.student.name != null ? info.student.name.toLowerCase() : "";
+                        carnet = info.student.carnet != null ? info.student.carnet.toLowerCase() : "";
+                        faculty = info.student.faculty != null ? info.student.faculty.toLowerCase() : "";
+                    } else if (info.enrollment != null) {
+                        name = "alumno " + info.enrollment.studentId;
+                    }
+                    return name.contains(q) || carnet.contains(q) || faculty.contains(q);
+                }).collect(Collectors.toList());
+            }
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LinearLayout container = new LinearLayout(parent.getContext());
+            container.setOrientation(LinearLayout.HORIZONTAL);
+            container.setGravity(Gravity.CENTER_VERTICAL);
+            int paddingH = (int) (12 * parent.getContext().getResources().getDisplayMetrics().density);
+            int paddingV = (int) (8 * parent.getContext().getResources().getDisplayMetrics().density);
+            container.setPadding(paddingH, paddingV, paddingH, paddingV);
+
+            LinearLayout textLayout = new LinearLayout(parent.getContext());
+            textLayout.setOrientation(LinearLayout.VERTICAL);
+            LinearLayout.LayoutParams lpText = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+            textLayout.setLayoutParams(lpText);
+
+            TextView tvName = new TextView(parent.getContext());
+            tvName.setTextSize(15f);
+            tvName.setTypeface(null, Typeface.BOLD);
+            tvName.setTextColor(ThemeHelper.isDarkMode(parent.getContext()) ? 0xFFFFFFFF : 0xFF000000);
+
+            TextView tvSub = new TextView(parent.getContext());
+            tvSub.setTextSize(13f);
+            tvSub.setTextColor(0xFF888888);
+
+            textLayout.addView(tvName);
+            textLayout.addView(tvSub);
+
+            MaterialButton btn = new MaterialButton(parent.getContext(), null, com.google.android.material.R.attr.borderlessButtonStyle);
+            btn.setText("Desinscribir");
+            btn.setTextSize(12f);
+            btn.setAllCaps(false);
+            btn.setTextColor(0xFFFFFFFF);
+            btn.setBackgroundTintList(ColorStateList.valueOf(0xFFDC3545));
+            int btnPad = (int) (8 * parent.getContext().getResources().getDisplayMetrics().density);
+            btn.setPadding(btnPad, 0, btnPad, 0);
+
+            container.addView(textLayout);
+            container.addView(btn);
+
+            container.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            return new ViewHolder(container, tvName, tvSub, btn);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            StudentGradeInfo info = filteredList.get(position);
+            if (info == null) return;
+
+            String name = "Alumno";
+            String carnetStr = "";
+            String facultyStr = "";
+            boolean isProf = (info.enrollment == null && info.student != null);
+
+            if (info.student != null) {
+                if (info.student.name != null && !info.student.name.isEmpty()) name = info.student.name;
+                if (info.student.carnet != null) carnetStr = info.student.carnet;
+                if (info.student.faculty != null) facultyStr = info.student.faculty;
+            } else if (info.enrollment != null) {
+                name = "Alumno ID: " + info.enrollment.studentId;
+            }
+
+            holder.tvName.setText(name);
+            String subtext;
+            if (isProf) {
+                subtext = "Profesor Asignado" + (!facultyStr.isEmpty() ? " • " + facultyStr : "");
+            } else {
+                subtext = carnetStr + (!carnetStr.isEmpty() && !facultyStr.isEmpty() ? " • " : "") + facultyStr;
+                if (subtext.isEmpty() && info.enrollment != null) {
+                    subtext = "Inscripción #" + info.enrollment.id;
+                }
+            }
+            holder.tvSub.setText(subtext);
+            holder.btnUnenroll.setOnClickListener(v -> listener.onUnenroll(info));
+        }
+
+        @Override
+        public int getItemCount() {
+            return filteredList.size();
+        }
+
+        static class ViewHolder extends RecyclerView.ViewHolder {
+            TextView tvName, tvSub;
+            MaterialButton btnUnenroll;
+
+            ViewHolder(View itemView, TextView tvName, TextView tvSub, MaterialButton btnUnenroll) {
+                super(itemView);
+                this.tvName = tvName;
+                this.tvSub = tvSub;
+                this.btnUnenroll = btnUnenroll;
+            }
+        }
     }
 
     @Override

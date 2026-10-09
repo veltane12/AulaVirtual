@@ -55,21 +55,17 @@ public class AdminEnrollmentListFragment extends Fragment {
         binding.spinnerFilter.setVisibility(View.GONE);
         binding.etSearch.setHint("Buscar materia...");
 
-        viewModel.getUserById(studentId, user -> {
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    if (binding != null && user != null) {
-                        binding.tvSubtitle.setText("Alumno: " + user.name);
-                        binding.tvSubtitle.setVisibility(View.VISIBLE);
-                    }
-                });
+        viewModel.fetchStudentById(studentId);
+        viewModel.getSelectedStudentRecord().observe(getViewLifecycleOwner(), student -> {
+            if (student != null && binding != null) {
+                binding.tvSubtitle.setText("Alumno: " + student.name);
+                binding.tvSubtitle.setVisibility(View.VISIBLE);
             }
         });
 
         // Timetable Header Action for Student
-        binding.cardHeaderAction.setVisibility(View.VISIBLE);
         binding.btnHeaderAction.setVisibility(View.VISIBLE);
-        binding.btnHeaderAction.setImageResource(R.drawable.ic_timetable);
+        binding.btnHeaderAction.setIconResource(R.drawable.ic_timetable);
         
         View.OnClickListener openStudentTimetable = v -> {
             Bundle args = new Bundle();
@@ -77,11 +73,10 @@ public class AdminEnrollmentListFragment extends Fragment {
             Navigation.findNavController(view).navigate(R.id.action_adminEnrollmentListFragment_to_adminFacilityTimetableFragment, args);
         };
         binding.btnHeaderAction.setOnClickListener(openStudentTimetable);
-        binding.cardHeaderAction.setOnClickListener(openStudentTimetable);
 
         // Carnet / Student Detail Header Action
-        binding.cardHeaderDetail.setVisibility(View.VISIBLE);
         binding.btnHeaderDetail.setVisibility(View.VISIBLE);
+        binding.btnHeaderDetail.setIconResource(R.drawable.ic_carnet);
 
         View.OnClickListener openStudentDetail = v -> {
             Bundle args = new Bundle();
@@ -89,7 +84,6 @@ public class AdminEnrollmentListFragment extends Fragment {
             Navigation.findNavController(view).navigate(R.id.action_adminEnrollmentListFragment_to_studentDetailFragment, args);
         };
         binding.btnHeaderDetail.setOnClickListener(openStudentDetail);
-        binding.cardHeaderDetail.setOnClickListener(openStudentDetail);
 
         adapter = new GradeAdapter(true);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -158,7 +152,7 @@ public class AdminEnrollmentListFragment extends Fragment {
             }
         });
 
-        binding.btnAdd.setText("Inscribir en Materia");
+        binding.btnAdd.setText("Añadir Inscripción");
         binding.btnAdd.setOnClickListener(v -> showEnrollDialog());
     }
 

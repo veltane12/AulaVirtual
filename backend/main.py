@@ -32,6 +32,16 @@ class UserDB(Base):
     profile_image = Column(Text)
     can_change_photo = Column(Integer, default=1)
 
+class StudentDB(Base):
+    __tablename__ = "students"
+    id = Column(Integer, primary_key=True, index=True)
+    encargadoId = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"))
+    carnet = Column(String(20), unique=True, nullable=False)
+    name = Column(String(255), nullable=False)
+    grade = Column(String(100))
+    faculty = Column(String(255))
+    profile_image = Column(Text)
+
 class SubjectDB(Base):
     __tablename__ = "subjects"
     id = Column(Integer, primary_key=True, index=True)
@@ -120,6 +130,8 @@ Base.metadata.create_all(bind=engine)
 def seed_initial_data():
     try:
         db = SessionLocal()
+        if not db.query(FacultyDB).filter(FacultyDB.id == 997).first():
+            db.add(FacultyDB(id=997, name="Encargados de Estudiantes", description="Facultad obligatoria asignada automáticamente a todos los Encargados de Estudiantes."))
         if not db.query(FacultyDB).filter(FacultyDB.id == 998).first():
             db.add(FacultyDB(id=998, name="Docencia", description="Facultad obligatoria asignada automáticamente a todos los Profesores."))
         if not db.query(FacultyDB).filter(FacultyDB.id == 999).first():

@@ -10,6 +10,7 @@ import com.aula.virtual.data.entity.FacilitySchedule;
 import com.aula.virtual.data.entity.Enrollment;
 import com.aula.virtual.data.entity.Faculty;
 import com.aula.virtual.data.entity.Notification;
+import com.aula.virtual.data.entity.Student;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
 import com.aula.virtual.data.entity.UserSubjectColor;
@@ -258,6 +259,106 @@ public class VirtualAulaRepository {
                 callback.onFailure(call, t);
             }
         });
+    }
+
+    public void getEncargadosOnly(Callback<List<User>> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    List<User> cached = db.userDao().getEncargadosOnly();
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(deduplicateUsers(cached))));
+                } catch (Exception e) {
+                    mainHandler.post(() -> callback.onFailure(null, e));
+                }
+            });
+        } else {
+            callback.onResponse(null, Response.success(new ArrayList<>()));
+        }
+    }
+
+    public void getStudentsByEncargado(int encargadoId, Callback<List<Student>> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    List<Student> students = db.studentDao().getStudentsByEncargado(encargadoId);
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(students)));
+                } catch (Exception e) {
+                    mainHandler.post(() -> callback.onFailure(null, e));
+                }
+            });
+        } else {
+            callback.onResponse(null, Response.success(new ArrayList<>()));
+        }
+    }
+
+    public void getAllStudentRecords(Callback<List<Student>> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    List<Student> students = db.studentDao().getAllStudents();
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(students)));
+                } catch (Exception e) {
+                    mainHandler.post(() -> callback.onFailure(null, e));
+                }
+            });
+        } else {
+            callback.onResponse(null, Response.success(new ArrayList<>()));
+        }
+    }
+
+    public void insertStudent(Student student, Callback<Student> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    long id = db.studentDao().insert(student);
+                    student.id = (int) id;
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(student)));
+                } catch (Exception e) {
+                    mainHandler.post(() -> callback.onFailure(null, e));
+                }
+            });
+        }
+    }
+
+    public void getStudentById(int id, Callback<Student> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    Student student = db.studentDao().getStudentById(id);
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(student)));
+                } catch (Exception e) {
+                    mainHandler.post(() -> callback.onFailure(null, e));
+                }
+            });
+        } else {
+            callback.onResponse(null, Response.success(null));
+        }
+    }
+
+    public void updateStudent(Student student, Callback<Student> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    db.studentDao().update(student);
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(student)));
+                } catch (Exception e) {
+                    mainHandler.post(() -> callback.onFailure(null, e));
+                }
+            });
+        }
+    }
+
+    public void deleteStudent(int id, Callback<Void> callback) {
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    db.studentDao().deleteById(id);
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(null)));
+                } catch (Exception e) {
+                    mainHandler.post(() -> callback.onFailure(null, e));
+                }
+            });
+        }
     }
 
     public void getAllAdmins(Callback<List<User>> callback) {
@@ -1012,32 +1113,35 @@ public class VirtualAulaRepository {
     }
 
     public void getSubjectEnrollments(int subjectId, Callback<List<StudentGradeInfo>> callback) {
-        if (isLocalMode()) {
-            if (db != null) {
-                executor.execute(() -> {
-                    try {
-                        List<Enrollment> enrollments = db.enrollmentDao().getBySubjectId(subjectId);
-                        List<StudentGradeInfo> infos = new ArrayList<>();
-                        if (enrollments != null) {
-                            for (Enrollment en : enrollments) {
-                                Subject sub = db.subjectDao().getSubjectById(en.subjectId);
-                                User stu = db.userDao().getUserById(en.studentId);
-                                StudentGradeInfo info = new StudentGradeInfo();
-                                info.enrollment = en;
-                                info.subject = sub;
-                                info.student = stu;
-                                infos.add(info);
+        if (db != null) {
+            executor.execute(() -> {
+                try {
+                    List<Enrollment> enrollments = db.enrollmentDao().getBySubjectId(subjectId);
+                    List<StudentGradeInfo> infos = new ArrayList<>();
+                    if (enrollments != null) {
+                        for (Enrollment en : enrollments) {
+                            Subject sub = db.subjectDao().getSubjectById(en.subjectId);
+                            User stu = db.userDao().getUserById(en.studentId);
+                            if (stu == null && db.studentDao() != null) {
+                                Student sRecord = db.studentDao().getStudentById(en.studentId);
+                                if (sRecord != null) {
+                                    stu = new User(sRecord.carnet, sRecord.name, "", "STUDENT", sRecord.faculty);
+                                    stu.id = sRecord.id;
+                                }
                             }
+                            StudentGradeInfo info = new StudentGradeInfo();
+                            info.enrollment = en;
+                            info.subject = sub;
+                            info.student = stu;
+                            infos.add(info);
                         }
-                        mainHandler.post(() -> callback.onResponse(null, Response.success(infos)));
-                    } catch (Exception e) {
-                        mainHandler.post(() -> callback.onFailure(null, e));
                     }
-                });
-            } else {
-                callback.onResponse(null, Response.success(new ArrayList<>()));
-            }
-            return;
+                    mainHandler.post(() -> callback.onResponse(null, Response.success(infos)));
+                } catch (Exception e) {
+                    mainHandler.post(() -> callback.onFailure(null, e));
+                }
+            });
+            if (isLocalMode()) return;
         }
 
         performCall(getApiService().getSubjectEnrollments(subjectId), callback);
@@ -1053,6 +1157,15 @@ public class VirtualAulaRepository {
                         List<User> participants = new ArrayList<>();
                         List<Integer> addedUserIds = new ArrayList<>();
 
+                        Subject sub = db.subjectDao().getSubjectById(subjectId);
+                        if (sub != null && sub.professorId != null) {
+                            User prof = db.userDao().getUserById(sub.professorId);
+                            if (prof != null && !addedUserIds.contains(prof.id)) {
+                                participants.add(prof);
+                                addedUserIds.add(prof.id);
+                            }
+                        }
+
                         for (FacilitySchedule sch : schedules) {
                             if (!addedUserIds.contains(sch.professorId)) {
                                 User prof = db.userDao().getUserById(sch.professorId);
@@ -1064,10 +1177,17 @@ public class VirtualAulaRepository {
                         }
                         for (Enrollment en : enrollments) {
                             if (!addedUserIds.contains(en.studentId)) {
-                                User stu = db.userDao().getUserById(en.studentId);
-                                if (stu != null) {
-                                    participants.add(stu);
-                                    addedUserIds.add(stu.id);
+                                Student stuRecord = db.studentDao().getStudentById(en.studentId);
+                                if (stuRecord != null) {
+                                    User stuUser = new User();
+                                    stuUser.id = stuRecord.id;
+                                    stuUser.carnet = stuRecord.carnet;
+                                    stuUser.name = stuRecord.name;
+                                    stuUser.faculty = stuRecord.faculty;
+                                    stuUser.profile_image = stuRecord.profile_image;
+                                    stuUser.role = "STUDENT";
+                                    participants.add(stuUser);
+                                    addedUserIds.add(stuRecord.id);
                                 }
                             }
                         }
@@ -2018,6 +2138,10 @@ public class VirtualAulaRepository {
                 // Re-seed Master Admin & Mandatory Faculties
                 db.userDao().insert(new User("ADMIN12345", "Admin Maestro", "ASD###", "ADMIN", "Administrativa"));
                 
+                Faculty f0 = new Faculty("Encargados de Estudiantes", "Facultad obligatoria asignada automáticamente a todos los Encargados de Estudiantes.");
+                f0.id = 997;
+                db.facultyDao().insert(f0);
+
                 Faculty f1 = new Faculty("Docencia", "Facultad obligatoria asignada automáticamente a todos los Profesores.");
                 f1.id = 998;
                 db.facultyDao().insert(f1);
@@ -2055,7 +2179,7 @@ public class VirtualAulaRepository {
                 int totalToUpload = 0;
                 if (faculties != null) {
                     for (Faculty f : faculties) {
-                        if (f.id != 998 && f.id != 999) totalToUpload++;
+                        if (f.id != 997 && f.id != 998 && f.id != 999) totalToUpload++;
                     }
                 }
                 if (subjects != null) totalToUpload += subjects.size();
@@ -2078,7 +2202,7 @@ public class VirtualAulaRepository {
                 // 1. Upload Faculties
                 if (faculties != null) {
                     for (Faculty f : faculties) {
-                        if (f.id != 998 && f.id != 999) {
+                        if (f.id != 997 && f.id != 998 && f.id != 999) {
                             Faculty newF = new Faculty(f.name, f.description);
                             newF.id = 0;
                             try {

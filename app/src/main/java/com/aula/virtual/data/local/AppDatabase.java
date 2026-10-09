@@ -14,6 +14,7 @@ import com.aula.virtual.data.entity.Facility;
 import com.aula.virtual.data.entity.FacilitySchedule;
 import com.aula.virtual.data.entity.Faculty;
 import com.aula.virtual.data.entity.Notification;
+import com.aula.virtual.data.entity.Student;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
 
@@ -22,6 +23,7 @@ import com.aula.virtual.data.entity.UserSubjectColor;
 @Database(
     entities = {
         User.class,
+        Student.class,
         Faculty.class,
         Subject.class,
         Facility.class,
@@ -32,13 +34,14 @@ import com.aula.virtual.data.entity.UserSubjectColor;
         UserSubjectColor.class,
         Notification.class
     },
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase INSTANCE;
 
     public abstract UserDao userDao();
+    public abstract StudentDao studentDao();
     public abstract FacultyDao facultyDao();
     public abstract SubjectDao subjectDao();
     public abstract FacilityDao facilityDao();
@@ -79,6 +82,10 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     private static void seedInitialData(SupportSQLiteDatabase db) {
+        db.execSQL("INSERT INTO faculties (id, name, description) " +
+                "SELECT 997, 'Encargados de Estudiantes', 'Facultad obligatoria asignada automáticamente a todos los Encargados de Estudiantes.' " +
+                "WHERE NOT EXISTS (SELECT 1 FROM faculties WHERE id = 997);");
+
         db.execSQL("INSERT INTO faculties (id, name, description) " +
                 "SELECT 998, 'Docencia', 'Facultad obligatoria asignada automáticamente a todos los Profesores.' " +
                 "WHERE NOT EXISTS (SELECT 1 FROM faculties WHERE id = 998);");

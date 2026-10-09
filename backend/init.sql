@@ -26,18 +26,30 @@ CREATE TABLE IF NOT EXISTS faculties (
     description TEXT                   -- Breve reseña o propósito de la facultad
 );
 
--- Tabla de Usuarios: Almacena todos los roles (Administradores, Profesores, Alumnos)
+-- Tabla de Usuarios (Cuentas con Acceso: Administradores, Profesores, Encargados del Estudiante)
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,          -- Identificador único interno
-    carnet VARCHAR(10) NOT NULL UNIQUE,         -- Código de identificación institucional (10 caracteres alfanuméricos)
-    name VARCHAR(255) NOT NULL,                 -- Nombre completo y apellidos del usuario
-    password VARCHAR(255) NOT NULL,             -- Contraseña de acceso (actualmente en texto plano)
-    role VARCHAR(50) NOT NULL,                  -- Rol del usuario: 'ADMIN', 'STUDENT' o 'PROFESSOR'
-    faculty VARCHAR(255),                       -- Nombre de la facultad a la que pertenece (relacionado con faculties.name)
-    address TEXT,                               -- Dirección domiciliar del usuario
-    personal_email VARCHAR(255),                -- Correo electrónico de contacto personal
-    profile_image LONGTEXT,                     -- Foto de perfil en formato Base64 para visualización directa
-    can_change_photo BOOLEAN DEFAULT 1          -- Flag: 1 permite cambiar foto, 0 bloquea por infracciones
+    carnet VARCHAR(10) NOT NULL UNIQUE,         -- Código de identificación institucional (Ej: ENC1234567, ADM...)
+    name VARCHAR(255) NOT NULL,                 -- Nombre completo del Encargado / Usuario
+    password VARCHAR(255) NOT NULL,             -- Contraseña de acceso
+    role VARCHAR(50) NOT NULL,                  -- Rol del usuario: 'ADMIN', 'ENCARGADO' o 'PROFESSOR'
+    faculty VARCHAR(255),                       -- Nombre de la facultad
+    address TEXT,                               -- Dirección domiciliar del Encargado
+    personal_email VARCHAR(255),                -- Correo electrónico del Encargado
+    profile_image LONGTEXT,                     -- Foto de perfil en Base64
+    can_change_photo BOOLEAN DEFAULT 1          -- Flag: 1 permite cambiar foto, 0 bloquea
+);
+
+-- Tabla de Estudiantes (Menores de edad sin acceso/contraseña directa)
+CREATE TABLE IF NOT EXISTS students (
+    id INT AUTO_INCREMENT PRIMARY KEY,          -- Identificador único interno del estudiante
+    encargadoId INT,                            -- ID del Encargado a cargo (FK a users.id)
+    carnet VARCHAR(20) NOT NULL UNIQUE,         -- Carnet/Código del estudiante
+    name VARCHAR(255) NOT NULL,                 -- Nombre completo del estudiante menor de edad
+    grade VARCHAR(100),                         -- Grado o sección del alumno
+    faculty VARCHAR(255),                       -- Facultad/Escuela
+    profile_image LONGTEXT,                     -- Foto del estudiante
+    FOREIGN KEY (encargadoId) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Tabla de Materias: Cursos académicos ofrecidos
@@ -250,6 +262,8 @@ BEGIN
         SET NEW.faculty = 'Docencia';
     ELSEIF NEW.role = 'ADMIN' THEN
         SET NEW.faculty = 'Administrativa';
+    ELSEIF NEW.role = 'ENCARGADO' THEN
+        SET NEW.faculty = 'Encargados de Estudiantes';
     END IF;
 END//
 
@@ -261,6 +275,8 @@ BEGIN
         SET NEW.faculty = 'Docencia';
     ELSEIF NEW.role = 'ADMIN' THEN
         SET NEW.faculty = 'Administrativa';
+    ELSEIF NEW.role = 'ENCARGADO' THEN
+        SET NEW.faculty = 'Encargados de Estudiantes';
     END IF;
 END//
 
@@ -268,6 +284,7 @@ DELIMITER ;
 
 -- Inserción de las Facultades obligatorias del sistema
 INSERT IGNORE INTO faculties (id, name, description) VALUES
+(997, 'Encargados de Estudiantes', 'Facultad obligatoria asignada automáticamente a todos los Encargados de Estudiantes.'),
 (998, 'Docencia', 'Facultad obligatoria asignada automáticamente a todos los Profesores.'),
 (999, 'Administrativa', 'Facultad obligatoria asignada automáticamente a todos los Administradores.');
 

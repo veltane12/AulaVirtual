@@ -88,7 +88,11 @@ public class SubjectBlogFragment extends Fragment {
         viewModel.getSubjectById(subjectId, sub -> {
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
-                    if (binding != null && sub != null) binding.tvBlogTitle.setText("Foro de Discusión: " + sub.name);
+                    if (binding != null && sub != null) {
+                        binding.tvBlogTitle.setText("Foro de la Materia");
+                        binding.tvBlogSubtitle.setText("Materia: " + sub.name);
+                        binding.tvBlogSubtitle.setVisibility(View.VISIBLE);
+                    }
                 });
             }
         });
@@ -104,7 +108,6 @@ public class SubjectBlogFragment extends Fragment {
             args.putInt("subjectId", subjectId);
             Navigation.findNavController(view).navigate(R.id.action_subjectBlogFragment_to_subjectDetailFragment, args);
         };
-        binding.cardSubjectDetailBlog.setOnClickListener(openSubjectDetail);
         binding.btnSubjectDetailBlog.setOnClickListener(openSubjectDetail);
 
         // Start polling
@@ -159,6 +162,11 @@ public class SubjectBlogFragment extends Fragment {
         viewModel.getSubjectBlog().observe(getViewLifecycleOwner(), entries -> {
             if (entries != null) {
                 adapter.setEntries(entries);
+                int count = entries.size();
+                if (binding != null && binding.tvBlogEntryCount != null) {
+                    binding.tvBlogEntryCount.setText(count + (count == 1 ? " entrada" : " entradas"));
+                    binding.tvBlogEntryCount.setVisibility(View.VISIBLE);
+                }
             }
         });
     }

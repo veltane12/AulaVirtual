@@ -126,9 +126,10 @@ public class AdminDetailFragment extends Fragment {
     }
 
     private void showImpersonateConfirmationDialog() {
-        if (admin == null || !"PROFESSOR".equals(admin.role)) return;
+        if (admin == null) return;
+        String roleTitle = "ENCARGADO".equals(admin.role) ? "Encargado del Estudiante" : "Profesor";
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Acceder como Profesor")
+                .setTitle("Acceder como " + roleTitle)
                 .setMessage("¿Deseas ingresar a la aplicación utilizando el perfil y menú de " + admin.name + "?")
                 .setPositiveButton("Acceder", (dialog, which) -> impersonateUser())
                 .setNegativeButton("Cancelar", null)
@@ -141,7 +142,6 @@ public class AdminDetailFragment extends Fragment {
             if ("PROFESSOR".equals(admin.role)) {
                 Navigation.findNavController(requireView()).navigate(R.id.action_adminDetailFragment_to_professorHomeFragment);
             } else {
-                // If it's a student (though students use StudentDetailFragment)
                 Navigation.findNavController(requireView()).navigate(R.id.action_adminDetailFragment_to_studentHomeFragment);
             }
         }
@@ -158,6 +158,8 @@ public class AdminDetailFragment extends Fragment {
                     title = "Detalle Profesor";
                 } else if ("ADMIN".equals(admin.role)) {
                     title = "Detalle Administrador";
+                } else if ("ENCARGADO".equals(admin.role)) {
+                    title = "Detalle Encargado";
                 } else if ("STUDENT".equals(admin.role)) {
                     title = "Detalle Estudiante";
                 }
@@ -173,8 +175,8 @@ public class AdminDetailFragment extends Fragment {
                 binding.etField2.setText(admin.carnet);
                 binding.etField3.setText(admin.password);
                 
-                // Show extended fields for both Professors and Admins
-                if ("PROFESSOR".equals(admin.role) || "ADMIN".equals(admin.role)) {
+                // Show extended fields for Professors, Admins, and Encargados
+                if ("PROFESSOR".equals(admin.role) || "ADMIN".equals(admin.role) || "ENCARGADO".equals(admin.role)) {
                     binding.etField4.setVisibility(View.VISIBLE);
                     binding.layoutAddress.setVisibility(View.VISIBLE);
                     binding.layoutPersonalEmail.setVisibility(View.VISIBLE);
@@ -187,6 +189,14 @@ public class AdminDetailFragment extends Fragment {
                         binding.etField2.setFilters(new InputFilter[]{new InputFilter.LengthFilter(6)});
                         if (admin.carnet != null && admin.carnet.startsWith("PROF")) {
                             binding.etField2.setText(admin.carnet.substring(4));
+                        } else {
+                            binding.etField2.setText(admin.carnet);
+                        }
+                    } else if ("ENCARGADO".equals(admin.role)) {
+                        binding.tvRolePrefix.setText("ENC");
+                        binding.etField2.setFilters(new InputFilter[]{new InputFilter.LengthFilter(7)});
+                        if (admin.carnet != null && admin.carnet.startsWith("ENC")) {
+                            binding.etField2.setText(admin.carnet.substring(3));
                         } else {
                             binding.etField2.setText(admin.carnet);
                         }
@@ -205,7 +215,7 @@ public class AdminDetailFragment extends Fragment {
                     binding.etAddress.setText(admin.address != null ? admin.address : "");
                     binding.etPersonalEmail.setText(admin.personal_email != null ? admin.personal_email : "");
 
-                    // Si es Profesor o Administrador, bloquear la selección de facultad (es automática e inmutable)
+                    // Bloquear la selección de facultad
                     binding.etField4.setEnabled(false);
                     binding.etField4.setFocusable(false);
                     binding.etField4.setClickable(false);
@@ -213,11 +223,11 @@ public class AdminDetailFragment extends Fragment {
                     boolean locked = admin.can_change_photo != null && admin.can_change_photo == 0;
                     binding.switchLockPhoto.setChecked(locked);
 
-                    // Show copy/toggle buttons for both Admin and Professor management
+                    // Show copy/toggle buttons for Admin, Professor, and Encargado management
                     binding.layoutCopyToggles.setVisibility(View.VISIBLE);
                     binding.layoutProfileHeaderContainer.setVisibility(View.VISIBLE);
 
-                    if ("PROFESSOR".equals(admin.role)) {
+                    if ("PROFESSOR".equals(admin.role) || "ENCARGADO".equals(admin.role)) {
                         binding.btnImpersonateAction.setVisibility(View.VISIBLE);
                         binding.btnImpersonate.setVisibility(View.GONE);
                         binding.btnManageGrades.setVisibility(View.GONE);
@@ -226,7 +236,7 @@ public class AdminDetailFragment extends Fragment {
                         binding.btnImpersonate.setVisibility(View.GONE);
                         binding.btnManageGrades.setVisibility(View.GONE);
                     }
-                } else {
+                }    else {
                     binding.tvRolePrefix.setVisibility(View.GONE);
                     binding.etField4.setVisibility(View.GONE);
                     binding.layoutAddress.setVisibility(View.GONE);

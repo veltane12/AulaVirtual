@@ -81,7 +81,7 @@ public class FacultyDetailFragment extends Fragment {
     }
 
     private boolean isSystemFaculty(String name) {
-        return name != null && ("Docencia".equalsIgnoreCase(name.trim()) || "Administrativa".equalsIgnoreCase(name.trim()));
+        return name != null && ("Docencia".equalsIgnoreCase(name.trim()) || "Administrativa".equalsIgnoreCase(name.trim()) || "Encargados de Estudiantes".equalsIgnoreCase(name.trim()));
     }
 
     private void saveChanges() {

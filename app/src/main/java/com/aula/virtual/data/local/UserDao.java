@@ -9,8 +9,14 @@ import java.util.List;
 
 @Dao
 public interface UserDao {
-    @Query("SELECT * FROM users WHERE role = 'STUDENT'")
+    @Query("SELECT * FROM users WHERE role = 'STUDENT' OR role = 'ENCARGADO'")
     List<User> getStudents();
+
+    @Query("SELECT * FROM users WHERE role = 'ENCARGADO'")
+    List<User> getEncargadosOnly();
+
+    @Query("SELECT * FROM users WHERE role = 'ENCARGADO' OR role = 'STUDENT'")
+    List<User> getEncargados();
 
     @Query("SELECT * FROM users WHERE role = 'ADMIN'")
     List<User> getAdmins();

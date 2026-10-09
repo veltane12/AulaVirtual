@@ -170,6 +170,25 @@
         <action
             android:id="@+id/action_adminStudentListFragment_to_adminEnrollmentListFragment"
             app:destination="@id/adminEnrollmentListFragment" />
+        <action
+            android:id="@+id/action_adminStudentListFragment_to_adminEncargadoDetailFragment"
+            app:destination="@id/adminEncargadoDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminEncargadoDetailFragment"
+        android:name="com.aula.virtual.ui.AdminEncargadoDetailFragment"
+        android:label="Gestión de Encargado"
+        tools:layout="@layout/fragment_admin_encargado_detail">
+        <argument
+            android:name="encargadoId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_adminEncargadoDetailFragment_to_adminEnrollmentListFragment"
+            app:destination="@id/adminEnrollmentListFragment" />
+        <action
+            android:id="@+id/action_adminEncargadoDetailFragment_to_adminDetailFragment"
+            app:destination="@id/adminDetailFragment" />
     </fragment>
 
     <fragment

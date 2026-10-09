@@ -56,7 +56,8 @@ public class StudentHomeFragment extends Fragment {
 
         viewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
-                binding.tvWelcomeName.setText("Bienvenido " + user.name);
+                String roleTitle = ("ENCARGADO".equals(user.role) || "GUARDIAN".equals(user.role)) ? "Encargado/a " : "";
+                binding.tvWelcomeName.setText("Bienvenido " + roleTitle + user.name);
                 updateProfileImage(user.profile_image, binding.ivProfileImageHome);
             }
         });

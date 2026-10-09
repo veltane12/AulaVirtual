@@ -14,6 +14,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.aula.virtual.R;
 import com.aula.virtual.data.StudentGradeInfo;
+import com.aula.virtual.data.entity.Student;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.databinding.FragmentAdminDashboardBinding;
 import java.util.ArrayList;
@@ -59,7 +60,11 @@ public class StudentDashboardFragment extends Fragment {
 
         viewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
-                viewModel.getGradeInfoForStudent(user.id).observe(getViewLifecycleOwner(), gradeInfos -> {
+                int defaultStudentId = user.id;
+                Student selected = viewModel.getSelectedStudent().getValue();
+                int studentIdToUse = (selected != null) ? selected.id : defaultStudentId;
+
+                viewModel.getGradeInfoForStudent(studentIdToUse).observe(getViewLifecycleOwner(), gradeInfos -> {
                     allStudentSubjects.clear();
                     if (gradeInfos != null) {
                         for (StudentGradeInfo info : gradeInfos) {
@@ -71,17 +76,16 @@ public class StudentDashboardFragment extends Fragment {
                     applyFilter();
                 });
 
-                binding.cardHeaderAction.setVisibility(View.VISIBLE);
-                binding.btnHeaderAction.setImageResource(R.drawable.ic_timetable);
+                binding.btnHeaderAction.setVisibility(View.VISIBLE);
+                binding.btnHeaderAction.setIconResource(R.drawable.ic_timetable);
 
                 View.OnClickListener openTimetable = v -> {
                     Bundle args = new Bundle();
-                    args.putInt("studentId", user.id);
+                    args.putInt("studentId", studentIdToUse);
                     Navigation.findNavController(requireView()).navigate(R.id.action_studentDashboardFragment_to_adminFacilityTimetableFragment, args);
                 };
 
                 binding.btnHeaderAction.setOnClickListener(openTimetable);
-                binding.cardHeaderAction.setOnClickListener(openTimetable);
             }
         });
     }

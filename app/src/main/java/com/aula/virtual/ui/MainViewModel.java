@@ -19,6 +19,7 @@ import com.aula.virtual.data.entity.Facility;
 import com.aula.virtual.data.entity.FacilitySchedule;
 import com.aula.virtual.data.entity.Faculty;
 import com.aula.virtual.data.entity.Notification;
+import com.aula.virtual.data.entity.Student;
 import com.aula.virtual.data.entity.Subject;
 import com.aula.virtual.data.entity.User;
 
@@ -34,12 +35,17 @@ import retrofit2.Response;
 public class MainViewModel extends AndroidViewModel {
     private final VirtualAulaRepository repository;
     private final MutableLiveData<List<User>> allStudents = new MutableLiveData<>();
+    private final MutableLiveData<List<Student>> allStudentRecords = new MutableLiveData<>();
+    private final MutableLiveData<Student> selectedStudentRecord = new MutableLiveData<>();
+    private final MutableLiveData<List<User>> allEncargados = new MutableLiveData<>();
     private final MutableLiveData<List<User>> allAdmins = new MutableLiveData<>();
     private final MutableLiveData<List<User>> allProfessors = new MutableLiveData<>();
     private final MutableLiveData<List<Subject>> allSubjects = new MutableLiveData<>();
     private final MutableLiveData<List<Faculty>> allFaculties = new MutableLiveData<>();
     private final MutableLiveData<List<StudentGradeInfo>> currentStudentGrades = new MutableLiveData<>();
     private final MutableLiveData<User> currentUser = new MutableLiveData<>();
+    private final MutableLiveData<List<Student>> myStudents = new MutableLiveData<>();
+    private final MutableLiveData<Student> selectedStudent = new MutableLiveData<>();
     private User adminUserBeforeImpersonation = null;
 
     private final MutableLiveData<User> selectedUser = new MutableLiveData<>();
@@ -93,6 +99,8 @@ public class MainViewModel extends AndroidViewModel {
 
     public void refreshData() {
         fetchStudents();
+        fetchStudentRecords();
+        fetchEncargados();
         fetchAdmins();
         fetchProfessors();
         fetchSubjects();
@@ -101,12 +109,103 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<User>> getAllStudents() { return allStudents; }
+    public LiveData<List<Student>> getAllStudentRecords() {
+        fetchStudentRecords();
+        return allStudentRecords;
+    }
+    public LiveData<List<User>> getAllEncargados() { 
+        fetchEncargados();
+        return allEncargados; 
+    }
     public LiveData<List<User>> getAllAdmins() { return allAdmins; }
     public LiveData<List<User>> getAllProfessors() { return allProfessors; }
     public LiveData<List<Subject>> getAllSubjects() { return allSubjects; }
     public LiveData<List<Faculty>> getAllFaculties() { return allFaculties; }
     public LiveData<User> getCurrentUser() { return currentUser; }
-    public void setCurrentUser(User user) { currentUser.setValue(user); }
+    public void setCurrentUser(User user) { 
+        currentUser.setValue(user); 
+        if (user != null) {
+            fetchStudentsForEncargado(user.id);
+        }
+    }
+
+    public LiveData<List<Student>> getMyStudents() { return myStudents; }
+    public LiveData<Student> getSelectedStudent() { return selectedStudent; }
+    public void setSelectedStudent(Student student) { selectedStudent.setValue(student); }
+
+    public void fetchStudentsForEncargado(int encargadoId) {
+        repository.getStudentsByEncargado(encargadoId, new Callback<List<Student>>() {
+            @Override
+            public void onResponse(Call<List<Student>> call, Response<List<Student>> response) {
+                if (response != null && response.body() != null) {
+                    List<Student> list = response.body();
+                    myStudents.postValue(list);
+                    if (!list.isEmpty() && selectedStudent.getValue() == null) {
+                        selectedStudent.postValue(list.get(0));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Student>> call, Throwable t) {}
+        });
+    }
+
+    public void fetchEncargados() {
+        repository.getEncargadosOnly(new Callback<List<User>>() {
+            @Override
+            public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                if (response != null && response.body() != null) {
+                    allEncargados.postValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<User>> call, Throwable t) {}
+        });
+    }
+
+    public void fetchStudentRecords() {
+        repository.getAllStudentRecords(new Callback<List<Student>>() {
+            @Override
+            public void onResponse(Call<List<Student>> call, Response<List<Student>> response) {
+                if (response != null && response.body() != null) {
+                    allStudentRecords.postValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Student>> call, Throwable t) {}
+        });
+    }
+
+    public void insertStudent(Student student, Callback<Student> callback) {
+        repository.insertStudent(student, callback);
+    }
+
+    public LiveData<Student> getSelectedStudentRecord() { return selectedStudentRecord; }
+
+    public void fetchStudentById(int studentId) {
+        repository.getStudentById(studentId, new Callback<Student>() {
+            @Override
+            public void onResponse(Call<Student> call, Response<Student> response) {
+                if (response != null && response.body() != null) {
+                    selectedStudentRecord.postValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Student> call, Throwable t) {}
+        });
+    }
+
+    public void updateStudentRecord(Student student, Callback<Student> callback) {
+        repository.updateStudent(student, callback);
+    }
+
+    public void deleteStudentRecord(int studentId, Callback<Void> callback) {
+        repository.deleteStudent(studentId, callback);
+    }
     
     public void startImpersonation(User student) {
         adminUserBeforeImpersonation = currentUser.getValue();

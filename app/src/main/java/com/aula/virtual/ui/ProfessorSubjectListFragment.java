@@ -83,12 +83,9 @@ public class ProfessorSubjectListFragment extends Fragment {
                 binding.btnAdd.setVisibility(View.VISIBLE);
                 binding.btnAdd.setOnClickListener(v -> showAssignSubjectDialog(profId));
 
-                adapter.setShowDeleteButton(true);
-                adapter.setDeleteButtonText("Desinscribir");
-                adapter.setOnDeleteClickListener(subject -> showUnassignSubjectDialog(profId, subject));
+                adapter.setShowDeleteButton(false);
 
                 // Carnet / Professor Detail Header Action
-                binding.cardHeaderDetail.setVisibility(View.VISIBLE);
                 binding.btnHeaderDetail.setVisibility(View.VISIBLE);
 
                 View.OnClickListener openProfessorDetail = v -> {
@@ -97,7 +94,6 @@ public class ProfessorSubjectListFragment extends Fragment {
                     Navigation.findNavController(view).navigate(R.id.action_professorSubjectListFragment_to_adminDetailFragment, args);
                 };
                 binding.btnHeaderDetail.setOnClickListener(openProfessorDetail);
-                binding.cardHeaderDetail.setOnClickListener(openProfessorDetail);
             } else {
                 binding.tvTitle.setText("Mis Materias Asignadas");
             }
@@ -117,8 +113,8 @@ public class ProfessorSubjectListFragment extends Fragment {
                 }
             });
 
-            binding.cardHeaderAction.setVisibility(View.VISIBLE);
-            binding.btnHeaderAction.setImageResource(R.drawable.ic_timetable);
+            binding.btnHeaderAction.setVisibility(View.VISIBLE);
+            binding.btnHeaderAction.setIconResource(R.drawable.ic_timetable);
             
             View.OnClickListener openTimetable = v -> {
                 Bundle args = new Bundle();
@@ -127,7 +123,6 @@ public class ProfessorSubjectListFragment extends Fragment {
             };
 
             binding.btnHeaderAction.setOnClickListener(openTimetable);
-            binding.cardHeaderAction.setOnClickListener(openTimetable);
         }
 
         adapter.setOnItemClickListener(subject -> {
@@ -208,26 +203,6 @@ public class ProfessorSubjectListFragment extends Fragment {
                     .show();
             });
         });
-    }
-
-    private void showUnassignSubjectDialog(int profId, Subject subject) {
-        if (subject == null) return;
-        new MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Desinscribir Materia")
-            .setMessage("¿Estás seguro de desinscribir a este profesor de la materia \"" + subject.name + "\"? Se eliminará la asignación del profesor.")
-            .setPositiveButton("Desinscribir", (dialog, which) -> {
-                viewModel.performOnlineAction(() -> {
-                    subject.professorId = null;
-                    viewModel.updateSubject(subject);
-                    viewModel.updateSchedulesProfessorBySubject(subject.id, 0);
-
-                    Toast.makeText(getContext(), "Inscripción eliminada", Toast.LENGTH_SHORT).show();
-                    viewModel.getSubjectsByProfessor(profId);
-                    viewModel.refreshData();
-                });
-            })
-            .setNegativeButton("Cancelar", null)
-            .show();
     }
 
     @Override

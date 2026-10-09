@@ -75,6 +75,35 @@
             android:layout_height="wrap_content"
             android:columnCount="2">
 
+            <!-- 0. ENCARGADOS (AMARILLO/NARANJA) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardEncargados"
+                style="@style/Widget.Bootstrap.Card"
+                android:layout_width="0dp"
+                android:layout_height="120dp"
+                android:layout_columnWeight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_person_badge"
+                        app:tint="@color/bs_warning"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Encargados"
+                        android:textStyle="bold"
+                        android:textColor="?android:attr/textColorPrimary"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <!-- 1. ALUMNOS (AZUL) -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardStudents"

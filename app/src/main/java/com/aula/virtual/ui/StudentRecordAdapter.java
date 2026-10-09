@@ -3,29 +3,28 @@ package com.aula.virtual.ui;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.aula.virtual.R;
-import com.aula.virtual.data.entity.User;
+import com.aula.virtual.data.entity.Student;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHolder> {
-    private List<User> students = new ArrayList<>();
+public class StudentRecordAdapter extends RecyclerView.Adapter<StudentRecordAdapter.ViewHolder> {
+    private List<Student> students = new ArrayList<>();
     private OnItemClickListener listener;
 
     public interface OnItemClickListener {
-        void onItemClick(User user);
+        void onItemClick(Student student);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
 
-    public void setStudents(List<User> students) {
-        this.students = students;
+    public void setStudents(List<Student> students) {
+        this.students = students != null ? students : new ArrayList<>();
         notifyDataSetChanged();
     }
 
@@ -38,31 +37,17 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        User user = students.get(position);
-        if (user == null) return;
-        
-        holder.tvName.setText(user.name != null ? user.name : "Sin nombre");
+        Student student = students.get(position);
+        if (student == null) return;
 
-        String carnetDisplay = user.carnet != null ? user.carnet : "-";
-        if ("ENCARGADO".equals(user.role) || "GUARDIAN".equals(user.role)) {
-            if (!carnetDisplay.startsWith("ENC")) {
-                carnetDisplay = "ENC" + carnetDisplay;
-            }
-        } else if ("PROFESSOR".equals(user.role)) {
-            if (!carnetDisplay.startsWith("PROF")) {
-                carnetDisplay = "PROF" + carnetDisplay;
-            }
-        } else if ("ADMIN".equals(user.role)) {
-            if (!carnetDisplay.startsWith("ADMIN")) {
-                carnetDisplay = "ADMIN" + carnetDisplay;
-            }
-        }
+        holder.tvName.setText(student.name != null ? student.name : "Sin nombre");
+        holder.tvCarnet.setText(student.carnet != null ? "Carnet: " + student.carnet : "-");
+        String detail = (student.grade != null ? student.grade : "") + 
+                         (student.faculty != null ? " • " + student.faculty : "");
+        holder.tvFaculty.setText(detail.isEmpty() ? "Sin grado/escuela" : detail);
 
-        holder.tvCarnet.setText("Carnet: " + carnetDisplay);
-        holder.tvFaculty.setText(user.faculty != null ? user.faculty : "Sin facultad");
-        
         holder.btnManage.setOnClickListener(v -> {
-            if (listener != null) listener.onItemClick(user);
+            if (listener != null) listener.onItemClick(student);
         });
     }
 
@@ -75,7 +60,7 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHold
         TextView tvName;
         TextView tvCarnet;
         TextView tvFaculty;
-        Button btnManage;
+        View btnManage;
 
         ViewHolder(View itemView) {
             super(itemView);

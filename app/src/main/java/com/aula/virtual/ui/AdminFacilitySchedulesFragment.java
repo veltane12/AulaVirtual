@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -81,13 +82,14 @@ public class AdminFacilitySchedulesFragment extends Fragment {
 
         binding.btnAdd.setText("Programar Clase");
         binding.btnAdd.setOnClickListener(v -> showAddScheduleDialog(null));
-        binding.spinnerFilter.setVisibility(View.GONE);
-        binding.etSearch.setVisibility(View.GONE);
+        binding.spinnerFilter.setVisibility(View.VISIBLE);
+        binding.etSearch.setVisibility(View.VISIBLE);
+        binding.etSearch.setHint("Buscar horario...");
+        setupSearch();
 
         // Make Timetable Card Header Action VISIBLE and Clickable!
-        binding.cardHeaderAction.setVisibility(View.VISIBLE);
         binding.btnHeaderAction.setVisibility(View.VISIBLE);
-        binding.btnHeaderAction.setImageResource(R.drawable.ic_timetable);
+        binding.btnHeaderAction.setIconResource(R.drawable.ic_timetable);
         
         View.OnClickListener openTimetable = v -> {
             Bundle args = new Bundle();
@@ -95,14 +97,10 @@ public class AdminFacilitySchedulesFragment extends Fragment {
             Navigation.findNavController(view).navigate(R.id.action_adminFacilitySchedulesFragment_to_adminFacilityTimetableFragment, args);
         };
         binding.btnHeaderAction.setOnClickListener(openTimetable);
-        binding.cardHeaderAction.setOnClickListener(openTimetable);
 
-        // Make Detalle Header Action VISIBLE and Clickable (with ic_building, theme accent color)
-        binding.cardHeaderDetail.setVisibility(View.VISIBLE);
+        // Make Detalle Header Action VISIBLE and Clickable (with ic_building)
         binding.btnHeaderDetail.setVisibility(View.VISIBLE);
-        binding.btnHeaderDetail.setImageResource(R.drawable.ic_building);
-        int accentColor = ThemeHelper.getSubjectColor(requireContext(), ThemeHelper.getAccentColorName(requireContext()));
-        binding.cardHeaderDetail.setCardBackgroundColor(accentColor);
+        binding.btnHeaderDetail.setIconResource(R.drawable.ic_building);
 
         View.OnClickListener openFacilityDetail = v -> {
             Bundle args = new Bundle();
@@ -110,7 +108,62 @@ public class AdminFacilitySchedulesFragment extends Fragment {
             Navigation.findNavController(view).navigate(R.id.action_adminFacilitySchedulesFragment_to_adminFacilityDetailFragment, args);
         };
         binding.btnHeaderDetail.setOnClickListener(openFacilityDetail);
-        binding.cardHeaderDetail.setOnClickListener(openFacilityDetail);
+    }
+
+    private void setupSearch() {
+        String[] options = {"Todo", "Materia", "Profesor", "Días"};
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, options);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerFilter.setAdapter(spinnerAdapter);
+
+        binding.etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                applyFilter();
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        binding.spinnerFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                applyFilter();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void applyFilter() {
+        if (currentSchedules == null) return;
+        String query = binding.etSearch.getText().toString().toLowerCase().trim();
+        String filterType = binding.spinnerFilter.getSelectedItem() != null ? binding.spinnerFilter.getSelectedItem().toString() : "Todo";
+
+        if (query.isEmpty()) {
+            adapter.setSchedules(currentSchedules);
+            binding.tvRecordCount.setText(currentSchedules.size() + (currentSchedules.size() == 1 ? " horario" : " horarios"));
+            return;
+        }
+
+        List<ScheduleInfo> filtered = currentSchedules.stream().filter(info -> {
+            if (info == null) return false;
+            String subject = info.subjectName != null ? info.subjectName.toLowerCase() : "";
+            String professor = info.professorName != null ? info.professorName.toLowerCase() : "";
+            String days = (info.schedule != null && info.schedule.days != null) ? info.schedule.days.toLowerCase() : "";
+            String time = (info.schedule != null && info.schedule.startTime != null && info.schedule.endTime != null) ? (info.schedule.startTime + " " + info.schedule.endTime).toLowerCase() : "";
+
+            if (filterType.equals("Todo")) {
+                return subject.contains(query) || professor.contains(query) || days.contains(query) || time.contains(query);
+            } else if (filterType.equals("Materia")) {
+                return subject.contains(query);
+            } else if (filterType.equals("Profesor")) {
+                return professor.contains(query);
+            } else if (filterType.equals("Días")) {
+                return days.contains(query);
+            }
+            return false;
+        }).collect(Collectors.toList());
+
+        adapter.setSchedules(filtered);
+        binding.tvRecordCount.setText(filtered.size() + (filtered.size() == 1 ? " horario" : " horarios"));
     }
 
     private void observeViewModel() {
@@ -126,13 +179,8 @@ public class AdminFacilitySchedulesFragment extends Fragment {
         });
 
         viewModel.getFacilitySchedules(facilityId).observe(getViewLifecycleOwner(), schedules -> {
-            currentSchedules = schedules;
-            adapter.setSchedules(schedules);
-            if (schedules != null) {
-                binding.tvRecordCount.setText(schedules.size() + (schedules.size() == 1 ? " horario" : " horarios"));
-            } else {
-                binding.tvRecordCount.setText("0 horarios");
-            }
+            currentSchedules = schedules != null ? schedules : new ArrayList<>();
+            applyFilter();
         });
     }
 

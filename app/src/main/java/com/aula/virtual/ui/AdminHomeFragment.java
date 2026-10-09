@@ -32,8 +32,17 @@ public class AdminHomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         MainViewModel viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        binding.cardStudents.setOnClickListener(v -> 
-            Navigation.findNavController(view).navigate(R.id.action_adminHomeFragment_to_adminStudentListFragment));
+        binding.cardEncargados.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putString("filterRole", "ENCARGADO");
+            Navigation.findNavController(view).navigate(R.id.action_adminHomeFragment_to_adminStudentListFragment, args);
+        });
+
+        binding.cardStudents.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putString("filterRole", "STUDENT");
+            Navigation.findNavController(view).navigate(R.id.action_adminHomeFragment_to_adminStudentListFragment, args);
+        });
         
         binding.cardSubjects.setOnClickListener(v -> 
             Navigation.findNavController(view).navigate(R.id.action_adminHomeFragment_to_adminSubjectListFragment));

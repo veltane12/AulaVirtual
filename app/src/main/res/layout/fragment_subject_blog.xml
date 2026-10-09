@@ -11,85 +11,137 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:id="@+id/tvBlogTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/layoutHeaderActionsBlog"
-                android:text="Foro de Discusión"
-                android:textSize="22sp"
-                android:textStyle="bold"/>
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
 
             <LinearLayout
-                android:id="@+id/layoutHeaderActionsBlog"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardSubjectDetailBlog"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    app:cardCornerRadius="22dp"
-                    app:cardElevation="3dp"
-                    app:strokeWidth="0dp"
-                    app:cardBackgroundColor="?attr/colorPrimary"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
-                    <ImageView
-                        android:id="@+id/btnSubjectDetailBlog"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/ic_book"
-                        app:tint="@color/white"
-                        android:padding="10dp"
-                        android:contentDescription="Detalle Materia" />
-                </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:id="@+id/tvBlogTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Foro de la Materia"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="?android:attr/textColorPrimary"/>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/btnViewParticipantsBlog"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                <TextView
+                    android:id="@+id/tvBlogEntryCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    app:cardCornerRadius="22dp"
-                    app:cardElevation="3dp"
-                    app:strokeWidth="0dp"
-                    app:cardBackgroundColor="?attr/colorPrimary"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/ic_person_badge"
-                        app:tint="@color/white"
-                        android:padding="10dp"
-                        android:contentDescription="Integrantes"/>
-                </com.google.android.material.card.MaterialCardView>
-
+                    android:text="0 entradas"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="2dp"
+                    android:background="@drawable/bg_badge_primary"
+                    android:textColor="@color/white"
+                    android:visibility="visible"/>
             </LinearLayout>
 
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/tvBlogSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:visibility="gone"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/btnAddEntryTop"
-            style="@style/Widget.Bootstrap.Button.Primary"
+        <LinearLayout
+            android:id="@+id/layoutHeaderActionsBlog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="+ Nueva Entrada al Foro"
-            android:textAllCaps="false"
-            android:layout_marginBottom="12dp"
-            android:visibility="gone"/>
+            android:orientation="horizontal"
+            android:gravity="start"
+            android:layout_marginBottom="12dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddEntryTop"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="Añadir Entrada"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:paddingHorizontal="12dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                app:cornerRadius="19dp"
+                app:icon="@drawable/ic_add"
+                app:iconGravity="textStart"
+                app:iconPadding="6dp"
+                app:iconSize="18dp"
+                app:iconTint="@color/white"
+                app:backgroundTint="?attr/colorPrimary"
+                android:contentDescription="Añadir Entrada"
+                android:visibility="gone"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubjectDetailBlog"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_marginStart="8dp"
+                android:text="Detalle"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:paddingHorizontal="12dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                app:cornerRadius="19dp"
+                app:icon="@drawable/ic_book"
+                app:iconGravity="textStart"
+                app:iconPadding="6dp"
+                app:iconSize="18dp"
+                app:iconTint="@color/white"
+                app:backgroundTint="?attr/colorPrimary"
+                android:contentDescription="Detalle"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewParticipantsBlog"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_marginStart="8dp"
+                android:text="Integrantes"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:paddingHorizontal="12dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                app:cornerRadius="19dp"
+                app:icon="@drawable/ic_person_badge"
+                app:iconGravity="textStart"
+                app:iconPadding="6dp"
+                app:iconSize="18dp"
+                app:iconTint="@color/white"
+                app:backgroundTint="?attr/colorPrimary"
+                android:contentDescription="Integrantes"/>
+
+        </LinearLayout>
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -116,6 +168,7 @@
         android:layout_margin="24dp"
         android:src="@drawable/ic_add"
         app:tint="@color/white"
+        android:contentDescription="Añadir entrada"
         android:visibility="gone"/>
 
 </RelativeLayout>

@@ -117,10 +117,7 @@ public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.ViewHolder> 
             holder.btnEdit.setOnClickListener(v -> {
                 if (listener != null) listener.onEditGrades(info);
             });
-            holder.btnDelete.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
-            holder.btnDelete.setOnClickListener(v -> {
-                if (listener != null) listener.onDeleteEnrollment(info);
-            });
+            holder.btnDelete.setVisibility(View.GONE);
         }
 
         if (holder.tvFacility != null && info.subject != null) {

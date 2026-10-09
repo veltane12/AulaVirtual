@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         int homeId = -1;
         if ("ADMIN".equals(role)) homeId = R.id.adminHomeFragment;
         else if ("PROFESSOR".equals(role)) homeId = R.id.professorHomeFragment;
-        else if ("STUDENT".equals(role)) homeId = R.id.studentHomeFragment;
+        else if ("STUDENT".equals(role) || "ENCARGADO".equals(role) || "GUARDIAN".equals(role)) homeId = R.id.studentHomeFragment;
         
         if (homeId != -1 && navController.getCurrentDestination() != null && 
             navController.getCurrentDestination().getId() != homeId) {

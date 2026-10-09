@@ -24,6 +24,7 @@ import android.text.TextWatcher;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.aula.virtual.data.entity.Faculty;
+import com.aula.virtual.data.entity.Student;
 import com.aula.virtual.data.entity.User;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -36,8 +37,11 @@ public class AdminStudentListFragment extends Fragment {
     private FragmentAdminDashboardBinding binding;
     private MainViewModel viewModel;
     private StudentAdapter adapter;
-    private List<User> allStudents = new ArrayList<>();
+    private StudentRecordAdapter studentRecordAdapter;
+    private List<User> allEncargados = new ArrayList<>();
+    private List<Student> allStudentRecords = new ArrayList<>();
     private List<Faculty> availableFaculties = new ArrayList<>();
+    private boolean isEncargadoMode = true;
 
     @Nullable
     @Override
@@ -51,17 +55,42 @@ public class AdminStudentListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        binding.tvTitle.setText("Listado de Alumnos");
+        String filterRole = (getArguments() != null) ? getArguments().getString("filterRole", "ENCARGADO") : "ENCARGADO";
+        isEncargadoMode = "ENCARGADO".equals(filterRole);
+
         adapter = new StudentAdapter();
+        studentRecordAdapter = new StudentRecordAdapter();
+
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerView.setAdapter(adapter);
+        if (isEncargadoMode) {
+            binding.recyclerView.setAdapter(adapter);
+            binding.tvTitle.setText("Listado de Encargados");
+            if (getActivity() != null) {
+                TextView tvNavTitle = getActivity().findViewById(R.id.tvNavTitle);
+                if (tvNavTitle != null) tvNavTitle.setText("Listado de Encargados");
+            }
+        } else {
+            binding.recyclerView.setAdapter(studentRecordAdapter);
+            binding.tvTitle.setText("Listado de Alumnos");
+            if (getActivity() != null) {
+                TextView tvNavTitle = getActivity().findViewById(R.id.tvNavTitle);
+                if (tvNavTitle != null) tvNavTitle.setText("Listado de Alumnos");
+            }
+        }
 
         setupSearch();
 
-        viewModel.getAllStudents().observe(getViewLifecycleOwner(), students -> {
-            allStudents = students;
-            applyFilter();
-        });
+        if (isEncargadoMode) {
+            viewModel.getAllEncargados().observe(getViewLifecycleOwner(), users -> {
+                allEncargados = users != null ? users : new ArrayList<>();
+                applyFilter();
+            });
+        } else {
+            viewModel.getAllStudentRecords().observe(getViewLifecycleOwner(), students -> {
+                allStudentRecords = students != null ? students : new ArrayList<>();
+                applyFilter();
+            });
+        }
 
         viewModel.getModificationError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
@@ -78,9 +107,15 @@ public class AdminStudentListFragment extends Fragment {
 
         viewModel.refreshData(); // Force refresh when entering list
 
-        adapter.setOnItemClickListener(student -> {
+        adapter.setOnItemClickListener(userItem -> {
             Bundle args = new Bundle();
-            args.putInt("studentId", student.id);
+            args.putInt("encargadoId", userItem.id);
+            Navigation.findNavController(view).navigate(R.id.action_adminStudentListFragment_to_adminEncargadoDetailFragment, args);
+        });
+
+        studentRecordAdapter.setOnItemClickListener(studentItem -> {
+            Bundle args = new Bundle();
+            args.putInt("studentId", studentItem.id);
             Navigation.findNavController(view).navigate(R.id.action_adminStudentListFragment_to_adminEnrollmentListFragment, args);
         });
 
@@ -113,37 +148,61 @@ public class AdminStudentListFragment extends Fragment {
         String query = binding.etSearch.getText().toString().toLowerCase().trim();
         String filterType = binding.spinnerFilter.getSelectedItem() != null ? binding.spinnerFilter.getSelectedItem().toString() : "Todo";
 
-        if (query.isEmpty()) {
-            adapter.setStudents(allStudents);
-            binding.tvRecordCount.setText(allStudents.size() + (allStudents.size() == 1 ? " registro" : " registros"));
-            return;
-        }
-
-        List<User> filtered = allStudents.stream().filter(s -> {
-            if (s == null) return false;
-            boolean match = false;
-            String name = s.name != null ? s.name.toLowerCase() : "";
-            String carnet = s.carnet != null ? s.carnet.toLowerCase() : "";
-            String faculty = s.faculty != null ? s.faculty.toLowerCase() : "";
-
-            if (filterType.equals("Todo")) {
-                match = name.contains(query) || 
-                        carnet.contains(query) || 
-                        faculty.contains(query);
-            } else if (filterType.equals("Carnet")) {
-                match = carnet.contains(query);
-            } else if (filterType.equals("Nombre")) {
-                match = name.contains(query);
-            } else if (filterType.equals("Facultad")) {
-                match = faculty.contains(query);
+        if (isEncargadoMode) {
+            if (query.isEmpty()) {
+                adapter.setStudents(allEncargados);
+                binding.tvRecordCount.setText(allEncargados.size() + (allEncargados.size() == 1 ? " registro" : " registros"));
+                return;
             }
-            return match;
-        }).collect(Collectors.toList());
 
-        adapter.setStudents(filtered);
-        binding.tvRecordCount.setText(filtered.size() + (filtered.size() == 1 ? " registro" : " registros"));
+            List<User> filtered = allEncargados.stream().filter(s -> {
+                if (s == null) return false;
+                String name = s.name != null ? s.name.toLowerCase() : "";
+                String carnet = s.carnet != null ? s.carnet.toLowerCase() : "";
+                String faculty = s.faculty != null ? s.faculty.toLowerCase() : "";
 
-        adapter.setStudents(filtered);
+                if (filterType.equals("Todo")) {
+                    return name.contains(query) || carnet.contains(query) || faculty.contains(query);
+                } else if (filterType.equals("Carnet")) {
+                    return carnet.contains(query);
+                } else if (filterType.equals("Nombre")) {
+                    return name.contains(query);
+                } else if (filterType.equals("Facultad")) {
+                    return faculty.contains(query);
+                }
+                return false;
+            }).collect(Collectors.toList());
+
+            adapter.setStudents(filtered);
+            binding.tvRecordCount.setText(filtered.size() + (filtered.size() == 1 ? " registro" : " registros"));
+        } else {
+            if (query.isEmpty()) {
+                studentRecordAdapter.setStudents(allStudentRecords);
+                binding.tvRecordCount.setText(allStudentRecords.size() + (allStudentRecords.size() == 1 ? " registro" : " registros"));
+                return;
+            }
+
+            List<Student> filtered = allStudentRecords.stream().filter(s -> {
+                if (s == null) return false;
+                String name = s.name != null ? s.name.toLowerCase() : "";
+                String carnet = s.carnet != null ? s.carnet.toLowerCase() : "";
+                String faculty = s.faculty != null ? s.faculty.toLowerCase() : "";
+
+                if (filterType.equals("Todo")) {
+                    return name.contains(query) || carnet.contains(query) || faculty.contains(query);
+                } else if (filterType.equals("Carnet")) {
+                    return carnet.contains(query);
+                } else if (filterType.equals("Nombre")) {
+                    return name.contains(query);
+                } else if (filterType.equals("Facultad")) {
+                    return faculty.contains(query);
+                }
+                return false;
+            }).collect(Collectors.toList());
+
+            studentRecordAdapter.setStudents(filtered);
+            binding.tvRecordCount.setText(filtered.size() + (filtered.size() == 1 ? " registro" : " registros"));
+        }
     }
 
     private void showAddUserDialog() {
@@ -155,7 +214,11 @@ public class AdminStudentListFragment extends Fragment {
     }
 
     private void showAddUserAlertDialog(List<Faculty> faculties) {
-        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), "Añadir Estudiante");
+        String filterRole = (getArguments() != null) ? getArguments().getString("filterRole", "ENCARGADO") : "ENCARGADO";
+        boolean isEncargado = "ENCARGADO".equals(filterRole);
+        String dialogTitle = isEncargado ? "Añadir Encargado del Estudiante" : "Añadir Alumno";
+
+        MaterialAlertDialogBuilder builder = DialogUtils.createMaterialDialog(requireContext(), dialogTitle);
         LinearLayout layout = DialogUtils.createDialogContainer(requireContext());
 
         final EditText etName = DialogUtils.createStyledEditText(requireContext(), "Nombre Completo", 0);
@@ -166,54 +229,104 @@ public class AdminStudentListFragment extends Fragment {
         layout.addView(etCarnet);
 
         final EditText etPass = DialogUtils.createStyledEditText(requireContext(), "Contraseña", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(etPass);
-
         final TextView tvStrength = new TextView(getContext());
-        tvStrength.setTextSize(12);
-        tvStrength.setVisibility(View.GONE);
-        layout.addView(tvStrength);
 
-        etPass.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() == 0) {
-                    tvStrength.setVisibility(View.GONE);
-                } else {
-                    tvStrength.setVisibility(View.VISIBLE);
-                    ValidationUtils.PasswordStrength strength = ValidationUtils.getPasswordStrength(s.toString());
-                    tvStrength.setText(strength.label);
-                    tvStrength.setTextColor(strength.color);
+        if (isEncargado) {
+            layout.addView(etPass);
+            tvStrength.setTextSize(12);
+            tvStrength.setVisibility(View.GONE);
+            layout.addView(tvStrength);
+
+            etPass.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (s.length() == 0) {
+                        tvStrength.setVisibility(View.GONE);
+                    } else {
+                        tvStrength.setVisibility(View.VISIBLE);
+                        ValidationUtils.PasswordStrength strength = ValidationUtils.getPasswordStrength(s.toString());
+                        tvStrength.setText(strength.label);
+                        tvStrength.setTextColor(strength.color);
+                    }
                 }
-            }
-            @Override public void afterTextChanged(Editable s) {}
-        });
+                @Override public void afterTextChanged(Editable s) {}
+            });
+        }
 
-        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Facultad...", true);
+        final User[] selectedEncargado = {null};
+        final TextView tvEncargado = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Encargado (Obligatorio)...", true);
+        if (!isEncargado) {
+            layout.addView(tvEncargado);
+
+            tvEncargado.setOnClickListener(v -> {
+                List<User> list = viewModel.getAllEncargados().getValue();
+                if (list == null || list.isEmpty()) {
+                    Toast.makeText(getContext(), "No existen encargados registrados. Registre uno primero.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String[] names = list.stream().map(u -> u.name + " (" + u.carnet + ")").toArray(String[]::new);
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Encargado Obligatorio")
+                        .setItems(names, (dialog, which) -> {
+                            selectedEncargado[0] = list.get(which);
+                            tvEncargado.setError(null);
+                            DialogUtils.setOptionState(tvEncargado, "Encargado: " + selectedEncargado[0].name, false, requireContext());
+                        }).show();
+            });
+        }
+
+        final String[] selectedFaculty = {isEncargado ? "Encargados de Estudiantes" : null};
+        final TextView tvFaculty = DialogUtils.createDialogOptionButton(requireContext(), isEncargado ? "Facultad: Encargados de Estudiantes" : "Seleccionar Facultad/Escuela...", !isEncargado);
+        if (isEncargado) {
+            tvFaculty.setEnabled(false);
+        }
         layout.addView(tvFaculty);
 
+        final String[] selectedGrade = {null};
+        final TextView tvGrade = DialogUtils.createDialogOptionButton(requireContext(), "Seleccionar Grado y Nivel (Primaria 1-9 / Bachiller 1-3)...", true);
         final EditText etAddress = DialogUtils.createStyledEditText(requireContext(), "Dirección (Opcional)", 0);
-        layout.addView(etAddress);
+
+        if (isEncargado) {
+            layout.addView(etAddress);
+        } else {
+            layout.addView(tvGrade);
+            final String[] gradeOptions = {
+                "1º Primaria", "2º Primaria", "3º Primaria", "4º Primaria",
+                "5º Primaria", "6º Primaria", "7º Primaria", "8º Primaria", "9º Primaria",
+                "1º Bachillerato", "2º Bachillerato", "3º Bachillerato"
+            };
+            tvGrade.setOnClickListener(v -> {
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Seleccionar Grado y Nivel")
+                        .setItems(gradeOptions, (dialog, which) -> {
+                            selectedGrade[0] = gradeOptions[which];
+                            tvGrade.setError(null);
+                            DialogUtils.setOptionState(tvGrade, "Grado: " + selectedGrade[0], false, requireContext());
+                        }).show();
+            });
+        }
 
         final EditText etEmail = DialogUtils.createStyledEditText(requireContext(), "Email Personal (Opcional)", 0);
-        layout.addView(etEmail);
+        if (isEncargado) {
+            layout.addView(etEmail);
+        }
 
         final String[] facultyNames;
         List<String> filteredNames = new ArrayList<>();
         for (Faculty f : faculties) {
-            if (!f.name.equals("Docencia") && !f.name.equals("Administrativa")) {
+            if (!f.name.equals("Docencia") && !f.name.equals("Administrativa") && !f.name.equals("Encargados de Estudiantes")) {
                 filteredNames.add(f.name);
             }
         }
         facultyNames = filteredNames.toArray(new String[0]);
-        final String[] selectedFaculty = {null};
 
         tvFaculty.setOnClickListener(v -> {
             new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Facultades")
+                .setTitle("Facultades/Escuelas")
                 .setItems(facultyNames, (dialog, which) -> {
                     selectedFaculty[0] = facultyNames[which];
                     tvFaculty.setError(null);
-                    DialogUtils.setOptionState(tvFaculty, "Facultad: " + selectedFaculty[0], false, requireContext());
+                    DialogUtils.setOptionState(tvFaculty, "Escuela: " + selectedFaculty[0], false, requireContext());
                 }).show();
         });
 
@@ -225,8 +338,8 @@ public class AdminStudentListFragment extends Fragment {
         dialog.show();
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v1 -> {
-            String name = etName.getText().toString();
-            String carnet = etCarnet.getText().toString();
+            String name = etName.getText().toString().trim();
+            String carnet = etCarnet.getText().toString().trim();
             String pass = etPass.getText().toString();
             
             boolean isValid = true;
@@ -239,26 +352,55 @@ public class AdminStudentListFragment extends Fragment {
                 etCarnet.setError("Carnet inválido (7 dígitos numéricos)");
                 isValid = false;
             }
-            if (ValidationUtils.getPasswordStrength(pass) == ValidationUtils.PasswordStrength.WEAK) {
+            if (isEncargado && ValidationUtils.getPasswordStrength(pass) == ValidationUtils.PasswordStrength.WEAK) {
                 etPass.setError("Contraseña muy débil");
                 isValid = false;
             }
             if (selectedFaculty[0] == null) {
-                tvFaculty.setError("Seleccione una facultad");
+                tvFaculty.setError("Seleccione una facultad o escuela");
+                isValid = false;
+            }
+            if (!isEncargado && selectedEncargado[0] == null) {
+                tvEncargado.setError("Debe seleccionar un Encargado obligatoriamente");
+                isValid = false;
+            }
+            if (!isEncargado && selectedGrade[0] == null) {
+                tvGrade.setError("Seleccione un grado y nivel");
                 isValid = false;
             }
 
             if (isValid) {
-                String fullCarnet = "EST" + carnet;
-                String address = etAddress.getText().toString().trim();
-                String email = etEmail.getText().toString().trim();
-                viewModel.performOnlineAction(() -> {
-                    User newStudent = new User(fullCarnet, name, pass, "STUDENT", selectedFaculty[0]);
-                    newStudent.address = address.isEmpty() ? null : address;
-                    newStudent.personal_email = email.isEmpty() ? null : email;
-                    viewModel.insertUser(newStudent);
-                    dialog.dismiss();
-                });
+                if (isEncargado) {
+                    String fullCarnet = "ENC" + carnet;
+                    String address = etAddress.getText().toString().trim();
+                    String email = etEmail.getText().toString().trim();
+                    viewModel.performOnlineAction(() -> {
+                        User newUser = new User(fullCarnet, name, pass, "ENCARGADO", selectedFaculty[0]);
+                        newUser.address = address.isEmpty() ? null : address;
+                        newUser.personal_email = email.isEmpty() ? null : email;
+                        viewModel.insertUser(newUser);
+                        dialog.dismiss();
+                    });
+                } else {
+                    String fullCarnet = "EST" + carnet;
+                    String grade = selectedGrade[0];
+                    Student newStudent = new Student(fullCarnet, name, grade, selectedFaculty[0], selectedEncargado[0].id);
+                    viewModel.performOnlineAction(() -> {
+                        viewModel.insertStudent(newStudent, new retrofit2.Callback<Student>() {
+                            @Override
+                            public void onResponse(@NonNull retrofit2.Call<Student> call, @NonNull retrofit2.Response<Student> response) {
+                                Toast.makeText(getContext(), "Alumno registrado exitosamente", Toast.LENGTH_SHORT).show();
+                                viewModel.refreshData();
+                                dialog.dismiss();
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull retrofit2.Call<Student> call, @NonNull Throwable t) {
+                                Toast.makeText(getContext(), "Error al guardar alumno", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    });
+                }
             }
         });
     }

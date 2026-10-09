@@ -3,7 +3,19 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
+
+    <!-- Hoja con esquina doblada -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M14,3H7a2,2 0,0 0 -2,2v14a2,2 0,0 0 2,2h10a2,2 0,0 0 2,-2V8zM14,3v5h5" />
+
+    <!-- Signo más centrado en la hoja -->
+    <path
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M12,11.5v6M9,14.5h6" />
 </vector>
